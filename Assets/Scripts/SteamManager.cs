@@ -104,6 +104,8 @@ public class SteamManager : MonoBehaviour {
 
 			Application.Quit();
 			return;
+			
+			
 		}
 
 		// Initializes the Steamworks API.
