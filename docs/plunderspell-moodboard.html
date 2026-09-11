@@ -1,0 +1,831 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>html{color-scheme:dark light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Plunderspell</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Eczar:wght@500;600;700;800&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Overpass+Mono:wght@400;600&display=swap">
+</head>
+<body>
+
+<style>
+/* ─────────────────────────────────────────────────────────────
+   PLUNDERSPELL — pitch bible
+   Single committed visual world: a candlelit lair at 2am.
+   Every colour is named for the pigment a real illuminator
+   would have ground to make it.
+   ───────────────────────────────────────────────────────────── */
+
+:root{
+  /* pigments */
+  --bone-black:   #14120E;  /* charred bone, the ground */
+  --ash:          #1E1A14;  /* raised surface */
+  --ash-hi:       #282318;  /* hover / inset */
+  --vellum:       #DCD2BA;  /* calfskin, primary text */
+  --vellum-dim:   #9A9078;  /* secondary text */
+  --vellum-faint: #635C4C;  /* tertiary, rules */
+  --verdigris:    #5FA288;  /* oxidised copper — the accent */
+  --verdigris-lo: #2E4C41;
+  --orpiment:     #C9A227;  /* arsenic yellow — value, loot, gold only */
+  --madder:       #C4542E;  /* madder lake — heat, danger, blood */
+  --lapis:        #7A6AA0;  /* ground lapis — the arcane, the voice */
+  --line:         #332D22;
+  --line-soft:    #262119;
+
+  --ff-display: "Eczar", Georgia, "Times New Roman", serif;
+  --ff-body:    "Spectral", Georgia, serif;
+  --ff-mono:    "Overpass Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --spine: 68ch;
+  --wide: 1180px;
+
+  /* vellum grain, inlined so nothing is fetched */
+  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='180' height='180' filter='url(%23n)' opacity='0.38'/></svg>");
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body{
+  margin:0;
+  background: var(--bone-black);
+  color: var(--vellum);
+  font-family: var(--ff-body);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.68;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* grain + a low guttering candle-glow, both purely decorative */
+body::before{
+  content:""; position: fixed; inset:0; pointer-events:none; z-index:2;
+  background-image: var(--grain);
+  opacity:.28; mix-blend-mode: overlay;
+}
+body::after{
+  content:""; position: fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(58% 42% at 50% -6%, rgba(201,162,39,.13), transparent 70%),
+    radial-gradient(40% 30% at 92% 18%, rgba(95,162,136,.07), transparent 70%);
+  animation: gutter 7.5s ease-in-out infinite;
+}
+@keyframes gutter{ 0%,100%{opacity:.9} 43%{opacity:.62} 71%{opacity:1} }
+@media (prefers-reduced-motion: reduce){
+  body::after{ animation:none }
+  *{ animation-duration:.001ms !important; transition-duration:.001ms !important }
+}
+
+.wrap{ position:relative; z-index:1; max-width: var(--wide); margin:0 auto; padding-inline: 20px; }
+.spine{ max-width: var(--spine); }
+
+h1,h2,h3,h4{ font-family: var(--ff-display); text-wrap: balance; margin:0; line-height:1.12; }
+p{ margin:0 0 1.05em; }
+p:last-child{ margin-bottom:0; }
+a{ color: var(--verdigris); }
+
+.eyebrow{
+  font-family: var(--ff-mono); font-size:11px; letter-spacing:.22em;
+  text-transform: uppercase; color: var(--vellum-faint);
+  display:flex; align-items:center; gap:12px; margin-bottom:18px;
+}
+.eyebrow::after{ content:""; flex:1; height:1px; background: var(--line); }
+
+.lede{ font-size: 1.22rem; line-height:1.58; color: var(--vellum); font-weight:300; }
+.dim{ color: var(--vellum-dim); }
+.mono{ font-family: var(--ff-mono); font-variant-numeric: tabular-nums; }
+
+section{ padding-block: 84px; border-top:1px solid var(--line-soft); }
+section:first-of-type{ border-top:0; }
+h2{ font-size: clamp(1.9rem, 4.4vw, 2.7rem); font-weight:700; letter-spacing:-.01em; margin-bottom:.5em; }
+h3{ font-size:1.18rem; font-weight:600; letter-spacing:.005em; margin-bottom:.45em; }
+
+/* ── HERO ─────────────────────────────────────────────── */
+.hero{ padding-block: clamp(56px, 11vw, 108px) 78px; border-top:0; }
+.sigil{ display:block; width:clamp(62px,9vw,86px); height:auto; margin-bottom:26px; }
+.hero h1{
+  font-size: clamp(3.4rem, 13.5vw, 8.6rem);
+  font-weight:800; letter-spacing:-.035em; line-height:.86;
+  color: var(--vellum);
+  margin-bottom:.16em;
+}
+.hero h1 em{ font-style:normal; color: var(--verdigris); }
+.hero .sub{
+  font-family: var(--ff-mono); font-size:12px; letter-spacing:.3em;
+  text-transform: uppercase; color: var(--orpiment); margin-bottom:34px;
+}
+.hook{
+  font-family: var(--ff-display); font-weight:500;
+  font-size: clamp(1.35rem, 3.3vw, 1.95rem); line-height:1.38;
+  max-width: 26ch; margin-bottom:30px;
+}
+.hook b{ color: var(--verdigris); font-weight:600; }
+.stamp{
+  display:inline-flex; gap:10px; align-items:center; flex-wrap:wrap;
+  font-family: var(--ff-mono); font-size:11px; letter-spacing:.14em;
+  text-transform:uppercase; color: var(--vellum-faint);
+}
+.stamp span{ border:1px solid var(--line); padding:5px 11px; }
+
+/* ── generic slabs ────────────────────────────────────── */
+.grid{ display:grid; gap:1px; background: var(--line-soft); border:1px solid var(--line-soft); }
+.grid > div{ background: var(--ash); padding:24px; }
+.g2{ grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); }
+.g3{ grid-template-columns: repeat(auto-fit, minmax(230px,1fr)); }
+
+.kicker{ font-family:var(--ff-mono); font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--vellum-faint); margin-bottom:10px; }
+
+/* ── THE LOOP ─────────────────────────────────────────── */
+.loop{ display:grid; grid-template-columns: repeat(auto-fit,minmax(190px,1fr)); gap:1px; background:var(--line-soft); border:1px solid var(--line-soft); }
+.beat{ background: var(--ash); padding:26px 22px; position:relative; }
+.beat .n{ font-family:var(--ff-mono); font-size:10.5px; letter-spacing:.2em; color:var(--verdigris); margin-bottom:12px; }
+.beat h4{ font-size:1.06rem; font-weight:600; margin-bottom:8px; }
+.beat p{ font-size:.9rem; line-height:1.55; color:var(--vellum-dim); }
+.beat.loss .n{ color: var(--madder); }
+.beat.gain .n{ color: var(--orpiment); }
+
+/* ── LEXICON TABLE ────────────────────────────────────── */
+.tablewrap{ overflow-x:auto; border:1px solid var(--line-soft); }
+table{ border-collapse: collapse; width:100%; min-width:640px; }
+thead th{
+  font-family:var(--ff-mono); font-size:10px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--vellum-faint); text-align:left; font-weight:400;
+  padding:13px 16px; background: var(--bone-black); border-bottom:1px solid var(--line);
+}
+td{ padding:13px 16px; border-bottom:1px solid var(--line-soft); vertical-align:top; font-size:.92rem; background: var(--ash); }
+tbody tr:last-child td{ border-bottom:0; }
+.word{ font-family:var(--ff-display); font-weight:600; font-size:1.06rem; letter-spacing:.03em; color:var(--lapis); white-space:nowrap; }
+.syl{ font-family:var(--ff-mono); font-size:11px; color:var(--vellum-faint); }
+.ms{ font-family:var(--ff-mono); font-size:12px; color:var(--vellum-dim); font-variant-numeric: tabular-nums; white-space:nowrap; }
+.misfire{ color: var(--madder); font-style:italic; }
+
+/* ── STRATIGRAPHY (the Ages) ──────────────────────────── */
+.strata{ border:1px solid var(--line-soft); }
+.layer{
+  display:grid; grid-template-columns: 132px 1fr; gap:0;
+  border-bottom:1px solid var(--line-soft); background: var(--ash);
+}
+.layer:last-child{ border-bottom:0; }
+.layer .depth{
+  padding:24px 18px; border-right:1px solid var(--line-soft);
+  font-family:var(--ff-mono); font-size:11px; line-height:1.5; color:var(--vellum-faint);
+  position:relative; overflow:hidden;
+}
+.layer .depth .yr{ display:block; color:var(--vellum); font-size:13px; margin-bottom:4px; font-variant-numeric:tabular-nums; }
+.layer .body{ padding:24px 22px; }
+.layer h3{ margin-bottom:6px; }
+.layer .tag{ font-family:var(--ff-mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; margin-bottom:12px; }
+.layer p{ font-size:.92rem; color:var(--vellum-dim); margin-bottom:.7em; }
+.layer .kit{ font-family:var(--ff-mono); font-size:11.5px; color:var(--vellum-dim); line-height:1.9; }
+.layer .kit b{ color:var(--vellum); font-weight:400; }
+/* each stratum carries its own sediment band */
+.l-bronze .depth{ background: linear-gradient(180deg, #3A2E18, #241C10); }
+.l-bronze .tag{ color:#B98A34 }
+.l-high   .depth{ background: linear-gradient(180deg, #1F3A33, #14241F); }
+.l-high   .tag{ color:var(--verdigris) }
+.l-late   .depth{ background: linear-gradient(180deg, #3A2320, #231413); }
+.l-late   .tag{ color:var(--madder) }
+.l-powder .depth{ background: linear-gradient(180deg, #2B2740, #191728); }
+.l-powder .tag{ color:var(--lapis) }
+
+/* ── WEAPON PLATES ────────────────────────────────────── */
+.plates{ display:grid; grid-template-columns: repeat(auto-fill, minmax(258px,1fr)); gap:1px; background:var(--line-soft); border:1px solid var(--line-soft); }
+.plate{ background: var(--ash); padding:22px; display:flex; flex-direction:column; gap:12px; transition: background .18s ease; }
+.plate:hover{ background: var(--ash-hi); }
+.plate svg{ width:100%; height:54px; display:block; }
+.plate .nm{ font-family:var(--ff-display); font-size:1.08rem; font-weight:600; }
+.plate .era{ font-family:var(--ff-mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--vellum-faint); }
+.plate p{ font-size:.86rem; line-height:1.55; color:var(--vellum-dim); }
+.rail{ display:flex; flex-direction:column; gap:6px; margin-top:auto; padding-top:12px; border-top:1px solid var(--line-soft); }
+.stat{ display:grid; grid-template-columns: 62px 1fr 34px; align-items:center; gap:9px; font-family:var(--ff-mono); font-size:9.5px; letter-spacing:.11em; text-transform:uppercase; color:var(--vellum-faint); }
+.bar{ height:3px; background: var(--line); }
+.bar i{ display:block; height:100%; background: var(--verdigris); }
+.stat.heft .bar i{ background: var(--orpiment); }
+.stat.risk .bar i{ background: var(--madder); }
+.stat b{ color:var(--vellum-dim); font-weight:400; text-align:right; font-variant-numeric:tabular-nums; }
+
+/* ── PIGMENT SWATCHES ─────────────────────────────────── */
+.pigments{ display:grid; grid-template-columns: repeat(auto-fit,minmax(168px,1fr)); gap:1px; background:var(--line-soft); border:1px solid var(--line-soft); }
+.pig{ background: var(--ash); padding:0; }
+.pig .chip{ height:104px; border-bottom:1px solid var(--line-soft); }
+.pig .meta{ padding:15px 16px; }
+.pig .nm{ font-family:var(--ff-display); font-size:1rem; font-weight:600; margin-bottom:3px; }
+.pig .hx{ font-family:var(--ff-mono); font-size:11px; color:var(--vellum-faint); letter-spacing:.06em; margin-bottom:8px; }
+.pig .use{ font-size:.82rem; line-height:1.5; color:var(--vellum-dim); }
+
+/* ── MOOD TILES ───────────────────────────────────────── */
+.moods{ display:grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap:1px; background:var(--line-soft); border:1px solid var(--line-soft); }
+.mood{ background:var(--ash); }
+.mood .sw{ aspect-ratio: 4/3; max-width:100%; position:relative; overflow:hidden; }
+.mood .cap{ padding:14px 16px; }
+.mood .cap .t{ font-family:var(--ff-display); font-size:.98rem; font-weight:600; margin-bottom:3px; }
+.mood .cap .d{ font-size:.8rem; color:var(--vellum-dim); line-height:1.5; }
+
+.m-lair  .sw{ background: radial-gradient(52% 46% at 38% 72%, #6E5320 0%, #2A2012 40%, #100E0A 100%); }
+.m-vault .sw{ background: linear-gradient(168deg,#0C0B08 0%,#1A1710 46%, #6B551E 88%, #C9A227 100%); }
+.m-portal .sw{ background: radial-gradient(44% 40% at 50% 50%, #B6C8FF 0%, #7A6AA0 26%, #2A2340 55%, #0D0C10 100%); }
+.m-siege .sw{ background: linear-gradient(12deg,#0E0C09 0%,#33170E 52%,#C4542E 88%, #E8A24E 100%); }
+.m-marsh .sw{ background: linear-gradient(200deg,#0A100E 0%,#1D3029 55%,#5FA288 100%); }
+.m-bronze .sw{ background: linear-gradient(155deg,#120E08 0%,#3D2D13 58%,#B98A34 100%); }
+/* the fleck of candle-soot every frame has */
+.mood .sw::after{ content:""; position:absolute; inset:0; background-image: var(--grain); opacity:.3; mix-blend-mode:overlay; }
+
+/* ── BUILT / TO BUILD ─────────────────────────────────── */
+.ledger{ border:1px solid var(--line-soft); }
+.row{ display:grid; grid-template-columns: 22px 1fr auto; gap:16px; align-items:baseline;
+      padding:14px 18px; border-bottom:1px solid var(--line-soft); background:var(--ash); }
+.row:last-child{ border-bottom:0; }
+.row .mk{ font-family:var(--ff-mono); font-size:13px; line-height:1.5; }
+.row.done .mk{ color: var(--verdigris); }
+.row.part .mk{ color: var(--orpiment); }
+.row.todo .mk{ color: var(--vellum-faint); }
+.row .what{ font-size:.94rem; }
+.row .what code{ font-family:var(--ff-mono); font-size:.82em; color:var(--vellum-dim); background:var(--bone-black); padding:1px 5px; }
+.row .st{ font-family:var(--ff-mono); font-size:10px; letter-spacing:.15em; text-transform:uppercase; white-space:nowrap; }
+.row.done .st{ color:var(--verdigris) } .row.part .st{ color:var(--orpiment) } .row.todo .st{ color:var(--vellum-faint) }
+
+/* ── PULLQUOTE ────────────────────────────────────────── */
+.pull{
+  border-left:2px solid var(--orpiment); padding:6px 0 6px 26px;
+  font-family:var(--ff-display); font-weight:500; font-style:normal;
+  font-size: clamp(1.25rem,3vw,1.7rem); line-height:1.42; color:var(--vellum);
+  max-width: 32ch;
+}
+
+/* ── MILESTONES ───────────────────────────────────────── */
+.miles{ display:grid; gap:1px; background:var(--line-soft); border:1px solid var(--line-soft); }
+.mile{ background:var(--ash); padding:22px 24px; display:grid; grid-template-columns: 116px 1fr; gap:22px; }
+.mile .when{ font-family:var(--ff-mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--verdigris); line-height:1.6; }
+.mile h4{ font-size:1.06rem; font-weight:600; margin-bottom:7px; }
+.mile p{ font-size:.9rem; color:var(--vellum-dim); line-height:1.6; }
+.mile ul{ margin:.6em 0 0; padding-left:1.05em; font-size:.88rem; color:var(--vellum-dim); }
+.mile li{ margin-bottom:.3em; }
+
+footer{ padding-block:60px 80px; border-top:1px solid var(--line-soft); color:var(--vellum-faint); font-family:var(--ff-mono); font-size:11px; letter-spacing:.1em; }
+
+@media (max-width: 640px){
+  body{ font-size:16px; }
+  section{ padding-block:60px; }
+  .layer{ grid-template-columns: 1fr; }
+  .layer .depth{ border-right:0; border-bottom:1px solid var(--line-soft); padding:16px 18px; }
+  .mile{ grid-template-columns: 1fr; gap:10px; }
+}
+</style>
+
+<div class="wrap">
+
+<!-- ════════════ HERO ════════════ -->
+<section class="hero">
+  <svg class="sigil" viewBox="0 0 100 100" role="img" aria-label="Plunderspell sigil: a key crossed with a wand inside a summoning ring">
+    <circle cx="50" cy="50" r="42" fill="none" stroke="#332D22" stroke-width="1.5"/>
+    <circle cx="50" cy="50" r="34" fill="none" stroke="#5FA288" stroke-width="1" stroke-dasharray="3 5"/>
+    <path d="M32 68 L66 34" stroke="#C9A227" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <circle cx="30" cy="70" r="6.5" fill="none" stroke="#C9A227" stroke-width="3"/>
+    <path d="M58 42 l7 7 M63 37 l6 6" stroke="#C9A227" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M68 68 L34 34" stroke="#7A6AA0" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <circle cx="70" cy="70" r="4" fill="#7A6AA0"/>
+  </svg>
+
+  <div class="sub">A co-op extraction game</div>
+  <h1>Plunder<em>spell</em></h1>
+  <p class="hook">Four wizards. One castle. <b>You cast by shouting the words out loud</b> — and everything you steal, you have to physically carry home.</p>
+  <div class="stamp">
+    <span>4-player co-op</span><span>First-person</span><span>Voice-cast</span><span>Physics loot</span><span>PC / Steam</span>
+  </div>
+</section>
+
+<!-- ════════════ THE PITCH ════════════ -->
+<section>
+  <div class="spine">
+    <div class="eyebrow">The pitch</div>
+    <h2>It's a heist film, except everyone is an idiot with a wand</h2>
+    <p class="lede">You and three friends are failing wizards. You share a damp lair, a stack of unpaid debts, and a portal that opens onto the past. Every night you step through it, break into somewhere you absolutely should not be, and try to get back out with something worth more than your own life.</p>
+
+    <p>Extraction games are built on one feeling: <em>I have too much to lose and not enough time.</em> Plunderspell keeps that and adds two things nobody has properly combined.</p>
+
+    <p><b style="color:var(--lapis)">First: you cast spells with your actual voice.</b> Not a hotkey. You press a key and say <span class="word" style="font-size:1em">FRANGO</span> and the wall breaks. Your friends hear you say it, half a second before it happens. When six people are whisper-shouting Latin at a locked door while something enormous walks toward them, you have a clip. Every single session produces a clip.</p>
+
+    <p><b style="color:var(--orpiment)">Second: loot is physical, not a grid.</b> There is no inventory screen. A golden altarpiece is an object with mass that two people have to carry between them, and it will not fit through the window you came in by. You will drop things. You will throw a reliquary at a knight and watch it shatter and know exactly how much money just left the room.</p>
+
+    <div class="pull">The comedy isn't written into the game. It's what happens when physics and a microphone are both allowed to go wrong at once.</div>
+  </div>
+</section>
+
+<!-- ════════════ WHY NOW ════════════ -->
+<section>
+  <div class="eyebrow">Why this, why now</div>
+  <h2 class="spine">The gap on the shelf</h2>
+  <div class="grid g3" style="margin-top:30px">
+    <div>
+      <div class="kicker">The proven appetite</div>
+      <p style="font-size:.93rem; color:var(--vellum-dim)">Four-player co-op horror-comedy is the most reliably viral shape in PC gaming. Its titles sell on friends recording friends. It needs almost no marketing budget — it needs a <em>mechanic that generates footage.</em></p>
+    </div>
+    <div>
+      <div class="kicker">The unserved fantasy</div>
+      <p style="font-size:.93rem; color:var(--vellum-dim)">That entire genre is set in space stations, sewers and abandoned facilities. Nobody has taken the formula somewhere with <em>gold in it</em>. Castles, crypts, treasuries and cathedrals are the most loot-dense fiction that exists, and the shelf is empty.</p>
+    </div>
+    <div>
+      <div class="kicker">The unclaimed input</div>
+      <p style="font-size:.93rem; color:var(--vellum-dim)">Everybody already has a microphone open, because these games run on voice chat. Using that mic as a <em>control input</em> costs the player nothing and has never been the core verb of a co-op game. It is sitting there, free.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ THE LOOP ════════════ -->
+<section>
+  <div class="eyebrow">The loop · 25–40 minutes</div>
+  <h2 class="spine">Lair, portal, castle, run</h2>
+  <p class="spine dim" style="margin-bottom:30px">One raid is a closed loop. The lair is the only thing that persists, which is what makes losing a run hurt and makes a good one worth bragging about.</p>
+
+  <div class="loop">
+    <div class="beat">
+      <div class="n">01 · PREPARE</div>
+      <h4>The Lair</h4>
+      <p>Persistent hub. Bind spells to your tongue, pick a physical weapon, choose an Age, and decide how greedy you're feeling. Debts are due whether you go out or not.</p>
+    </div>
+    <div class="beat">
+      <div class="n">02 · COMMIT</div>
+      <h4>The Portal</h4>
+      <p>Step through into a procedurally built castle in a chosen century. Once the four of you are in, the portal narrows. It will not stay open all night.</p>
+    </div>
+    <div class="beat">
+      <div class="n">03 · TAKE</div>
+      <h4>The Plunder</h4>
+      <p>Break in. Find the treasury, the crypt, the reliquary. Every object has weight, value and fragility. Noise attracts the household. So does shouting.</p>
+    </div>
+    <div class="beat loss">
+      <div class="n">04 · PANIC</div>
+      <h4>The Hue &amp; Cry</h4>
+      <p>Something notices. The castle wakes. Now you're carrying a chandelier down a spiral stair with a war-hound behind you and a spell you keep mispronouncing.</p>
+    </div>
+    <div class="beat gain">
+      <div class="n">05 · ESCAPE</div>
+      <h4>The Extraction</h4>
+      <p>Only what physically crosses the portal comes home. Drop a friend's body or drop the gold — that is a genuine choice, and it will be remembered.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ VOICE ════════════ -->
+<section>
+  <div class="spine">
+    <div class="eyebrow">Pillar one · The tongue</div>
+    <h2>Spells you have to say out loud</h2>
+    <p class="lede">Hold the cast key. Speak the word. The game listens on your machine — no servers, no subscription, no audio ever leaves your PC — and recognises it in under a tenth of a second.</p>
+    <p>The lexicon is deliberately small and deliberately hard. Around forty words, chosen so they sound nothing like each other when whispered but tempting to slur when panicking. <b>Mishearing is not a bug we're hiding — it is content we are writing.</b> Every incantation has a documented failure twin, and the failure is always funnier than the success.</p>
+  </div>
+
+  <div class="tablewrap" style="margin-top:34px">
+    <table>
+      <thead>
+        <tr><th>Incantation</th><th>Cadence</th><th>Effect</th><th>Cast</th><th>Near-miss</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="word">IGNIS<div class="syl">2 syl · IG-nis</div></td>
+          <td class="ms">short, hard</td>
+          <td>An ember dart. Cheap, fast, sets tapestries and thatch alight — which is rarely what you wanted.</td>
+          <td class="ms">180 ms</td>
+          <td class="misfire">"INGUIS" — you set your own beard alight</td>
+        </tr>
+        <tr>
+          <td class="word">FRANGO<div class="syl">2 syl · FRAN-go</div></td>
+          <td class="ms">plosive</td>
+          <td>Shatter. Breaks masonry, locks, bars — and every fragile thing you are currently holding.</td>
+          <td class="ms">210 ms</td>
+          <td class="misfire">"FRAGO" — you shatter the floor you're on</td>
+        </tr>
+        <tr>
+          <td class="word">LEVO<div class="syl">2 syl · LAY-vo</div></td>
+          <td class="ms">open, sustained</td>
+          <td>Telekinetic lift. The heavy-loot verb — grab, swing, stack, and hurl anything with mass.</td>
+          <td class="ms">190 ms</td>
+          <td class="misfire">"LEVE" — you lift <em>yourself</em>, badly</td>
+        </tr>
+        <tr>
+          <td class="word">AURUM VOCO<div class="syl">4 syl · OW-rum VO-co</div></td>
+          <td class="ms">two-beat</td>
+          <td>Gold-sense. Everything valuable glows through stone for four seconds. Also makes you glow.</td>
+          <td class="ms">340 ms</td>
+          <td class="misfire">"AURUM LOCO" — the gold screams instead</td>
+        </tr>
+        <tr>
+          <td class="word">TONITRUS<div class="syl">3 syl · TON-i-truss</div></td>
+          <td class="ms">rolling</td>
+          <td>Thunderclap. A physics shove — clears a doorway, drops a portcullis, launches a friend.</td>
+          <td class="ms">260 ms</td>
+          <td class="misfire">"TENEBRIS" — every light in the room dies</td>
+        </tr>
+        <tr>
+          <td class="word">SOMNUS<div class="syl">2 syl · SOM-nus</div></td>
+          <td class="ms">soft, whispered</td>
+          <td>Sleep. Must be spoken <em>quietly</em> — the mic measures your volume, and shouting it wakes the room.</td>
+          <td class="ms">220 ms</td>
+          <td class="misfire">"SONUS" — a loud noise, exactly where you are</td>
+        </tr>
+        <tr>
+          <td class="word">CADAVER SURGE<div class="syl">5 syl · ka-DA-ver SUR-gay</div></td>
+          <td class="ms">long, deliberate</td>
+          <td>Raise a corpse as a porter. It carries loot. It is slow, obedient, and will follow you home.</td>
+          <td class="ms">480 ms</td>
+          <td class="misfire">it raises, and it is not obedient</td>
+        </tr>
+        <tr>
+          <td class="word">PORTA<div class="syl">2 syl · POR-ta</div></td>
+          <td class="ms">final</td>
+          <td>Emergency extraction. Ruinously expensive. Opens a hole home, right here, right now.</td>
+          <td class="ms">200 ms</td>
+          <td class="misfire">"PORTO" — it opens onto the <em>wrong Age</em></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid g3" style="margin-top:28px">
+    <div>
+      <div class="kicker">Runs offline</div>
+      <p style="font-size:.9rem;color:var(--vellum-dim)">A small keyword-spotting model ships inside the build. No API key, no per-player cost, no outage can take the game down.</p>
+    </div>
+    <div>
+      <div class="kicker">Accessible by default</div>
+      <p style="font-size:.9rem;color:var(--vellum-dim)">Every incantation is also bindable to a key. Voice is the intended way to play, never the required one — nobody is locked out for being mute, shy, or in a shared house.</p>
+    </div>
+    <div>
+      <div class="kicker">Volume is a mechanic</div>
+      <p style="font-size:.9rem;color:var(--vellum-dim)">Loudness is read as well as words. Some spells demand a whisper; some demand a genuine shout. The game asks you to be brave in your own living room.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ PHYSICS ════════════ -->
+<section>
+  <div class="spine">
+    <div class="eyebrow">Pillar two · The hands</div>
+    <h2>Nothing in the world is a menu</h2>
+    <p class="lede">Every item is a rigid body with mass, and every rigid body can hurt someone. There is no separate "combat system" — hitting a man with a candlestick and looting a candlestick are the same code path.</p>
+    <p>Damage comes from impact velocity, so a sword is simply a heavy thing with a sharp end that you swung fast. That one rule makes the entire castle into a weapon: a dropped portcullis, a shoved wardrobe, a chandelier cut loose above a dining hall, a friend flung by a mispronounced <span class="word" style="font-size:1em">TONITRUS</span>.</p>
+    <p>It also makes greed legible without a single UI element. Bulk is measured in <span class="mono">stone</span>. A silver ewer is 2 stone and fits under one arm. The altarpiece is 14 stone, needs two people, and the moment either of you lets go it falls down the stairs and stops being worth anything.</p>
+  </div>
+
+  <div class="grid g2" style="margin-top:32px">
+    <div>
+      <div class="kicker">Carry &amp; hurl</div>
+      <p style="font-size:.92rem;color:var(--vellum-dim)">Grab anything, rotate it in front of you, push it deeper or pull it closer, then throw. Already implemented on the existing codebase — including creatures, who can be picked up, carried, throttled and thrown.</p>
+    </div>
+    <div>
+      <div class="kicker">Fragility</div>
+      <p style="font-size:.92rem;color:var(--vellum-dim)">Stained glass, reliquaries, illuminated manuscripts and alchemical glass all break on impact. The most valuable loot in the game is also the loot least able to survive you panicking.</p>
+    </div>
+    <div>
+      <div class="kicker">Corpses are objects</div>
+      <p style="font-size:.92rem;color:var(--vellum-dim)">A dead friend is a 12-stone item. You can carry them out and revive them at the lair — at the cost of the gold you'd otherwise have carried in that pair of hands.</p>
+    </div>
+    <div>
+      <div class="kicker">The castle reacts</div>
+      <p style="font-size:.92rem;color:var(--vellum-dim)">Noise is a physical event, not a scripted trigger. A shattered window, a shouted incantation, a dropped suit of armour — each propagates as sound through the level and wakes what it reaches.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ THE AGES ════════════ -->
+<section>
+  <div class="eyebrow">Pillar three · The Ages</div>
+  <h2 class="spine">Dig down through history and steal from all of it</h2>
+  <p class="spine dim" style="margin-bottom:34px">Your lair sits outside time, so every Age is a destination rather than a chapter. Each has its own architecture, loot, defenders and weapon tier. The rule that makes this sing: <b style="color:var(--orpiment)">whatever you carry out of one Age, you can carry into another.</b> A wheellock pistol is a curiosity in 1620 and an act of god in 1200 BC. We will not balance that away — that <em>is</em> the progression.</p>
+
+  <div class="strata">
+    <div class="layer l-bronze">
+      <div class="depth"><span class="yr">c. 1200 BC</span>Stratum I<br>deepest</div>
+      <div class="body">
+        <div class="tag">The Bronze Age</div>
+        <h3>Citadels of mud-brick and smoke</h3>
+        <p>Palace complexes, painted plaster, grain stores and god-kings. Low ceilings, narrow doors, torchlight. Defenders are many, poorly armoured and utterly unprepared for anything you bring back from later.</p>
+        <div class="kit"><b>Loot:</b> ingots, faience, ceremonial bronze, sealed amphorae<br><b>Kit:</b> khopesh · sling · oxhide shield · fire-pot<br><b>Hazard:</b> the fire spreads faster than anywhere else</div>
+      </div>
+    </div>
+    <div class="layer l-high">
+      <div class="depth"><span class="yr">c. 1250</span>Stratum II</div>
+      <div class="body">
+        <div class="tag">The High Medieval</div>
+        <h3>Stone keeps and reliquaries</h3>
+        <p>The default Age and the vertical slice. Curtain walls, spiral stairs, a chapel worth more than the rest of the castle combined. Garrisons are small but armoured, and the household wakes in stages.</p>
+        <div class="kit"><b>Loot:</b> reliquaries, altar plate, illuminated psalters, coin<br><b>Kit:</b> arming sword · mace · crossbow · boiling oil<br><b>Hazard:</b> spiral stairs turn clockwise — against you</div>
+      </div>
+    </div>
+    <div class="layer l-late">
+      <div class="depth"><span class="yr">c. 1450</span>Stratum III</div>
+      <div class="body">
+        <div class="tag">The Late Medieval</div>
+        <h3>Plate, powder and paranoia</h3>
+        <p>Concentric fortresses built specifically to stop people like you. Murder-holes, dog-legged gates, guard rotations. The first Age where the defenders have gunpowder and the architecture assumes a siege.</p>
+        <div class="kit"><b>Loot:</b> Burgundian plate, tapestry, banking ledgers, jewels<br><b>Kit:</b> poleaxe · hand cannon · pavise · caltrops<br><b>Hazard:</b> guards now actively hunt in pairs</div>
+      </div>
+    </div>
+    <div class="layer l-powder">
+      <div class="depth"><span class="yr">c. 1620</span>Stratum IV<br>shallowest</div>
+      <div class="body">
+        <div class="tag">The Age of Powder</div>
+        <h3>Palaces, cabinets and gunpowder</h3>
+        <p>Wide halls, huge windows, immense glass — and magazines of black powder that turn any fight into demolition. The richest, most fragile, most flammable loot in the game.</p>
+        <div class="kit"><b>Loot:</b> cabinets of curiosity, mirrors, astrolabes, silver services<br><b>Kit:</b> wheellock pistol · rapier · grenado · petard<br><b>Hazard:</b> one stray <span class="word" style="font-size:.95em">IGNIS</span> near the magazine ends the raid</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ THE CASTLE ════════════ -->
+<section>
+  <div class="spine">
+    <div class="eyebrow">Level generation</div>
+    <h2>Castles aren't dungeons, so don't generate them like one</h2>
+    <p class="lede">Every procedural co-op game builds a web of rooms and corridors. A real castle isn't that — it's a set of nested rings, each harder to get into than the last, and that structure does the game design for us for free.</p>
+    <p>We generate outward-in: <b>curtain wall → outer bailey → inner ward → keep → undercroft and crypt.</b> Value rises with every ring you cross. Which means the deepest, richest room is also the furthest from the way out, and <b style="color:var(--madder)">extraction is always a fighting retreat back through everything you already woke up.</b> You never walk out of a good run calmly.</p>
+  </div>
+
+  <div class="grid g3" style="margin-top:30px">
+    <div>
+      <div class="kicker">Socket-matched modules</div>
+      <p style="font-size:.9rem;color:var(--vellum-dim)">Rooms are prefabs with tagged joins — door, window, arrow-loop, stair up, stair down, murder-hole. Assembly matches sockets, so results stay architecturally plausible and artists can add rooms without a programmer.</p>
+    </div>
+    <div>
+      <div class="kicker">One integer on the wire</div>
+      <p style="font-size:.9rem;color:var(--vellum-dim)">The host rolls a seed and sends it before load. Every client builds the identical castle locally. No geometry is ever replicated, so a 400-room fortress costs the same bandwidth as an empty room.</p>
+    </div>
+    <div>
+      <div class="kicker">Validated, not hoped-for</div>
+      <p style="font-size:.9rem;color:var(--vellum-dim)">After generation, a flood-fill proves the crypt can reach the portal. If it can't, the castle is thrown away and rerolled. A layout that soft-locks a run is worse than a slow loading screen.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ ARSENAL ════════════ -->
+<section>
+  <div class="eyebrow">The arsenal</div>
+  <h2 class="spine">Twelve things worth swinging</h2>
+  <p class="spine dim" style="margin-bottom:30px">No damage numbers on screen. Weapons are described by what they weigh and what they do to a room, because that's what physics actually simulates.</p>
+
+  <div class="plates">
+
+    <div class="plate">
+      <svg viewBox="0 0 200 54" aria-hidden="true"><path d="M20 40 C60 40 90 34 150 22" stroke="#B98A34" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M150 22 C168 18 176 24 182 16" stroke="#B98A34" stroke-width="6" fill="none" stroke-linecap="round"/><rect x="10" y="34" width="16" height="12" rx="2" fill="#4A3A1C"/></svg>
+      <div><div class="era">Bronze Age</div><div class="nm">Khopesh</div></div>
+      <p>A sickle of cast bronze. Hooks a shield away from a body, then the same swing opens it. Slow, and it bends.</p>
+      <div class="rail">
+        <div class="stat"><span>Reach</span><div class="bar"><i style="width:40%"></i></div><b>40</b></div>
+        <div class="stat heft"><span>Heft</span><div class="bar"><i style="width:55%"></i></div><b>3st</b></div>
+        <div class="stat risk"><span>Noise</span><div class="bar"><i style="width:30%"></i></div><b>low</b></div>
+      </div>
+    </div>
+
+    <div class="plate">
+      <svg viewBox="0 0 200 54" aria-hidden="true"><path d="M30 14 L100 30 L30 46" stroke="#7A6A4A" stroke-width="3" fill="none" stroke-linejoin="round"/><circle cx="112" cy="30" r="11" fill="#5A5348"/><path d="M100 30 L150 30" stroke="#33302A" stroke-width="2"/></svg>
+      <div><div class="era">Bronze Age</div><div class="nm">Sling</div></div>
+      <p>A cord and a stone. Nearly silent, absurdly cheap, and at full whirl it kills a man in a helmet. Requires actual space to swing.</p>
+      <div class="rail">
+        <div class="stat"><span>Reach</span><div class="bar"><i style="width:85%"></i></div><b>85</b></div>
+        <div class="stat heft"><span>Heft</span><div class="bar"><i style="width:8%"></i></div><b>0st</b></div>
+        <div class="stat risk"><span>Noise</span><div class="bar"><i style="width:8%"></i></div><b>none</b></div>
+      </div>
+    </div>
+
+    <div class="plate">
+      <svg viewBox="0 0 200 54" aria-hidden="true"><circle cx="46" cy="30" r="22" fill="none" stroke="#B98A34" stroke-width="5"/><circle cx="46" cy="30" r="8" fill="#3A2E18"/><path d="M68 30 L180 30" stroke="#4A3A1C" stroke-width="4" stroke-linecap="round"/></svg>
+      <div><div class="era">Bronze Age</div><div class="nm">Oxhide Shield</div></div>
+      <p>A wall you carry. Stops arrows and slingstones dead. Also the fastest way down a flight of stairs, if you're brave.</p>
+      <div class="rail">
+        <div class="stat"><span>Reach</span><div class="bar"><i style="width:15%"></i></div><b>15</b></div>
+        <div class="stat heft"><span>Heft</span><div class="bar"><i style="width:60%"></i></div><b>4st</b></div>
+        <div class="stat risk"><span>Noise</span><div class="bar"><i style="width:45%"></i></div><b>mid</b></div>
+      </div>
+    </div>
+
+    <div class="plate">
+      <svg viewBox="0 0 200 54" aria-hidden="true"><path d="M24 30 L140 30" stroke="#9FA6AC" stroke-width="7" stroke-linecap="round"/><path d="M140 30 L176 30" stroke="#9FA6AC" stroke-width="3" stroke-linecap="round"/><path d="M38 12 L38 48" stroke="#5FA288" stroke-width="5" stroke-linecap="round"/><circle cx="18" cy="30" r="7" fill="#5FA288"/></svg>
+      <div><div class="era">High Medieval</div><div class="nm">Arming Sword</div></div>
+      <p>The honest default. Fast enough to matter in a corridor, light enough that you can still carry loot in the other hand.</p>
+      <div class="rail">
+        <div class="stat"><span>Reach</span><div class="bar"><i style="width:52%"></i></div><b>52</b></div>
+        <div class="stat heft"><span>Heft</span><div class="bar"><i style="width:30%"></i></div><b>2st</b></div>
+        <div class="stat risk"><span>Noise</span><div class="bar"><i style="width:35%"></i></div><b>low</b></div>
+      </div>
+    </div>
+
+    <div class="plate">
+      <svg viewBox="0 0 200 54" aria-hidden="true"><path d="M20 30 L128 30" stroke="#4A3A28" stroke-width="6" stroke-linecap="round"/><path d="M128 16 L128 44 L160 44 L172 30 L160 16 Z" fill="#6E7278"/><path d="M140 16 L140 44 M152 16 L152 44" stroke="#33373C" stroke-width="2"/></svg>
+      <div><div class="era">High Medieval</div><div class="nm">Flanged Mace</div></div>
+      <p>Doesn't care about armour and doesn't care about doors. The loudest thing in the game that isn't on fire.</p>
+      <div class="rail">
+        <div class="stat"><span>Reach</span><div class="bar"><i style="width:35%"></i></div><b>35</b></div>
+        <div class="stat heft"><span>Heft</span><div class="bar"><i style="width:70%"></i></div><b>5st</b></div>
+        <div class="stat risk"><span>Noise</span><div class="bar"><i style="width:88%"></i></div><b>high</b></div>
+      </div>
+    </div>
+
+    <div class="plate">
+      <svg viewBox="0 0 200 54" aria-hidden="true"><path d="M60 30 L170 30" stroke="#4A3A28" stroke-width="6" stroke-linecap="round"/><path d="M60 10 C36 18 36 42 60 50" stroke="#8A6A3A" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M60 10 L60 50" stroke="#B9B2A0" stroke-width="1.6"/><path d="M60 30 L110 30" stroke="#DCD2BA" stroke-width="3"/></svg>
+      <div><div class="era">High Medieval</div><div class="nm">Crossbow</div></div>
+      <p>One bolt, then a long, terrible reload during which you are simply a man holding a plank. Silent, and it drops a guard before he shouts.</p>
+      <div class="rail">
+        <div class="stat"><span>Reach</span><div class="bar"><i style="width:95%"></i></div><b>95</b></div>
+        <div class="stat heft"><span>Heft</span><div class="bar"><i style="width:42%"></i></div><b>3st</b></div>
+        <div class="stat risk"><span>Noise</span><div class="bar"><i style="width:14%"></i></div><b>none</b></div>
+      </div>
+    </div>
+
+    <div class="plate">
+      <svg viewBox="0 0 200 54" aria-hidden="true"><path d="M16 30 L150 30" stroke="#4A3A28" stroke-width="6" stroke-linecap="round"/><path d="M150 30 L184 30" stroke="#9FA6AC" stroke-width="4" stroke-linecap="round"/><path d="M146 8 L166 22 L146 30 Z" fill="#9FA6AC"/><path d="M146 52 L166 38 L146 30 Z" fill="#6E7278"/></svg>
+      <div><div class="era">Late Medieval</div><div class="nm">Poleaxe</div></div>
+      <p>Axe, hammer and spike on six feet of oak. Wins every open hall and is completely useless in a stairwell — which is where you'll be.</p>
+      <div class="rail">
+        <div class="stat"><span>Reach</span><div class="bar"><i style="width:78%"></i></div><b>78</b></div>
+        <div class="stat heft"><span>Heft</span><div class="bar"><i style="width:80%"></i></div><b>6st</b></div>
+        <div class="stat risk"><span>Noise</span><div class="bar"><i style="width:60%"></i></div><b>mid</b></div>
+      </div>
+    </div>
+
+    <div class="plate">
+      <svg viewBox="0 0 200 54" aria-hidden="true"><path d="M30 34 L120 34" stroke="#4A3A28" stroke-width="9" stroke-linecap="round"/><rect x="118" y="24" width="56" height="19" rx="3" fill="#3A3D40"/><circle cx="176" cy="33" r="5" fill="#C4542E"/><path d="M184 33 q8 -9 14 -3" stroke="#C4542E" stroke-width="2.5" fill="none"/></svg>
+      <div><div class="era">Late Medieval</div><div class="nm">Hand Cannon</div></div>
+      <p>A tube of iron you point and hope about. Deafening, wildly inaccurate, and in the Bronze Age it functions as a religious experience.</p>
+      <div class="rail">
+        <div class="stat"><span>Reach</span><div class="bar"><i style="width:58%"></i></div><b>58</b></div>
+        <div class="stat heft"><span>Heft</span><div class="bar"><i style="width:50%"></i></div><b>4st</b></div>
+        <div class="stat risk"><span>Noise</span><div class="bar"><i style="width:100%"></i></div><b>max</b></div>
+      </div>
+    </div>
+
+    <div class="plate">
+      <svg viewBox="0 0 200 54" aria-hidden="true"><g fill="#7A7268"><path d="M30 30 l10 -10 l10 10 l-10 10 Z"/><path d="M70 20 l10 -10 l10 10 l-10 10 Z"/><path d="M110 36 l10 -10 l10 10 l-10 10 Z"/><path d="M150 24 l10 -10 l10 10 l-10 10 Z"/></g></svg>
+      <div><div class="era">Late Medieval</div><div class="nm">Caltrops</div></div>
+      <p>Thrown by the handful behind you. Does almost no damage and wins more chases than anything else in the game.</p>
+      <div class="rail">
+        <div class="stat"><span>Reach</span><div class="bar"><i style="width:20%"></i></div><b>20</b></div>
+        <div class="stat heft"><span>Heft</span><div class="bar"><i style="width:12%"></i></div><b>1st</b></div>
+        <div class="stat risk"><span>Noise</span><div class="bar"><i style="width:20%"></i></div><b>low</b></div>
+      </div>
+    </div>
+
+    <div class="plate">
+      <svg viewBox="0 0 200 54" aria-hidden="true"><path d="M36 40 q20 -22 54 -22 l52 0" stroke="#5A4630" stroke-width="7" fill="none" stroke-linecap="round"/><rect x="120" y="14" width="54" height="10" rx="2" fill="#4A4E52"/><circle cx="118" cy="24" r="7" fill="#B98A34"/><path d="M178 19 q9 -8 15 -2" stroke="#C4542E" stroke-width="2.5" fill="none"/></svg>
+      <div><div class="era">Age of Powder</div><div class="nm">Wheellock Pistol</div></div>
+      <p>Concealable, one shot, no fuse to give you away. The only ranged weapon you can draw while carrying a chandelier.</p>
+      <div class="rail">
+        <div class="stat"><span>Reach</span><div class="bar"><i style="width:46%"></i></div><b>46</b></div>
+        <div class="stat heft"><span>Heft</span><div class="bar"><i style="width:16%"></i></div><b>1st</b></div>
+        <div class="stat risk"><span>Noise</span><div class="bar"><i style="width:82%"></i></div><b>high</b></div>
+      </div>
+    </div>
+
+    <div class="plate">
+      <svg viewBox="0 0 200 54" aria-hidden="true"><path d="M40 30 L184 30" stroke="#C3C8CC" stroke-width="3.5" stroke-linecap="round"/><circle cx="36" cy="30" r="13" fill="none" stroke="#B98A34" stroke-width="3"/><circle cx="20" cy="30" r="6" fill="#B98A34"/></svg>
+      <div><div class="era">Age of Powder</div><div class="nm">Rapier</div></div>
+      <p>Almost weightless, lethally fast, and it breaks if you hit anything solid with it. A duelist's toy in a building full of armour.</p>
+      <div class="rail">
+        <div class="stat"><span>Reach</span><div class="bar"><i style="width:68%"></i></div><b>68</b></div>
+        <div class="stat heft"><span>Heft</span><div class="bar"><i style="width:10%"></i></div><b>1st</b></div>
+        <div class="stat risk"><span>Noise</span><div class="bar"><i style="width:12%"></i></div><b>none</b></div>
+      </div>
+    </div>
+
+    <div class="plate">
+      <svg viewBox="0 0 200 54" aria-hidden="true"><circle cx="92" cy="32" r="19" fill="#2E3236" stroke="#4A4E52" stroke-width="2"/><path d="M104 18 q14 -14 26 -6" stroke="#C4542E" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="134" cy="12" r="4.5" fill="#E8A24E"/></svg>
+      <div><div class="era">Age of Powder</div><div class="nm">Grenado</div></div>
+      <p>A powder-filled sphere with a lit fuse that you must physically throw. It rolls. It rolls back. It has no opinion about whose side you're on.</p>
+      <div class="rail">
+        <div class="stat"><span>Reach</span><div class="bar"><i style="width:44%"></i></div><b>44</b></div>
+        <div class="stat heft"><span>Heft</span><div class="bar"><i style="width:22%"></i></div><b>1st</b></div>
+        <div class="stat risk"><span>Noise</span><div class="bar"><i style="width:100%"></i></div><b>max</b></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════════ PALETTE ════════════ -->
+<section>
+  <div class="spine">
+    <div class="eyebrow">Art direction · Colour</div>
+    <h2>Ground your own pigments</h2>
+    <p class="lede">The palette is named for the pigments a real illuminator would have ground in the period the game is set. That isn't decoration — it constrains us honestly, because these are the only colours that could exist in the world we're depicting.</p>
+    <p>The discipline: <b style="color:var(--verdigris)">verdigris carries the interface</b>, <b style="color:var(--orpiment)">orpiment is reserved exclusively for things worth money</b>, and nothing else in the game is allowed to be gold. When a player sees that yellow, it always means the same thing.</p>
+  </div>
+
+  <div class="pigments" style="margin-top:32px">
+    <div class="pig"><div class="chip" style="background:#14120E"></div><div class="meta"><div class="nm">Bone Black</div><div class="hx">#14120E</div><div class="use">Charred bone. The ground of everything — every unlit corner, every interface backdrop.</div></div></div>
+    <div class="pig"><div class="chip" style="background:#DCD2BA"></div><div class="meta"><div class="nm">Vellum</div><div class="hx">#DCD2BA</div><div class="use">Scraped calfskin. All primary text and parchment UI. Never pure white — nothing here is bleached.</div></div></div>
+    <div class="pig"><div class="chip" style="background:#5FA288"></div><div class="meta"><div class="nm">Verdigris</div><div class="hx">#5FA288</div><div class="use">Oxidised copper. The accent, the arcane glow, every interactive affordance.</div></div></div>
+    <div class="pig"><div class="chip" style="background:#C9A227"></div><div class="meta"><div class="nm">Orpiment</div><div class="hx">#C9A227</div><div class="use">Arsenic yellow — beautiful and toxic. Loot, value, candleflame. <b style="color:var(--orpiment)">Nothing else.</b></div></div></div>
+    <div class="pig"><div class="chip" style="background:#C4542E"></div><div class="meta"><div class="nm">Madder Lake</div><div class="hx">#C4542E</div><div class="use">Boiled madder root. Fire, alarm, wounds, and the moment the household wakes.</div></div></div>
+    <div class="pig"><div class="chip" style="background:#7A6AA0"></div><div class="meta"><div class="nm">Ground Lapis</div><div class="hx">#7A6AA0</div><div class="use">More costly than gold. Reserved for the voice: incantation text, portals, the necromantic.</div></div></div>
+  </div>
+</section>
+
+<!-- ════════════ MOOD ════════════ -->
+<section>
+  <div class="eyebrow">Art direction · Mood</div>
+  <h2 class="spine">Six frames the game should be able to produce</h2>
+  <p class="spine dim" style="margin-bottom:30px">Stylised, not photoreal — chunky readable silhouettes, hand-painted texture, and lighting that is almost entirely diegetic. If you can see it, something in the room is burning.</p>
+
+  <div class="moods">
+    <div class="mood m-lair"><div class="sw"></div><div class="cap"><div class="t">The Lair</div><div class="d">One candle, one fire, deep warm falloff into total black. The only safe frame in the game.</div></div></div>
+    <div class="mood m-vault"><div class="sw"></div><div class="cap"><div class="t">The Treasury</div><div class="d">Darkness with gold bleeding in from one corner. Orpiment doing its single job.</div></div></div>
+    <div class="mood m-portal"><div class="sw"></div><div class="cap"><div class="t">The Portal</div><div class="d">Cold lapis light thrown upward onto faces. The only unnatural colour in the world.</div></div></div>
+    <div class="mood m-siege"><div class="sw"></div><div class="cap"><div class="t">The Hue &amp; Cry</div><div class="d">Madder and flame from below. Everything readable as silhouette against fire.</div></div></div>
+    <div class="mood m-marsh"><div class="sw"></div><div class="cap"><div class="t">The Approach</div><div class="d">Pre-dawn verdigris mist. Wet stone, low contrast, the long walk in.</div></div></div>
+    <div class="mood m-bronze"><div class="sw"></div><div class="cap"><div class="t">Bronze Age Interior</div><div class="d">Ochre plaster and smoke. Warmer, lower, dustier than every later Age.</div></div></div>
+  </div>
+
+  <div class="grid g3" style="margin-top:28px">
+    <div><div class="kicker">Silhouette first</div><p style="font-size:.9rem;color:var(--vellum-dim)">Robes, hoods and bulky loot read at 10 metres in the dark. Every character reads as a shape before it reads as a person.</p></div>
+    <div><div class="kicker">Diegetic light only</div><p style="font-size:.9rem;color:var(--vellum-dim)">Torches, candles, hearths, spell effects. No ambient fill. Darkness is a real obstacle, and light is a resource you carry and can drop.</p></div>
+    <div><div class="kicker">Texture over polygons</div><p style="font-size:.9rem;color:var(--vellum-dim)">Hand-painted albedo, soot in the crevices, gilt worn off the high points. Cheap to author, ages well, doesn't chase fidelity we can't win.</p></div>
+  </div>
+</section>
+
+<!-- ════════════ WHAT EXISTS ════════════ -->
+<section>
+  <div class="spine">
+    <div class="eyebrow">Production reality</div>
+    <h2>Most of this is already built</h2>
+    <p class="lede">This is the part that should change how seriously you take the pitch. Your existing repository — specifically the <span class="mono" style="font-size:.85em">steam-multiplayer-framework</span> branch, which is 30 commits ahead of everything else — is not a blank Unity project. It already contains a working first-person physics extraction game with Steam multiplayer. And it already has a <b style="color:var(--lapis)">SpellBook</b>.</p>
+    <p>The single largest piece of work in pivoting is <em>deletion</em>. Planetary gravity lives in its own assembly, <span class="mono" style="font-size:.85em">Runtime/Gravity/</span>, and is exactly two files with three consumers. Removing it is an afternoon, not a rewrite.</p>
+  </div>
+
+  <div class="ledger" style="margin-top:30px">
+    <div class="row done"><span class="mk">✦</span><span class="what">First-person Rigidbody player with a 10-state FSM, health, dodge, ground-snap, air control — <code>PlayerStateMachine.cs</code></span><span class="st">Built</span></div>
+    <div class="row done"><span class="mk">✦</span><span class="what">Physics grab / carry / rotate / throw, with velocity-scaled impact damage — <code>Item.cs</code>, <code>ItemManager.cs</code></span><span class="st">Built</span></div>
+    <div class="row done"><span class="mk">✦</span><span class="what">Spell casting driven by a ScriptableObject: fire rate, spread, projectile count, homing, reload — <code>SpellBook.cs</code>, <code>SpellStats.cs</code></span><span class="st">Built</span></div>
+    <div class="row done"><span class="mk">✦</span><span class="what">Enemy FSM with 7 states — including a <b>picked-up</b> state. Monsters are already carryable, throwable and throttleable.</span><span class="st">Built</span></div>
+    <div class="row done"><span class="mk">✦</span><span class="what">Steam multiplayer: PurrNet with Steam transport, PurrLobby, friend invites, rich presence, cold-launch joins — <code>SteamInviteGateway.cs</code></span><span class="st">Built</span></div>
+    <div class="row done"><span class="mk">✦</span><span class="what">Clean core: singletons, event bus, state machine base, <code>IHealth</code>, and seven separate assembly definitions</span><span class="st">Built</span></div>
+    <div class="row part"><span class="mk">◐</span><span class="what">Planetary gravity — isolated in <code>Runtime/Gravity/</code>, 2 files, 3 consumers</span><span class="st">Delete</span></div>
+    <div class="row todo"><span class="mk">○</span><span class="what">Castle generator: concentric wards, socket-matched modules, replicated seed, layout validation — written fresh</span><span class="st">New</span></div>
+    <div class="row todo"><span class="mk">○</span><span class="what">Voice: mic capture, on-device keyword spotting, spell lexicon, misfire table</span><span class="st">New</span></div>
+    <div class="row todo"><span class="mk">○</span><span class="what">Loot: value, bulk in stone, fragility hooked into the existing impact path</span><span class="st">New</span></div>
+    <div class="row todo"><span class="mk">○</span><span class="what">Ages as ScriptableObjects; extraction portal; raid timer</span><span class="st">New</span></div>
+    <div class="row todo"><span class="mk">○</span><span class="what">The lair: persistent hub, debts, progression</span><span class="st">New</span></div>
+  </div>
+
+  <p class="spine" style="margin-top:26px; color:var(--vellum-dim); font-size:.94rem">One warning worth acting on early: the branch you're currently checked out on is a stale copy of <span class="mono">main</span>, 30 commits behind. Anything built from it starts by throwing away all of the above.</p>
+</section>
+
+<!-- ════════════ ROADMAP ════════════ -->
+<section>
+  <div class="eyebrow">The route in</div>
+  <h2 class="spine">Four milestones to knowing whether it's fun</h2>
+  <p class="spine dim" style="margin-bottom:30px">The riskiest assumption is not the castle or the loot. It's whether shouting at your computer feels powerful rather than embarrassing. Everything is sequenced to answer that as early as possible.</p>
+
+  <div class="miles">
+    <div class="mile">
+      <div class="when">Milestone 0<br>~1 week</div>
+      <div>
+        <h4>Fork clean, cut gravity</h4>
+        <p>Branch from the real trunk, delete the Gravity assembly, restore world gravity across the player states and items, confirm nothing else regressed.</p>
+        <ul><li>Crates and players fall along −Y and land flat</li><li>Thrown items still deal velocity-scaled damage</li><li>All seven assemblies compile with zero gravity references</li></ul>
+      </div>
+    </div>
+    <div class="mile">
+      <div class="when">Milestone 1<br>~2 weeks</div>
+      <div>
+        <h4>Prove the voice</h4>
+        <p>A bare grey room and four incantations. Nothing else. Measure recognition accuracy, latency and — most importantly — whether people keep doing it after ten minutes.</p>
+        <ul><li>&gt;90% top-1 across four accents on a 40-word lexicon</li><li>Under 150 ms from word-end to effect</li><li>Misfires land as jokes, not as frustration</li></ul>
+      </div>
+    </div>
+    <div class="mile">
+      <div class="when">Milestone 2<br>~6 weeks</div>
+      <div>
+        <h4>The vertical slice</h4>
+        <p>One castle, one Age (High Medieval), four spells, four players, the full loop end to end. This is the thing you show people.</p>
+        <ul><li>Castle generator built fresh — concentric wards, socket-matched modules, one replicated seed</li><li>Loot with value, bulk and fragility; two-person carries</li><li>An extraction portal that only counts what physically crosses it</li><li>A lair that remembers what came back</li></ul>
+      </div>
+    </div>
+    <div class="mile">
+      <div class="when">Milestone 3<br>ongoing</div>
+      <div>
+        <h4>Open the other Ages</h4>
+        <p>Ages are content, not engineering, once the ScriptableObject exists. Each adds a room set, a loot table, an enemy roster and a weapon tier — and immediately multiplies every Age before it, because the weapons travel.</p>
+        <ul><li>Bronze Age, Late Medieval, Age of Powder</li><li>The anachronism rule stays unbalanced on purpose</li><li>Lair progression, debts, and reasons to go back out</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ CLOSE ════════════ -->
+<section>
+  <div class="spine">
+    <div class="eyebrow">In one line</div>
+    <h2 style="font-size:clamp(1.7rem,4.6vw,2.9rem)">Four friends whisper-shouting dead languages at a locked door while carrying a stolen altarpiece down a staircase, badly.</h2>
+    <p class="lede" style="margin-top:22px">That sentence is the entire marketing plan. It is also a description of the mechanics, which is how you know the design is sound.</p>
+  </div>
+</section>
+
+<footer>
+  PLUNDERSPELL · PITCH BIBLE v0.1 · FORK OF ROGUE-AI-EXTRACTION-GAME · UNITY 6000.3.15F1 · PURRNET + STEAM
+</footer>
+
+</div>
+</body>
+</html>
