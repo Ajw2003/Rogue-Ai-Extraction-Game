@@ -24,15 +24,6 @@ public class PlayerWalkState : PlayerState
         _stateMachine._rb.linearVelocity = (moveDirection * _stateMachine.walkSpeed) + (up * verticalSpeed);
     }
 
-    private Vector3 CameraRelativeInputOnGravityPlane(Vector3 up)
-    {
-        Vector3 cameraForward = Vector3.ProjectOnPlane(_stateMachine.CameraTransform.forward, up).normalized;
-        Vector3 cameraRight = Vector3.ProjectOnPlane(_stateMachine.CameraTransform.right, up).normalized;
-
-        Vector3 moveDirection = (cameraForward * _stateMachine.MovementDirection.y) + (cameraRight * _stateMachine.MovementDirection.x);
-        return moveDirection.normalized;
-    }
-
     public override void Exit()
     {
         // Move to idle state when movement stops - TODO, not carried from ThirdPerson.

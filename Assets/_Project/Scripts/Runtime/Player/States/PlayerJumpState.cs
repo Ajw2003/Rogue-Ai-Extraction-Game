@@ -39,13 +39,6 @@ public class PlayerJumpState : PlayerState
         ClampHorizontalVelocity(up);
     }
 
-    private Vector3 CameraRelativeInputOnGravityPlane(Vector3 up)
-    {
-        Vector3 cameraForward = Vector3.ProjectOnPlane(_stateMachine.CameraTransform.forward, up).normalized;
-        Vector3 cameraRight = Vector3.ProjectOnPlane(_stateMachine.CameraTransform.right, up).normalized;
-        return (cameraForward * _stateMachine.MovementDirection.y) + (cameraRight * _stateMachine.MovementDirection.x);
-    }
-
     private void ClampHorizontalVelocity(Vector3 up)
     {
         Vector3 velocity = _stateMachine._rb.linearVelocity;

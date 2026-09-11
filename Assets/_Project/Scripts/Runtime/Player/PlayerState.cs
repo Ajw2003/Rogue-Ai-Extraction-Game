@@ -28,12 +28,18 @@ namespace StateMachine
         {
         }
 
-        public virtual void OnTriggerEnter2D(Collider2D other)
+        // Movement input resolved against the camera and flattened onto the plane the current
+        // planet defines, so "forward" means forward on this surface rather than forward in world
+        // space. Returns a unit vector, or zero when there is no input.
+        protected Vector3 CameraRelativeInputOnGravityPlane(Vector3 up)
         {
-        }
+            Vector3 cameraForward = Vector3.ProjectOnPlane(_stateMachine.CameraTransform.forward, up).normalized;
+            Vector3 cameraRight = Vector3.ProjectOnPlane(_stateMachine.CameraTransform.right, up).normalized;
 
-        public virtual void HandleMovement()
-        {
+            Vector3 moveDirection = (cameraForward * _stateMachine.MovementDirection.y)
+                                    + (cameraRight * _stateMachine.MovementDirection.x);
+
+            return moveDirection.normalized;
         }
     }
 }
