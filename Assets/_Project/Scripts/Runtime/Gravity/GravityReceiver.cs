@@ -20,6 +20,10 @@ public class GravityReceiver : MonoBehaviour
     {
         _rb = GetComponent<Rigidbody>();
         _rb.useGravity = false;
+
+        // Rotation is owned by this component and by look input, never by the solver.
+        // See docs/systems/gravity.md - Invariants.
+        _rb.freezeRotation = true;
     }
 
     private void FixedUpdate()
