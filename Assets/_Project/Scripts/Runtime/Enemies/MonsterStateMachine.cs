@@ -5,7 +5,7 @@ using StateMachine.States;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class MonsterStateMachine : BaseStateMachine, IHealth
+public class MonsterStateMachine : BaseStateMachine, IHealth, ICarryableCreature
 {
     public float CurrentHealth => _health;
     public float MaxHealth => maxHealth;

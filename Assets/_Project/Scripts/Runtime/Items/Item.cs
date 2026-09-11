@@ -14,8 +14,11 @@ public class Item : MonoBehaviour
     private Vector3 _targetPosition;
     private Quaternion _targetRotation = Quaternion.identity;
 
-    // References for enemy handling
-    private MonsterStateMachine _monsterAI;
+    // References for enemy handling. Resolved through Core interfaces, not MonsterStateMachine
+    // directly, so Items does not depend on Enemies (Enemies already depends on Items via Item
+    // references in the Monster FSM, and a direct reference back would create a cycle).
+    private IHealth _monsterHealth;
+    private ICarryableCreature _carryableCreature;
     private NavMeshAgent _agent;
 
     [Header("Physics Settings")]
@@ -31,7 +34,8 @@ public class Item : MonoBehaviour
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
-        _monsterAI = GetComponent<MonsterStateMachine>();
+        _monsterHealth = GetComponent<IHealth>();
+        _carryableCreature = GetComponent<ICarryableCreature>();
         _agent = GetComponent<NavMeshAgent>();
 
         _rb.interpolation = RigidbodyInterpolation.Interpolate;
@@ -71,15 +75,18 @@ public class Item : MonoBehaviour
             if (targetHealth.CurrentHealth < healthBefore) dealtDamage = true;
         }
 
-        // Damage ourselves if we are an enemy item being thrown.
-        if (_monsterAI != null)
+        // Damage ourselves if we are an enemy item being thrown. GetComponent<IHealth>() hands
+        // back an interface reference, so Unity's fake-null override (which only applies to a
+        // statically-typed UnityEngine.Object) does not kick in here — check the underlying
+        // Object directly, or a destroyed monster reads as still alive.
+        if (_monsterHealth != null && (Object)_monsterHealth != null)
         {
             // Only take impact damage if we are NOT grounded/active.
             if (!_agent.enabled || myVelocity > 1f)
             {
-                float healthBefore = _monsterAI.CurrentHealth;
-                _monsterAI.TakeDamage(damage, impactVelocity);
-                if (_monsterAI.CurrentHealth < healthBefore) dealtDamage = true;
+                float healthBefore = _monsterHealth.CurrentHealth;
+                _monsterHealth.TakeDamage(damage, impactVelocity);
+                if (_monsterHealth.CurrentHealth < healthBefore) dealtDamage = true;
             }
         }
 
@@ -102,9 +109,9 @@ public class Item : MonoBehaviour
 
         _targetRotation = transform.rotation;
 
-        if (_monsterAI != null)
+        if (_carryableCreature != null && (Object)_carryableCreature != null)
         {
-            _monsterAI.PickUp();
+            _carryableCreature.PickUp();
         }
     }
 
