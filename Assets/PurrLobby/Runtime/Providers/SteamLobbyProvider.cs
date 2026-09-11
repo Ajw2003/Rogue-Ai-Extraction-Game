@@ -101,6 +101,7 @@ namespace PurrLobby.Providers
                 return new Lobby { IsValid = false };
 
             _currentLobby = lobbyId;
+            SetJoinRichPresence(lobbyId); // RogueAi: offer friends-list Join Game
 
             if (lobbyProperties != null)
             {
@@ -180,8 +181,57 @@ namespace PurrLobby.Providers
 
             if (handleSteamInit)
                 HandleSteamInit();
-            
+
+            // RogueAi: cold-launch invite handling. By this point Steam is either initialised by
+            // HandleSteamInit above, or (handleSteamInit == false) by whatever external code owns
+            // that responsibility and ran before InitializeAsync was called — either way
+            // IsSteamClientAvailable is the correct gate, not a guess about init order.
+            TryJoinLobbyFromCommandLine();
+
             return Task.CompletedTask;
+        }
+
+        // RogueAi: Steam launches the client with "+connect_lobby <id>" as two separate argv
+        // entries when a friend accepts an invite while the game is closed. Nothing else in
+        // PurrLobby reads it, so a cold-launch invite silently did nothing.
+        private void TryJoinLobbyFromCommandLine()
+        {
+            if (!IsSteamClientAvailable)
+                return;
+
+            var args = Environment.GetCommandLineArgs();
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i] != "+connect_lobby")
+                    continue;
+
+                if (i + 1 >= args.Length)
+                {
+                    PurrLogger.LogWarning("+connect_lobby was passed on the command line with no lobby id following it.");
+                    return;
+                }
+
+                if (!ulong.TryParse(args[i + 1], out var lobbyId))
+                {
+                    PurrLogger.LogWarning($"+connect_lobby value '{args[i + 1]}' is not a valid lobby id.");
+                    return;
+                }
+
+                _ = JoinLobbyAsync(lobbyId.ToString());
+                return;
+            }
+        }
+
+        // RogueAi: lets a friend's client offer the "Join Game" button in the Steam friends list.
+        // Cleared on leave, or a departed lobby keeps offering a stale join.
+        private void SetJoinRichPresence(Steamworks.CSteamID lobbyId)
+        {
+            Steamworks.SteamFriends.SetRichPresence("connect", $"+connect_lobby {lobbyId.m_SteamID}");
+        }
+
+        private void ClearJoinRichPresence()
+        {
+            Steamworks.SteamFriends.SetRichPresence("connect", null);
         }
 
         private void HandleSteamInit()
@@ -235,6 +285,7 @@ namespace PurrLobby.Providers
                 if (result.m_EChatRoomEnterResponse == (uint)Steamworks.EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess)
                 {
                     _currentLobby = new Steamworks.CSteamID(result.m_ulSteamIDLobby);
+                    SetJoinRichPresence(_currentLobby); // RogueAi: offer friends-list Join Game
                     tcs.TrySetResult(true);
                 }
                 else
@@ -269,6 +320,7 @@ namespace PurrLobby.Providers
 
             Steamworks.SteamMatchmaking.LeaveLobby(_currentLobby);
             _currentLobby = default;
+            ClearJoinRichPresence(); // RogueAi: otherwise the friends list keeps offering a stale Join
             OnLobbyLeft?.Invoke();
             return Task.CompletedTask;
         }
@@ -279,6 +331,14 @@ namespace PurrLobby.Providers
             {
                 var cLobbyId = new Steamworks.CSteamID(ulong.Parse(lobbyId));
                 Steamworks.SteamMatchmaking.LeaveLobby(cLobbyId);
+
+                // RogueAi: this overload can target a lobby other than the current one, so only
+                // clear rich presence when it actually is the local player's own lobby.
+                if (cLobbyId == _currentLobby)
+                {
+                    _currentLobby = default;
+                    ClearJoinRichPresence();
+                }
             }
 
             return Task.CompletedTask;
