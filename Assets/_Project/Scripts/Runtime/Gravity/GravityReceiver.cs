@@ -28,6 +28,11 @@ public class GravityReceiver : MonoBehaviour
 
     private void FixedUpdate()
     {
+        // Kinematic means something else (Item, while held/dragged) owns this transform for the
+        // duration - applying gravity force and slerping rotation on top of that would fight
+        // whatever the owner sets this frame, producing jitter.
+        if (_rb.isKinematic) return;
+
         ResolveDominantGravitySource();
         ApplyGravityForce();
         AlignToGravityUp();
