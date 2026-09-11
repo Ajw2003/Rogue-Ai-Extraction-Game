@@ -1,260 +1,299 @@
 # PLUNDERSPELL
 
-**A four-player co-op extraction game. You cast spells by shouting them out loud, and everything
-you steal you have to physically carry home.**
+> *Lo — four wizards, penniless and badly behaved, who cast their spells by shouting them out loud,
+> and who must carry every stolen thing home in their own two arms.*
 
-Status: pitch / design bible v0.1 — no implementation yet.
-Interactive mood board: see `docs/plunderspell-moodboard.html` (open in a browser).
+Status: pitch / design bible v0.2 — no implementation yet.
+Illustrated mood board: `docs/plunderspell-moodboard.html` (open it in a browser).
+Engineering plan: [`docs/plans/plunderspell.md`](plans/plunderspell.md).
 
----
-
-## 1. The pitch
-
-You and three friends are failing wizards. You share a damp lair, a stack of unpaid debts, and a
-portal that opens onto the past. Every night you step through it, break into somewhere you
-absolutely should not be, and try to get back out with something worth more than your own life.
-
-Extraction games run on one feeling: *I have too much to lose and not enough time.* Plunderspell
-keeps that and adds two things that have not been properly combined before.
-
-**Voice casting.** Not a hotkey. You hold a key, say `FRANGO`, and the wall breaks. Your friends
-hear you say it half a second before it happens. Six people whisper-shouting Latin at a locked door
-while something enormous walks toward them is a clip. Every session produces a clip.
-
-**Physical loot.** There is no inventory grid. A golden altarpiece is an object with mass that two
-people carry between them, and it will not fit through the window you came in by. You will drop
-things. You will throw a reliquary at a knight, watch it shatter, and know exactly how much money
-just left the room.
-
-The comedy is not written. It is what happens when physics and a microphone are both allowed to go
-wrong at once.
-
-### Why this, why now
-
-| | |
-|---|---|
-| **Proven appetite** | Four-player co-op horror-comedy is the most reliably viral shape in PC gaming. It sells on friends recording friends. It needs a mechanic that generates footage, not a marketing budget. |
-| **Unserved fantasy** | That entire genre is set in space stations, sewers and abandoned facilities. Nobody has taken the formula somewhere with gold in it. Castles, crypts and cathedrals are the most loot-dense fiction that exists. |
-| **Unclaimed input** | Everyone already has a mic open, because these games run on voice chat. Using it as a *control input* costs the player nothing and has never been the core verb of a co-op game. |
-
-**The one-line version:** four friends whisper-shouting dead languages at a locked door while
-carrying a stolen altarpiece down a staircase, badly.
+*A note on the voice: the pitch is written to be read aloud, and it is written by a herald who is
+being paid to oversell. Everything from §9 onward drops the act and is plain, checkable fact — the
+herald says so himself when he gets there.*
 
 ---
 
-## 2. The loop — 25 to 40 minutes
+## 1. Gather round, for I intend to oversell this
 
-1. **The Lair** — persistent hub. Bind spells, pick a weapon, choose an Age, decide how greedy you
-   feel. Debts are due whether you go out or not.
-2. **The Portal** — step through into a procedurally built castle in a chosen century. Once all
-   four are in, the portal narrows.
-3. **The Plunder** — break in. Find the treasury, the crypt, the reliquary. Everything has weight,
-   value and fragility. Noise attracts the household. So does shouting.
-4. **The Hue & Cry** — something notices. The castle wakes. Now you are carrying a chandelier down
-   a spiral stair with a war-hound behind you and a spell you keep mispronouncing.
-5. **The Extraction** — only what physically crosses the portal comes home. Drop a friend's body or
-   drop the gold: a real choice, and it will be remembered.
+I am a writer. I am about to do to this game exactly what I have done for every middling knight who
+ever paid me in soup — dress it in a pedigree it has not yet earned, and announce it at a volume it
+cannot yet justify.
 
-The lair is the only thing that persists. That is what makes losing a run hurt.
+But mark me. I will not lie to you. I will simply say the true things *loudly*. Here they are, and
+you may hold me to every one.
+
+**The first truth: you cast with your own voice.** Not a key. Not a wheel of little pictures. You
+hold your breath, you say `FRANGO` aloud, in your own house, where people can hear you — and the
+wall comes down. Your friends hear the word half a heartbeat before the world obeys it. Four people
+hissing a dead language at a locked door while something enormous walks toward them: that is not a
+feature I have invented for you. That is simply what happens.
+
+**The second truth: the gold is real and it is heavy.** There is no satchel of holding. No grid. No
+tidy little window. A golden altarpiece is a *thing*, with weight, and it takes two of you to lift
+it, and it will not fit through the window you came in by. You will drop it. You will hurl a
+reliquary at an oncoming knight and watch it burst, and you will know to the penny what just left
+the room.
+
+**And the third, which I offer with some feeling: these wizards are in debt.** I have sympathy. I
+have been stripped to my skin by a pardoner and a summoner in the same fortnight, and I tell you
+plainly that had anyone offered me a portal into a wealthier century, I would have taken it before
+they finished the sentence.
+
+> Nobody wrote the jokes. They are what happens when a microphone and the laws of physics are
+> permitted to fail at the same instant.
 
 ---
 
-## 3. Pillar one — the tongue
+## 2. The gap on the shelf is shaped like a castle
 
-Hold the cast key. Speak the word. Recognition happens **on the player's own machine** in under a
-tenth of a second. No servers, no subscription, no audio ever leaves the PC.
+**The appetite is proven.** Four friends, one horrible place, everybody recording. It is the most
+reliably infectious shape in this business, and it sells by word of mouth and shared clip. It does
+not need a war-chest. It needs *a mechanic that makes footage.*
 
-The lexicon is deliberately small and deliberately hard: about forty words chosen to sound nothing
-like each other when whispered, but tempting to slur when panicking. **Mishearing is not a bug we
-hide — it is content we write.** Every incantation has a documented failure twin, and the failure is
-always funnier than the success.
+**The fantasy is unclaimed.** Every last one of them is set in a space station, a sewer, or a
+facility somebody abandoned. Not one has gone anywhere with *gold in it*. Castles, crypts,
+treasuries, cathedrals — the richest fiction ever written down, and the shelf is bare.
 
-| Incantation | Cadence | Effect | Cast | Near-miss |
+**The instrument is idle.** Every player already has a mouth open and a microphone listening,
+because these games run on chatter. To make that mouth a *control* costs the player nothing,
+requires no purchase, and has never once been the central verb. It is sitting there, free.
+
+---
+
+## 3. Out of the lair, into the past, home again if you are fortunate
+
+One raid, start to finish — five and twenty minutes, or forty if you are greedy. Only the lair
+survives it, which is precisely what makes a bad night sting and a good one worth telling people
+about for a week.
+
+1. **The Lair.** Damp, yours, and permanent. Set the words on your tongue, choose a blade, choose a
+   century, and decide how greedy you are feeling. The debts fall due whether you go out tonight or
+   not.
+2. **The Portal.** Step through, into a castle that did not exist an hour ago. Once all four of you
+   are in, the way home begins to narrow. It will not wait up for you.
+3. **The Plunder.** Find the treasury. Find the crypt. Find the chapel, which is worth more than the
+   rest of it together. Everything has weight, worth and fragility — and noise brings the household.
+   So does shouting.
+4. **The Hue & Cry.** Something has noticed. Now you are carrying a chandelier down a spiral stair
+   with a war-hound at your heels and a word you cannot say properly under pressure.
+5. **The Extraction.** Only what physically crosses the threshold comes home. Your friend's body, or
+   the gold — you may not have arms for both. Choose. Everyone will remember it.
+
+---
+
+## 4. The first pillar — you do not press a button, you say the word
+
+Hold the key. Speak. The game listens **on your own machine** and understands you in less time than
+it takes to flinch — no distant servers, no monthly tithe, and not one whisper of your voice ever
+leaves the house.
+
+There are some forty words, and they are chosen with malice. Each sounds nothing like its neighbour
+when murmured, and every one is a delight to mangle when you are frightened. **We are not hiding the
+mishearings. We are writing them.** Every incantation has a twin it can collapse into, and the twin
+is always funnier than the thing you meant.
+
+| Say this | Cadence | And this happens | Cast | Fumble it, and |
 |---|---|---|---|---|
-| `IGNIS` (2 syl) | short, hard | Ember dart. Cheap, fast, sets tapestries and thatch alight — rarely what you wanted. | 180 ms | *INGUIS* — you set your own beard alight |
-| `FRANGO` (2 syl) | plosive | Shatter. Breaks masonry, locks, bars — and every fragile thing you are holding. | 210 ms | *FRAGO* — you shatter the floor you're on |
-| `LEVO` (2 syl) | open, sustained | Telekinetic lift. The heavy-loot verb: grab, swing, stack, hurl anything with mass. | 190 ms | *LEVE* — you lift yourself, badly |
-| `AURUM VOCO` (4 syl) | two-beat | Gold-sense. Everything valuable glows through stone for four seconds. Also makes you glow. | 340 ms | *AURUM LOCO* — the gold screams instead |
-| `TONITRUS` (3 syl) | rolling | Thunderclap. A physics shove: clears a doorway, drops a portcullis, launches a friend. | 260 ms | *TENEBRIS* — every light in the room dies |
-| `SOMNUS` (2 syl) | soft, whispered | Sleep. Must be spoken *quietly* — the mic measures volume, and shouting it wakes the room. | 220 ms | *SONUS* — a loud noise, exactly where you are |
-| `CADAVER SURGE` (5 syl) | long, deliberate | Raise a corpse as a porter. It carries loot. It follows you home. | 480 ms | it raises, and it is not obedient |
-| `PORTA` (2 syl) | final | Emergency extraction. Ruinously expensive. Opens a hole home, here, now. | 200 ms | *PORTO* — it opens onto the wrong Age |
+| `IGNIS` (2 syl) | short, hard | A dart of ember. Cheap, quick, and it sets tapestry and thatch alight — almost never what you had in mind. | 180 ms | your own beard goes up |
+| `FRANGO` (2 syl) | plosive | Shatter. Masonry, locks, bars, iron — and every fragile thing you happen to be holding. | 210 ms | the floor you are standing on |
+| `LEVO` (2 syl) | open, sustained | The lifting word, and the one you will use most. Take hold of anything with weight and swing it, stack it, or throw it at someone. | 190 ms | you lift *yourself*, poorly |
+| `AURUM VOCO` (4 syl) | two-beat | Call the gold. For four seconds every valuable thing shines through solid stone. You also shine. Everyone can see you. | 340 ms | the gold screams instead |
+| `TONITRUS` (3 syl) | rolling | Thunder. An honest shove — it clears a doorway, drops a portcullis, launches a friend across a hall. | 260 ms | every light in the room dies |
+| `SOMNUS` (2 syl) | soft, whispered | Sleep. Spoken *softly* — the game measures how loud you are, and bellowing it wakes the very room you were lulling. | 220 ms | a loud noise, precisely where you are |
+| `CADAVER SURGE` (5 syl) | long, deliberate | Raise the dead as a porter. Slow. Obedient. It carries your gold, and it follows you home. | 480 ms | it rises. it is not obedient |
+| `PORTA` (2 syl) | final | The way out, torn open here and now. Ruinously dear. You will say it exactly once, and too late. | 200 ms | it opens on the *wrong century* |
 
-**Runs offline.** A small keyword-spotting model ships inside the build. No API key, no per-player
-cost, no outage can take the game down.
+**It needs nothing but you.** The listening happens inside the game, on the player's own machine. No
+key to buy, no coin per hour, and no distant outage can take the thing off the air.
 
-**Accessible by default.** Every incantation is also bindable to a key. Voice is the intended way to
-play, never the required one — nobody is locked out for being mute, shy, or in a shared house.
+**No one is shut out.** Every word can also be bound to a key. Speaking is how it is meant to be
+played, never how it must be. Nobody is locked out for being mute, or shy, or awake at three in the
+morning in a thin-walled house.
 
-**Volume is a mechanic.** Loudness is read as well as words. Some spells demand a whisper, some
-demand a real shout. The game asks you to be brave in your own living room.
-
----
-
-## 4. Pillar two — the hands
-
-Every item is a rigid body with mass, and every rigid body can hurt someone. There is no separate
-combat system: hitting a man with a candlestick and looting a candlestick are the same code path.
-
-Damage comes from impact velocity, so a sword is simply a heavy thing with a sharp end that you
-swung fast. That one rule turns the whole castle into a weapon — a dropped portcullis, a shoved
-wardrobe, a chandelier cut loose above a dining hall, a friend flung by a mispronounced `TONITRUS`.
-
-It also makes greed legible without a single UI element. Bulk is measured in **stone**. A silver
-ewer is 2 st and fits under one arm. The altarpiece is 14 st, needs two people, and the moment
-either of you lets go it falls down the stairs and stops being worth anything.
-
-- **Carry & hurl** — grab anything, rotate it, push it deeper or pull it closer, throw it. Creatures
-  included: they can be picked up, carried, throttled and thrown.
-- **Fragility** — stained glass, reliquaries, illuminated manuscripts and alchemical glass break on
-  impact. The most valuable loot is the least able to survive you panicking.
-- **Corpses are objects** — a dead friend is a 12 st item. Carry them out and revive them at the
-  lair, at the cost of the gold that pair of hands would otherwise have carried.
-- **The castle reacts** — noise is a physical event, not a scripted trigger. A shattered window, a
-  shouted incantation, a dropped suit of armour: each propagates as sound and wakes what it reaches.
+**Loudness counts.** The game hears how loudly, not only what. Some words demand a whisper and some
+demand a genuine shout. It is asking you to be brave in your own sitting room, and that is the whole
+trick.
 
 ---
 
-## 5. Pillar three — the Ages
+## 5. The second pillar — nothing in this world is a menu
 
-Your lair sits outside time, so every Age is a destination rather than a chapter. Each has its own
-architecture, loot, defenders and weapon tier.
+Every object has mass, and anything with mass can kill a man. There is no separate art of combat
+here: braining a guard with a candlestick and stealing a candlestick are the very same act,
+performed with different feeling.
 
-**The rule that makes this sing:** whatever you carry out of one Age, you can carry into another. A
-wheellock pistol is a curiosity in 1620 and an act of god in 1200 BC. We do not balance that away —
-that *is* the progression.
+Harm comes from how fast a thing was moving. Which means a sword is merely a heavy object with a
+sharp end that you swung hard — and the whole castle becomes an armoury. A dropped portcullis. A
+shoved wardrobe. A chandelier cut loose above a dining hall. A friend, launched by a word you
+mispronounced.
+
+It also lets a man read his own greed without a single number on the screen. Bulk is reckoned in
+**stone**. A silver ewer is 2, and sits under one arm. The altarpiece is 14, wants two of you, and
+the instant either lets go it goes down the stairs and ceases to be worth anything at all.
+
+- **Take it and throw it.** Seize anything, turn it about in front of you, push it out or draw it
+  close, then let fly. Living things included — they may be picked up, carried, throttled and
+  thrown, and they have opinions about all four.
+- **Fragility.** Coloured glass, reliquaries, painted psalters, the alchemist's glassware — all of
+  it breaks. The richest prize in the building is always the one least able to survive your panic.
+- **The dead are cargo.** A fallen friend weighs 12 stone. Carry him out and he lives again at the
+  lair, at the exact cost of whatever that pair of hands would otherwise have brought home.
+  Friendship, priced honestly.
+- **The house wakes.** Noise is a real event, not a trigger some poor soul scripted. A smashed
+  window, a shouted word, a suit of armour hitting flagstones — each travels outward through the
+  building and rouses whatever it reaches.
+
+---
+
+## 6. The third pillar — rob every century, then introduce them to each other
+
+The lair stands outside of time, so no century is a chapter; each is simply a door. Every one has
+its own stonework, its own riches, its own defenders and its own iron.
+
+And here is the rule I would have you remember above all others: **whatever you carry out of one
+Age, you may carry into another.** A wheellock pistol is a curiosity in 1620 and an act of God in
+1200 BC. We will not be correcting that. That *is* the progression.
 
 ### Stratum I — The Bronze Age (c. 1200 BC)
-Palace complexes of mud-brick and painted plaster, grain stores and god-kings. Low ceilings, narrow
-doors, torchlight. Defenders are many, poorly armoured, and utterly unprepared for anything you
-bring back from later.
-- **Loot:** ingots, faience, ceremonial bronze, sealed amphorae
-- **Kit:** khopesh · sling · oxhide shield · fire-pot
-- **Hazard:** fire spreads faster here than anywhere else
+Painted plaster, grain stores, and kings who are also gods and will tell you so. Low ceilings,
+narrow doors, firelight. The defenders are many, poorly armoured, and wholly unready for anything
+you fetch back from later.
+- **Riches:** ingots, faience, ceremonial bronze, sealed amphorae
+- **Iron:** khopesh · sling · oxhide shield · fire-pot
+- **Hazard:** fire runs faster here than anywhere
 
 ### Stratum II — The High Medieval (c. 1250)
-The default Age and the vertical slice. Curtain walls, spiral stairs, a chapel worth more than the
-rest of the castle combined. Garrisons are small but armoured, and the household wakes in stages.
-- **Loot:** reliquaries, altar plate, illuminated psalters, coin
-- **Kit:** arming sword · mace · crossbow · boiling oil
-- **Hazard:** spiral stairs turn clockwise — against you
+My own century, and the one you will learn on. Curtain walls, spiral stairs, and a chapel worth more
+than everything around it. The garrison is small and well-dressed in steel, and the household wakes
+by degrees rather than all at once.
+- **Riches:** reliquaries, altar plate, illuminated psalters, coin
+- **Iron:** arming sword · mace · crossbow · boiling oil
+- **Hazard:** the stairs turn clockwise, and not in your favour
 
 ### Stratum III — The Late Medieval (c. 1450)
-Concentric fortresses built specifically to stop people like you. Murder-holes, dog-legged gates,
-guard rotations. The first Age where defenders have gunpowder and the architecture assumes a siege.
-- **Loot:** Burgundian plate, tapestry, banking ledgers, jewels
-- **Kit:** poleaxe · hand cannon · pavise · caltrops
-- **Hazard:** guards hunt in pairs
+Fortresses within fortresses, built by men who had you specifically in mind. Murder-holes, crooked
+gates, guards who walk to a schedule. The first century where the defenders have powder of their own
+and the architecture expects a siege.
+- **Riches:** Burgundian plate, tapestry, banking ledgers, jewels
+- **Iron:** poleaxe · hand cannon · pavise · caltrops
+- **Hazard:** they hunt in pairs now
 
 ### Stratum IV — The Age of Powder (c. 1620)
-Wide halls, huge windows, immense glass, and magazines of black powder that turn any fight into
-demolition. The richest, most fragile, most flammable loot in the game.
-- **Loot:** cabinets of curiosity, mirrors, astrolabes, silver services
-- **Kit:** wheellock pistol · rapier · grenado · petard
-- **Hazard:** one stray `IGNIS` near the magazine ends the raid
+Wide halls, enormous windows, glass by the acre — and magazines of black powder that turn any
+argument into demolition. The richest, most delicate and most flammable plunder in the game, all in
+one building.
+- **Riches:** cabinets of curiosity, mirrors, astrolabes, silver services
+- **Iron:** wheellock pistol · rapier · grenado · petard
+- **Hazard:** one stray `IGNIS` near the magazine ends the evening
 
 ---
 
-## 6. Level generation — castles are not dungeons
+## 7. A castle is not a dungeon, so do not build it like one
 
-Every procedural co-op game builds a web of rooms and corridors. A real castle is not that. It is a
-set of nested rings, each harder to get into than the last, and that structure does the game design
-for us.
+Every game of this kind lays out a tangle of rooms and passages and calls it a fortress. But a
+fortress is no tangle. It is a set of rings, each one harder to enter than the last — and that shape
+does our work for us.
 
-Generate outward-in: **curtain wall → outer bailey → inner ward → keep → undercroft and crypt.**
-Value rises with every ring you cross, so the deepest, richest room is also the furthest from the
-way out — and **extraction is always a fighting retreat back through everything you already woke
-up.** You never walk out of a good run calmly.
+So we build from the outside inward: **curtain wall, outer bailey, inner ward, keep, and the crypt
+beneath it all.** Worth rises with every ring you cross. Which means the deepest and richest room is
+also the furthest from the door — and **going home is always a fighting retreat through everything
+you have already woken.** Nobody walks calmly out of a good night.
 
-- **Socket-matched modules.** Rooms are prefabs with tagged joins: `door`, `window`, `arrow-loop`,
-  `stair-up`, `stair-down`, `murder-hole`. Assembly matches sockets, keeping results
-  architecturally plausible and letting artists add rooms without a programmer.
-- **One integer on the wire.** The host rolls a seed and replicates it before load; every client
-  builds the identical castle locally. No geometry is replicated, so a 400-room fortress costs the
-  same bandwidth as an empty one.
-- **Determinism is a hard requirement.** Use an explicitly-passed `System.Random` instance — never
-  `UnityEngine.Random`, whose global static state is shared with VFX and audio, making generation
-  order-dependent and clients divergent.
-- **Validated, not hoped-for.** After generation, flood-fill to prove the crypt can reach a portal.
-  If it cannot, throw the castle away and reroll. A layout that soft-locks a run is worse than a
-  slow loading screen.
+- **Rooms that know their own joins.** Each room carries tagged sockets — `door`, `window`,
+  `arrow-loop`, `stair-up`, `stair-down`, `murder-hole` — fitted together by matching. The result
+  stays architecturally honest, and an artist may add a new room without ever troubling a
+  programmer.
+- **One number crosses the wire.** The host rolls a single seed and sends it before the doors open;
+  every machine then builds the identical castle for itself. No stone is ever transmitted, so a
+  four-hundred-room fortress costs precisely what an empty room costs.
+- **Determinism is not optional.** Use an explicitly-passed `System.Random` instance — never
+  `UnityEngine.Random`, whose global static state is shared with VFX and audio, which makes
+  generation order-dependent and sends the clients quietly out of step with one another.
+- **Proven, not merely hoped.** Once built, the castle is walked by machine to prove the crypt can
+  still reach a door. If it cannot, the whole thing is thrown away and rolled again. A fortress that
+  traps a party is worse by far than a slow loading screen.
 
 > **Clean-room constraint.** The `feature/Owen/PCG` branch is off-limits. Its author has left the
 > project, so it is not a reference, not a prototype scaffold and not a shortcut. Do not open those
 > files, do not diff against them, and never merge, cherry-pick or rebase that branch into this
 > lineage. The generator is written from this specification and from castle architecture, nothing
-> else. See `docs/plans/plunderspell.md` for the full provenance note.
+> else. See [`docs/plans/plunderspell.md`](plans/plunderspell.md) for the full provenance note.
 
 ---
 
-## 7. The arsenal
+## 8. I present the field
 
-No damage numbers on screen. Weapons are described by what they weigh and what they do to a room,
-because that is what the physics actually simulates. Heft is in stone.
+You will find no damage numbers here. A weapon is described by what it weighs and what it does to a
+room, because that is the only thing the game is actually pretending about. Heft is in stone.
 
-| Weapon | Age | Reach | Heft | Noise | Notes |
+| Weapon | Age | Reach | Heft | Noise | The herald's note |
 |---|---|---:|---:|---|---|
-| Khopesh | Bronze | 40 | 3 st | low | Sickle of cast bronze. Hooks a shield away, same swing opens the body. Slow, and it bends. |
-| Sling | Bronze | 85 | 0 st | none | Cord and a stone. Nearly silent, absurdly cheap, kills a man in a helmet. Needs space to swing. |
-| Oxhide shield | Bronze | 15 | 4 st | mid | A wall you carry. Stops arrows dead. Also the fastest way down a flight of stairs. |
-| Arming sword | High Med. | 52 | 2 st | low | The honest default. Fast in a corridor, light enough to keep a hand free for loot. |
-| Flanged mace | High Med. | 35 | 5 st | high | Doesn't care about armour or doors. Loudest thing in the game that isn't on fire. |
-| Crossbow | High Med. | 95 | 3 st | none | One bolt, then a long terrible reload during which you are a man holding a plank. Drops a guard before he shouts. |
-| Poleaxe | Late Med. | 78 | 6 st | mid | Axe, hammer and spike on six feet of oak. Wins every open hall, useless in a stairwell — where you'll be. |
-| Hand cannon | Late Med. | 58 | 4 st | max | A tube of iron you point and hope about. In the Bronze Age it is a religious experience. |
-| Caltrops | Late Med. | 20 | 1 st | low | Thrown by the handful behind you. Almost no damage; wins more chases than anything else. |
-| Wheellock pistol | Powder | 46 | 1 st | high | Concealable, one shot, no fuse to give you away. The only ranged weapon you can draw while carrying a chandelier. |
-| Rapier | Powder | 68 | 1 st | none | Weightless and lethally fast, and it breaks if you hit anything solid. A duelist's toy in a building full of armour. |
-| Grenado | Powder | 44 | 1 st | max | A powder sphere with a lit fuse that you physically throw. It rolls. It rolls back. It has no opinion about whose side you're on. |
+| Khopesh | Bronze | 40 | 3 st | low | A hook of cast bronze. It takes a man's shield away, and the very same swing opens what was behind it. Slow. And it bends, about which it will not warn you. |
+| Sling | Bronze | 85 | 0 st | none | A cord and a stone, and nothing else. Silent as prayer, cheap as dirt, and it will put a man in a helmet on the floor. It wants room to swing. You will not have room. |
+| Oxhide shield | Bronze | 15 | 4 st | mid | A wall, carried. It eats arrows all day without complaint. It is also — and I cannot stress this enough — the fastest way down a staircase. |
+| Arming sword | High Med. | 52 | 2 st | low | The honest one. Quick enough for a corridor, light enough that your other hand stays free for money. No poetry whatsoever. Merely competent, which is rarer. |
+| Flanged mace | High Med. | 35 | 5 st | high | It holds no opinion about armour and none whatsoever about doors. It is the loudest thing in this game that is not actively on fire. |
+| Crossbow | High Med. | 95 | 3 st | none | One bolt. Then a long and terrible pause, during which you are simply a man holding a plank. But that one bolt drops a guard before he can tell anybody about you. |
+| Poleaxe | Late Med. | 78 | 6 st | mid | Axe, hammer and spike upon six feet of good oak. Magnificent in a great hall. Utterly useless in a stairwell — which is, naturally, where you will be standing. |
+| Hand cannon | Late Med. | 58 | 4 st | max | A tube of iron that you point, and then hope about. Deafening. Wildly inaccurate. Carried into the Bronze Age it ceases to be a weapon and becomes a religious conversion. |
+| Caltrops | Late Med. | 20 | 1 st | low | Flung by the fistful behind you as you run. They barely scratch a man. They have won more chases than every sword on this page put together. |
+| Wheellock pistol | Powder | 46 | 1 st | high | Hidden, one shot, and no burning cord to betray you beforehand. The only gun in the game you can draw while your other arm is full of chandelier. |
+| Rapier | Powder | 68 | 1 st | none | Weightless, lethal, and it snaps clean if you strike anything solid with it. A duellist's toy, in a house full of men in plate. Bring it regardless. Be brilliant. |
+| Grenado | Powder | 44 | 1 st | max | A sphere of powder with a lit cord, which you must throw with your own arm. It rolls. It rolls back. It has never once taken a side in its life. |
 
 ---
 
-## 8. Art direction
+## 9. Every pigment here was ground from something real
 
-### Palette
-
-Named for the pigments a real illuminator would have ground in the period. That is not decoration —
-it constrains us honestly, because these are the only colours that could exist in this world.
+These are not colours chosen off a wheel. Each is named for a thing an illuminator would have ground
+in a bowl in the century we are robbing — which keeps us honest, because these are the only colours
+that could have existed in the world we are showing you.
 
 | Pigment | Hex | Role |
 |---|---|---|
-| Bone Black | `#14120E` | Charred bone. The ground of everything: unlit corners, interface backdrops. |
-| Vellum | `#DCD2BA` | Scraped calfskin. All primary text and parchment UI. Never pure white — nothing here is bleached. |
-| Verdigris | `#5FA288` | Oxidised copper. The accent, the arcane glow, every interactive affordance. |
-| Orpiment | `#C9A227` | Arsenic yellow, beautiful and toxic. Loot, value, candleflame. **Nothing else.** |
-| Madder Lake | `#C4542E` | Boiled madder root. Fire, alarm, wounds, the moment the household wakes. |
-| Ground Lapis | `#7A6AA0` | More costly than gold. Reserved for the voice: incantation text, portals, the necromantic. |
+| Bone Black | `#14120E` | Charred bone, and nothing gentler. The ground of the world — every corner your torch does not reach. |
+| Vellum | `#DCD2BA` | Scraped calfskin. Every letter sits upon it. Never white — nothing in this century is white. |
+| Verdigris | `#5FA288` | Copper that has wept. Every glowing, arcane, touchable thing takes this colour and no other. |
+| Orpiment | `#C9A227` | Arsenic. Beautiful, and it kills the men who grind it. Spent only on gold — which I would gently observe is also true of gold. |
+| Madder Lake | `#C4542E` | Boiled root. Fire, alarm, blood, and the precise moment the household wakes. |
+| Ground Lapis | `#7A6AA0` | Dearer than gold by weight. Reserved for the voice alone — incantations, portals, and whatever it is that answers them. |
 
-The discipline: **verdigris carries the interface, orpiment is reserved exclusively for things worth
-money, and nothing else in the game is allowed to be gold.** When a player sees that yellow, it
-always means the same thing.
+And we keep a discipline: **verdigris carries every button and glow, orpiment is spent on nothing
+whatsoever but money, and no other thing in the game is permitted to be gold.** When a player catches
+that yellow at the edge of a dark room, it means one thing, always, and he will run toward it without
+being told.
 
-### Mood
+### Light
 
-Stylised, not photoreal. Chunky readable silhouettes, hand-painted texture, and lighting that is
-almost entirely diegetic. If you can see it, something in the room is burning.
+Stylised, never photographic. Thick readable shapes, paint you can see the hand in, and light that
+always comes from something standing in the room.
 
-Six frames the game should be able to produce: **The Lair** (one candle, deep warm falloff into
-black) · **The Treasury** (darkness with gold bleeding in from one corner) · **The Portal** (cold
-lapis thrown upward onto faces — the only unnatural colour in the world) · **The Hue & Cry** (madder
-and flame from below, everything readable as silhouette) · **The Approach** (pre-dawn verdigris
-mist, wet stone, low contrast) · **Bronze Age Interior** (ochre plaster and smoke, warmer and
-dustier than every later Age).
+Six frames the game should be able to produce: **The Lair** (one candle, one fire, falling away into
+black — the only safe frame in the whole game) · **The Treasury** (darkness, with gold bleeding in
+from a single corner) · **The Portal** (cold lapis thrown upward onto four faces; the only colour
+here that nature did not make) · **The Hue & Cry** (fire from below, everything a shape, and every
+shape running) · **The Approach** (before dawn; wet stone, green mist, no contrast, and the long walk
+in) · **Bronze Age Interior** (ochre plaster and smoke, warmer and lower and dustier than any century
+that follows).
 
-- **Silhouette first** — robes, hoods and bulky loot read at 10 m in the dark. Every character reads
-  as a shape before it reads as a person.
-- **Diegetic light only** — torches, candles, hearths, spell effects. No ambient fill. Darkness is a
-  real obstacle and light is a resource you carry and can drop.
-- **Texture over polygons** — hand-painted albedo, soot in the crevices, gilt worn off the high
-  points. Cheap to author, ages well, doesn't chase fidelity we can't win.
+- **The shape comes first.** Robes, hoods and awkward bulky plunder read at ten paces in the dark.
+  Every figure is a silhouette before it is ever a face.
+- **Only honest light.** Torches, candles, hearths, and spells. Nothing is lit by nothing. Darkness
+  is a real obstacle, and light is a thing you carry — and may drop.
+- **Paint over polygons.** Hand-painted surfaces, soot settled in the crevices, gilt worn off
+  wherever a hand would touch. Cheap to make, ages beautifully, and does not chase a fidelity we
+  cannot win.
 
 ---
 
-## 9. Production reality
+## 10. Here endeth the poetry
 
-This repository is not a blank Unity project. The `claude/steam-multiplayer-framework-xia7ch`
-lineage already contains a working first-person physics extraction game with Steam multiplayer — and
-it already has a `SpellBook`.
+*I am a hired mouth, and you would be a fool to buy anything on my word alone. So here is the
+accounting, and I have not touched it.*
+
+This repository is not an empty room. The `claude/steam-multiplayer-framework-xia7ch` lineage
+already contains a working first-person physics extraction game with Steam multiplayer — and it
+already has a `SpellBook`.
 
 | Status | System |
 |---|---|
@@ -276,28 +315,45 @@ assembly definition and is two files with three consumers. That is an afternoon,
 
 ---
 
-## 10. Milestones
+## 11. Four milestones to knowing whether it is any fun
 
-**M0 — Fork clean, cut gravity (~1 week).** Branch from the trunk, delete the Gravity assembly,
-restore world gravity across the player states and items, confirm nothing regressed. Crates and
-players fall along −Y and land flat; thrown items still deal velocity-scaled damage; all assemblies
-compile with zero gravity references.
+The riskiest thing here is not the castle, nor the gold, nor the men in armour. It is whether
+shouting at your own computer feels like power or like embarrassment. Everything is ordered to answer
+that as early as it can be answered.
 
-**M1 — Prove the voice (~2 weeks).** A bare grey room and four incantations, nothing else. Target
+**M0 — Fork clean, cut gravity (~1 week).** Branch from the real trunk, delete the Gravity assembly,
+restore world gravity across the player states and items, confirm nothing else moved. Crates and
+players fall along −Y and land flat; thrown items still deal velocity-scaled damage; all seven
+assemblies compile with zero gravity references.
+
+**M1 — Prove the voice (~2 weeks).** A bare grey room and four words, nothing else at all. Target
 >90% top-1 across four accents on the 40-word lexicon, under 150 ms from word-end to effect, and
-misfires that land as jokes rather than frustration. This is the riskiest assumption in the project;
-everything is sequenced to answer it early.
+misfires that land as jokes rather than frustration. This is the riskiest assumption in the project,
+which is exactly why it is answered second.
 
-**M2 — The vertical slice (~6 weeks).** One castle, one Age (High Medieval), four spells, four
-players, the full loop end to end. Castle generator built fresh; loot with value, bulk and
-fragility; two-person carries; an extraction portal that only counts what physically crosses it; a
-lair that remembers what came back. This is the thing you show people.
+**M2 — The vertical slice (~6 weeks).** One castle, one century, four words, four players, the whole
+loop from lair to lair. Castle generator built fresh; loot with value, bulk and fragility; two-person
+carries; an extraction portal that counts only what physically crosses it; a lair that remembers what
+came back. This is the thing you put in front of people.
 
-**M3 — Open the other Ages (ongoing).** Ages are content, not engineering, once the ScriptableObject
-exists. Each adds a room set, a loot table, an enemy roster and a weapon tier — and immediately
-multiplies every Age before it, because the weapons travel. The anachronism rule stays unbalanced on
-purpose.
+**M3 — Open the other Ages (ongoing).** Once the ScriptableObject exists, a century is content rather
+than engineering. Each brings a room set, a loot table, a roster and a tier of iron — and each
+multiplies every century before it, because the weapons travel. The anachronism stays unbalanced,
+deliberately.
 
 ---
 
-*Pitch bible v0.1 — fork of Rogue-Ai-Extraction-Game · Unity 6000.3.15f1 · PurrNet + Steam*
+## And so I leave you
+
+**Four friends, whisper-shouting a dead language at a locked door, carrying a stolen altarpiece down
+a staircase, badly.**
+
+That sentence is the whole of the marketing. It is also an accurate description of the mechanics —
+which is precisely how you know the design is sound, and how you know that for once I have not had to
+invent a single thing.
+
+Go and build it. I shall be at the back, taking wagers on which of you says `PORTA` too late.
+
+---
+
+*Pitch bible v0.2 — fork of Rogue-Ai-Extraction-Game · Unity 6000.3.15f1 · PurrNet + Steam*
