@@ -1,0 +1,279 @@
+using Interfaces;
+using StateMachine.States;
+using UnityEngine;
+
+namespace StateMachine
+{
+    // The merged controller: Rigidbody-based movement (from the old PlayerStateMachine lineage)
+    // driven in the gravity-relative frame supplied by GravityReceiver (the math from the old
+    // RawMathPlayerController lineage). See GravityReceiver for force application and alignment,
+    // and PlayerWalkState/PlayerJumpState for how movement is expressed against receiver.Up
+    // instead of world Vector3.up.
+    [RequireComponent(typeof(GravityReceiver))]
+    public class PlayerStateMachine : BaseStateMachine, IHealth, IChokeDamageSource
+    {
+        public float CurrentHealth => _health;
+        public float MaxHealth => _maxHealth;
+        public float ChokeDamage => _chokeDamage;
+
+        public PlayerState PreviousState { get; set; }
+
+        public PlayerRunState RunState { get; set; }
+        public PlayerInvunerableState InvunerableState { get; set; }
+        public PlayerWalkState WalkState { get; set; }
+        public PlayerAttackState AttackState { get; set; }
+        public PlayerDeadState DeadState { get; set; }
+        public PlayerDodgeState DodgeState { get; set; }
+        public PlayerRespawnState RespawnState { get; set; }
+        public PlayerIdleState IdleState { get; set; }
+        public PlayerJumpState JumpState { get; set; }
+
+        public SpellBook SpellBook { get; set; }
+
+        public Vector2 MovementDirection { get; set; }
+
+        public Rigidbody _rb;
+        public GravityReceiver GravityReceiver { get; private set; }
+
+        public float walkSpeed;
+        public float JumpForce;
+        public float FallMultiplier = 2.5f;
+
+        [Range(0, 1)]
+        public float AirControl = 0.7f;
+
+        public float DodgeForce;
+        public float respawnSpeed;
+
+        public float MouseSensitivity = 100f;
+        public Transform CameraTransform;
+
+        [Header("Combat Settings")]
+        public Transform AttackPoint;
+        public float AttackRange = 0.5f;
+        public float AttackDamage = 10f;
+        public LayerMask EnemyLayers;
+
+        [Header("Ground Check Settings")]
+        [SerializeField] private float _groundCheckRadius = 0.3f;
+        [SerializeField] private float _groundCheckDistance = 1.6f;
+        [SerializeField] private float _groundedHeight = 1.0f;
+        [SerializeField] private float _groundSnapSpeed = 15f;
+        [SerializeField] private LayerMask _groundLayer;
+        public bool IsGrounded { get; private set; }
+
+        [Header("Physics Damage Settings")]
+        public float MinVelocityForDamage = 5f;
+
+        [Header("Item Interaction Settings")]
+        [SerializeField] private float _chokeDamage = 5f; // Damage per second while holding an enemy
+
+        private float _xRotation = 0f;
+        private float _health;
+        private float _maxHealth = 100;
+        public bool dead;
+
+        public override void ChangeState(IState newState)
+        {
+            if (newState == CurrentState)
+                return;
+
+            PreviousState = CurrentState as PlayerState;
+            base.ChangeState(newState);
+        }
+
+        public void Look(Vector2 lookDelta)
+        {
+            if (CameraTransform == null)
+            {
+                Debug.LogWarning("CameraTransform is not assigned in PlayerStateMachine.");
+                return;
+            }
+
+            float mouseX = lookDelta.x * MouseSensitivity * Time.deltaTime;
+            float mouseY = lookDelta.y * MouseSensitivity * Time.deltaTime;
+
+            _xRotation -= mouseY;
+            _xRotation = Mathf.Clamp(_xRotation, -90f, 90f);
+
+            CameraTransform.localRotation = Quaternion.Euler(_xRotation, 0f, 0f);
+
+            // Space.Self: rotates around the transform's own up axis, which GravityReceiver keeps
+            // aligned to the current planet's up, so this stays correct without referencing Up
+            // directly.
+            transform.Rotate(Vector3.up * mouseX);
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            if (AttackPoint != null)
+            {
+                Gizmos.color = Color.red;
+                Gizmos.DrawWireSphere(AttackPoint.position, AttackRange);
+            }
+        }
+
+        public void Awake()
+        {
+            RunState = new PlayerRunState(this);
+            InvunerableState = new PlayerInvunerableState(this);
+            WalkState = new PlayerWalkState(this);
+            AttackState = new PlayerAttackState(this);
+            DeadState = new PlayerDeadState(this);
+            DodgeState = new PlayerDodgeState(this);
+            RespawnState = new PlayerRespawnState(this);
+            IdleState = new PlayerIdleState(this);
+            JumpState = new PlayerJumpState(this);
+            _rb = GetComponent<Rigidbody>();
+            GravityReceiver = GetComponent<GravityReceiver>();
+            _health = _maxHealth;
+        }
+
+        private void Start()
+        {
+            ChangeState(IdleState);
+            AssignSpellBook(null);
+        }
+
+        public void AssignSpellBook(SpellBook spellBook)
+        {
+            SpellBook = spellBook == null ? GetComponent<SpellBook>() : spellBook;
+        }
+
+        public void Die()
+        {
+            ChangeState(DeadState);
+            dead = true;
+        }
+
+        public void Walk()
+        {
+            ChangeState(WalkState);
+        }
+
+        public void TakeDamage(float damage)
+        {
+            if (dead) return;
+            _health -= damage;
+            if (_health <= 0)
+            {
+                Die();
+            }
+        }
+
+        public void TakeDamage(float damage, float impactVelocity)
+        {
+            if (dead) return;
+            if (impactVelocity < MinVelocityForDamage) return;
+
+            _health -= damage;
+            if (_health <= 0)
+            {
+                Die();
+            }
+        }
+
+        public void Move(Vector2 movement)
+        {
+            MovementDirection = movement;
+        }
+
+        public void Run()
+        {
+            ChangeState(RunState);
+        }
+
+        public void Dodge()
+        {
+            if (CurrentState != DodgeState)
+            {
+                ChangeState(DodgeState);
+            }
+        }
+
+        public void Respawn()
+        {
+            ChangeState(RespawnState);
+        }
+
+        public override void FixedUpdate()
+        {
+            GroundCheck();
+            base.FixedUpdate();
+            ApplyExtraFallGravity();
+        }
+
+        // Ground check in the gravity frame: a SphereCast along -up, with proportional
+        // error-correction snapping the body to the target ride height. This is what removes the
+        // camera jitter a hard position snap would cause - ported from the old transform-based
+        // controller's UpdateGravity.
+        private void GroundCheck()
+        {
+            Vector3 up = GravityReceiver.Up;
+            Vector3 origin = transform.position + up * 0.5f;
+            float verticalSpeed = Vector3.Dot(_rb.linearVelocity, up);
+
+            bool hitGround = Physics.SphereCast(origin, _groundCheckRadius, -up, out RaycastHit hit, _groundCheckDistance, _groundLayer);
+            IsGrounded = hitGround;
+
+            // Only snap while not actively rising - snapping mid-jump would cancel the jump.
+            if (hitGround && verticalSpeed <= 0f)
+            {
+                SnapToGroundHeight(hit, up);
+            }
+        }
+
+        private void SnapToGroundHeight(RaycastHit hit, Vector3 up)
+        {
+            float currentHeight = hit.distance - 0.5f;
+            float error = currentHeight - _groundedHeight;
+            if (Mathf.Abs(error) <= 0.001f) return;
+
+            float correction = error * _groundSnapSpeed * Time.fixedDeltaTime;
+            if (Mathf.Abs(correction) > Mathf.Abs(error)) correction = error;
+
+            _rb.MovePosition(_rb.position - up * correction);
+        }
+
+        // Extra weight while falling, expressed as additional force along the current gravity
+        // direction rather than world -Y, so it still points at the planet under custom gravity.
+        private void ApplyExtraFallGravity()
+        {
+            if (IsGrounded) return;
+            if (GravityReceiver.DominantSource == null) return;
+
+            Vector3 gravityDirection = -GravityReceiver.Up;
+            float strength = GravityReceiver.DominantSource.gravityStrength;
+            _rb.AddForce(gravityDirection * strength * (FallMultiplier - 1), ForceMode.Acceleration);
+        }
+
+        public void Dead()
+        {
+            ChangeState(DeadState);
+        }
+
+        public void Idle()
+        {
+            ChangeState(IdleState);
+        }
+
+        public void Jump()
+        {
+            if (IsGrounded && CurrentState != JumpState)
+            {
+                ChangeState(JumpState);
+            }
+        }
+
+        public void Attack()
+        {
+            ChangeState(AttackState);
+            SpellBook.CastSpell();
+        }
+
+        public void Invunerable()
+        {
+            ChangeState(InvunerableState);
+        }
+    }
+}
