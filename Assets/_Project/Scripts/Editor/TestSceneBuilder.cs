@@ -4,10 +4,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-// Development convenience only, not shipped gameplay. The port has no player prefab and no scene
-// that has ever been run - Tools/RogueAi/Build Test Scene builds a minimal one from code instead
-// of hand-authored prefab/scene YAML, so the merged controller and gravity/carry systems have
-// something to run against and stay reviewable as a diff.
+// Development convenience only, not shipped gameplay. See docs/systems/core.md - Dev tooling.
 public static class TestSceneBuilder
 {
     // Judgement calls - tune here rather than hunting through the generated scene.

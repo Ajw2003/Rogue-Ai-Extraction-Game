@@ -25,6 +25,17 @@ paid for everywhere — keep it small.
   GameObject.
 - **A subclass overriding `OnDestroy` must call `base.OnDestroy()`.** See Traps.
 
+## Dev tooling
+
+- **`Tools/RogueAi/Build Test Scene`** (`Assets/_Project/Scripts/Editor/TestSceneBuilder.cs`) builds a
+  throwaway player prefab, planet and grabbable item from code and saves them as
+  `Assets/_Project/Scenes/TestScene.unity` / `Assets/_Project/Prefabs/Player.prefab`. It exists
+  because nothing in the project has ever been run - there was no player prefab and no test scene -
+  and the project decision was a reviewable code path over prefab YAML authored blind. Re-running
+  always starts from a fresh empty scene rather than adding to what is already there, so it never
+  leaves a duplicate planet behind. Tuning (planet radius, gravity strength, spawn height) lives in
+  named consts at the top of the file. Not shipped gameplay.
+
 ## Traps
 
 - **Unity's fake null and `?.`** — a destroyed `UnityEngine.Object` is not a real C# null. It
