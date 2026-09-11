@@ -1,0 +1,17 @@
+{
+    "name": "RogueAi.Items",
+    "rootNamespace": "",
+    "references": [
+        "RogueAi.Core",
+        "RogueAi.Gravity"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
