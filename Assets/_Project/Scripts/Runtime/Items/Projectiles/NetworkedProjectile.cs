@@ -1,4 +1,5 @@
 using System.Collections;
+using Interfaces;
 using UnityEngine;
 
 // Plain MonoBehaviour for now - becomes a PurrNet NetworkBehaviour once networking is wired up
@@ -15,7 +16,7 @@ public class NetworkedProjectile : MonoBehaviour
 
     private void OnCollisionEnter(Collision other)
     {
-        if (other.gameObject.TryGetComponent(out MonsterStateMachine monster))
+        if (other.gameObject.TryGetComponent(out IHealth monster))
         {
             monster.TakeDamage(Damage);
         }
