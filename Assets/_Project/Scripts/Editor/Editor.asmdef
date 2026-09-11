@@ -1,0 +1,21 @@
+{
+    "name": "RogueAi.Editor",
+    "rootNamespace": "",
+    "references": [
+        "RogueAi.Core",
+        "RogueAi.Gravity",
+        "RogueAi.Items",
+        "RogueAi.Player"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
