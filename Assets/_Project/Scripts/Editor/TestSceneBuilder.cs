@@ -10,12 +10,10 @@ using UnityEngine.SceneManagement;
 public static class TestSceneBuilder
 {
     // Judgement calls - tune here rather than hunting through the generated scene.
-    // At radius 25 the horizon sat about two body-lengths away and a lap took under half a minute,
-    // which made the curvature read as a bug rather than a planet. 80 walks a lap in roughly 80
-    // seconds at PlayerWalkSpeed.
-    private const float PlanetRadius = 80f;
-    private const float PlanetInfluenceRadius = 200f;
-    private const float PlanetGravityStrength = 9.81f;
+    // 120 units square is roughly 20 seconds of walking edge to edge at PlayerWalkSpeed: enough
+    // room to build up speed and test a fall without the ground ending mid-test.
+    private const float GroundSize = 120f;
+    private const float GroundThickness = 1f;
     private const float PlayerCapsuleHeight = 2f;
     private const float PlayerCapsuleRadius = 0.5f;
     private const float PlayerWalkSpeed = 6f;
@@ -38,12 +36,12 @@ public static class TestSceneBuilder
         BuildSceneLight();
         BuildManagers();
 
-        GameObject planet = BuildPlanet();
+        BuildGround();
         GameObject playerPrefab = BuildPlayerPrefab();
         GameObject player = (GameObject)PrefabUtility.InstantiatePrefab(playerPrefab, scene);
-        BuildTestItem(planet.transform);
+        BuildTestItem();
 
-        player.transform.position = new Vector3(0f, PlanetRadius + PlayerGroundedHeight + PlayerCapsuleHeight * 0.5f, 0f);
+        player.transform.position = new Vector3(0f, PlayerGroundedHeight + PlayerCapsuleHeight * 0.5f, 0f);
 
         EnsureSceneFolderExists();
         EditorSceneManager.SaveScene(scene, ScenePath);
@@ -51,7 +49,7 @@ public static class TestSceneBuilder
         Debug.Log($"RogueAi: test scene built at {ScenePath} with player prefab at {PlayerPrefabPath}.");
     }
 
-    // NewSceneSetup.EmptyScene omits the default light, so without this the planet renders unlit
+    // NewSceneSetup.EmptyScene omits the default light, so without this the ground renders unlit
     // and the scene looks broken before any gameplay is even exercised.
     private static void BuildSceneLight()
     {
@@ -70,20 +68,14 @@ public static class TestSceneBuilder
         new GameObject("ItemManager").AddComponent<ItemManager>();
     }
 
-    private static GameObject BuildPlanet()
+    // A box rather than a plane: a plane's collider is one-sided and infinitely thin, so anything
+    // moving fast enough tunnels straight through it. The top face sits at y = 0.
+    private static void BuildGround()
     {
-        GameObject planet = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        planet.name = "TestPlanet";
-        planet.transform.position = Vector3.zero;
-        // The primitive sphere mesh has a radius of 0.5, so scale it up to PlanetRadius.
-        planet.transform.localScale = Vector3.one * (PlanetRadius * 2f);
-
-        GravitySource gravitySource = planet.AddComponent<GravitySource>();
-        gravitySource.type = GravitySource.GravityType.Spherical;
-        gravitySource.gravityStrength = PlanetGravityStrength;
-        gravitySource.influenceRadius = PlanetInfluenceRadius;
-
-        return planet;
+        GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        ground.name = "Ground";
+        ground.transform.position = new Vector3(0f, -GroundThickness * 0.5f, 0f);
+        ground.transform.localScale = new Vector3(GroundSize, GroundThickness, GroundSize);
     }
 
     private static GameObject BuildPlayerPrefab()
@@ -95,8 +87,7 @@ public static class TestSceneBuilder
         capsule.height = PlayerCapsuleHeight;
         capsule.radius = PlayerCapsuleRadius;
 
-        // Adding PlayerStateMachine pulls in Rigidbody and GravityReceiver via their
-        // [RequireComponent] chain (PlayerStateMachine -> GravityReceiver -> Rigidbody).
+        // Adding PlayerStateMachine pulls in the Rigidbody via its [RequireComponent].
         PlayerStateMachine stateMachine = player.AddComponent<PlayerStateMachine>();
         stateMachine.walkSpeed = PlayerWalkSpeed;
         stateMachine.JumpForce = PlayerJumpForce;
@@ -136,15 +127,17 @@ public static class TestSceneBuilder
         serialized.ApplyModifiedPropertiesWithoutUndo();
     }
 
-    private static void BuildTestItem(Transform planetTransform)
+    private static void BuildTestItem()
     {
         GameObject item = GameObject.CreatePrimitive(PrimitiveType.Cube);
         item.name = "TestItem";
         item.transform.localScale = Vector3.one * ItemSize;
-        item.transform.position = new Vector3(3f, PlanetRadius + ItemSize, 0f);
+        // Dropped from a height so the first thing the scene shows is the item falling and
+        // tumbling - the quickest read on whether gravity came back correctly.
+        item.transform.position = new Vector3(3f, 5f, 0f);
 
-        // Item's [RequireComponent] chain pulls in Rigidbody and GravityReceiver; CreatePrimitive
-        // already gave the cube a BoxCollider for the grab/throw physics to act on.
+        // Item's [RequireComponent] pulls in the Rigidbody; CreatePrimitive already gave the cube
+        // a BoxCollider for the grab/throw physics to act on.
         item.AddComponent<Item>();
     }
 

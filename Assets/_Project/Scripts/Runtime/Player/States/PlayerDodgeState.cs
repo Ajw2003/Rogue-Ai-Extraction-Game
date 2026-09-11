@@ -16,9 +16,8 @@ namespace StateMachine.States
                 inputDirection.Normalize();
             }
 
-            // Transform direction from local (player-relative) to world space - the player's
-            // local up is already gravity-aligned by GravityReceiver, so this needs no change
-            // for custom gravity.
+            // Transform direction from local (player-relative) to world space. freezeRotation
+            // keeps the player's local up aligned to world up, so this stays flat.
             Vector3 dodgeDirection = _stateMachine.transform.TransformDirection(inputDirection);
             _stateMachine._rb.AddForce(dodgeDirection * _stateMachine.DodgeForce, ForceMode.Impulse);
         }
