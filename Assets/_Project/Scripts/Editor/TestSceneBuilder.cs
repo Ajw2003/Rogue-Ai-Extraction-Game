@@ -1,3 +1,5 @@
+using Code.Scripts.EventSystems;
+using Player;
 using StateMachine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -8,8 +10,11 @@ using UnityEngine.SceneManagement;
 public static class TestSceneBuilder
 {
     // Judgement calls - tune here rather than hunting through the generated scene.
-    private const float PlanetRadius = 25f;
-    private const float PlanetInfluenceRadius = 60f;
+    // At radius 25 the horizon sat about two body-lengths away and a lap took under half a minute,
+    // which made the curvature read as a bug rather than a planet. 80 walks a lap in roughly 80
+    // seconds at PlayerWalkSpeed.
+    private const float PlanetRadius = 80f;
+    private const float PlanetInfluenceRadius = 200f;
     private const float PlanetGravityStrength = 9.81f;
     private const float PlayerCapsuleHeight = 2f;
     private const float PlayerCapsuleRadius = 0.5f;
@@ -30,6 +35,9 @@ public static class TestSceneBuilder
         // this idempotent - there is never a second planet to accumulate.
         Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
+        BuildSceneLight();
+        BuildManagers();
+
         GameObject planet = BuildPlanet();
         GameObject playerPrefab = BuildPlayerPrefab();
         GameObject player = (GameObject)PrefabUtility.InstantiatePrefab(playerPrefab, scene);
@@ -41,6 +49,25 @@ public static class TestSceneBuilder
         EditorSceneManager.SaveScene(scene, ScenePath);
 
         Debug.Log($"RogueAi: test scene built at {ScenePath} with player prefab at {PlayerPrefabPath}.");
+    }
+
+    // NewSceneSetup.EmptyScene omits the default light, so without this the planet renders unlit
+    // and the scene looks broken before any gameplay is even exercised.
+    private static void BuildSceneLight()
+    {
+        GameObject lightObject = new GameObject("DirectionalLight");
+        Light directionalLight = lightObject.AddComponent<Light>();
+        directionalLight.type = LightType.Directional;
+        lightObject.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
+    }
+
+    // ItemManager drives the grab/carry/throw input and is a scene-owned singleton, so without an
+    // instance in the scene ItemManager.Instance stays null and clicking an item does nothing.
+    // EventManager backs the input controller's re-enable path for the same reason.
+    private static void BuildManagers()
+    {
+        new GameObject("EventManager").AddComponent<EventManager>();
+        new GameObject("ItemManager").AddComponent<ItemManager>();
     }
 
     private static GameObject BuildPlanet()
@@ -75,6 +102,10 @@ public static class TestSceneBuilder
         stateMachine.JumpForce = PlayerJumpForce;
 
         SetGroundCheckFields(stateMachine);
+
+        // Without this nothing ever calls Move/Jump/Look on the state machine, so the player sits
+        // in PlayerIdleState and reads as completely unresponsive.
+        player.AddComponent<PlayerInputController>();
 
         Transform cameraPivot = new GameObject("CameraPivot").transform;
         cameraPivot.SetParent(player.transform, false);
