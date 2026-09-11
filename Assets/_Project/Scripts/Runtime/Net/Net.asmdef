@@ -3,8 +3,10 @@
     "rootNamespace": "",
     "references": [
         "RogueAi.Core",
+        "RogueAi.Player",
         "GUID:a1bf09639aa73494fb75c7113fc43818",
-        "GUID:68bd7fdb68ef2684e982e8a9825b18a5"
+        "GUID:68bd7fdb68ef2684e982e8a9825b18a5",
+        "GUID:6e20f757a1bae164fa42750dd2b27dcb"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
