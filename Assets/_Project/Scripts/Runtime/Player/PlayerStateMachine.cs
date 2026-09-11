@@ -219,8 +219,20 @@ namespace StateMachine
             // Only snap while not actively rising - snapping mid-jump would cancel the jump.
             if (hitGround && verticalSpeed <= 0f)
             {
+                CancelVelocityAlongUp(up, verticalSpeed);
                 SnapToGroundHeight(hit, up);
             }
+        }
+
+        // GravityReceiver applies its force every FixedUpdate regardless of contact, so without
+        // this the downward speed integrates without bound while SnapToGroundHeight holds the
+        // position - the body fights itself hard enough to read as continuous jumping. The
+        // transform-based controller this was ported from avoided it by only integrating gravity
+        // while airborne and zeroing its vertical velocity on every grounded frame; the Rigidbody
+        // merge kept the snap and dropped both halves of that.
+        private void CancelVelocityAlongUp(Vector3 up, float verticalSpeed)
+        {
+            _rb.linearVelocity -= up * verticalSpeed;
         }
 
         private void SnapToGroundHeight(RaycastHit hit, Vector3 up)
@@ -268,7 +280,10 @@ namespace StateMachine
         public void Attack()
         {
             ChangeState(AttackState);
-            SpellBook.CastSpell();
+
+            // A player with no SpellBook is a valid setup (the test scene has one), so an unarmed
+            // attack swings without casting rather than throwing.
+            if (SpellBook != null) SpellBook.CastSpell();
         }
 
         public void Invunerable()
