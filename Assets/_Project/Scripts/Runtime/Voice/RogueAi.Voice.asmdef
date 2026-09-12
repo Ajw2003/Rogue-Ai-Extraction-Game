@@ -1,12 +1,8 @@
 {
-    "name": "RogueAi.Player",
-    "rootNamespace": "",
+    "name": "RogueAi.Voice",
+    "rootNamespace": "RogueAi.Voice",
     "references": [
-        "RogueAi.Core",
-        "RogueAi.Items",
-        "RogueAi.Voice",
-        "RogueAi.Spells",
-        "Unity.InputSystem"
+        "PurrNet.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
