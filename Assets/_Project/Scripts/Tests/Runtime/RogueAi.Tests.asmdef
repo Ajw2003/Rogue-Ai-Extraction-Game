@@ -4,6 +4,7 @@
     "references": [
         "RogueAi.Voice",
         "RogueAi.Spells",
+        "RogueAi.Castle",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],
