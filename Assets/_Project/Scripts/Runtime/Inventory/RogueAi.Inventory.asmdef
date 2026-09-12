@@ -1,0 +1,16 @@
+{
+    "name": "RogueAi.Inventory",
+    "rootNamespace": "RogueAi.Inventory",
+    "references": [
+        "PurrNet.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

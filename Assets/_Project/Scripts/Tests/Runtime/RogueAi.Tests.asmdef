@@ -8,6 +8,9 @@
         "RogueAi.Loot",
         "RogueAi.Acoustics",
         "RogueAi.Alarm",
+        "RogueAi.Inventory",
+        "RogueAi.Extraction",
+        "RogueAi.Lair",
         "PurrNet.Runtime",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
