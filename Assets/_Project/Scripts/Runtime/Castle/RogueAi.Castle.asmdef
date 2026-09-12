@@ -1,17 +1,10 @@
 {
-    "name": "RogueAi.Editor",
-    "rootNamespace": "",
+    "name": "RogueAi.Castle",
+    "rootNamespace": "RogueAi.Castle",
     "references": [
-        "RogueAi.Core",
-        "RogueAi.Items",
-        "RogueAi.Player",
-        "RogueAi.Voice",
-        "RogueAi.Spells",
-        "RogueAi.Castle"
+        "PurrNet.Runtime"
     ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
