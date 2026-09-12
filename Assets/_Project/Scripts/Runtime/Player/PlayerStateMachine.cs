@@ -153,6 +153,19 @@ namespace StateMachine
             ChangeState(WalkState);
         }
 
+        /// <summary>
+        /// Lair-revival entry point used by DownedPlayerCarryAdapter once a downed player has been
+        /// carried to extraction. Clears the dead flag, restores health to the given fraction of max
+        /// (0..1) and returns the player to a controllable state.
+        /// </summary>
+        public void ReviveTo(float healthFraction)
+        {
+            healthFraction = Mathf.Clamp01(healthFraction);
+            _health = _maxHealth * healthFraction;
+            dead = false;
+            ChangeState(RespawnState);
+        }
+
         public void TakeDamage(float damage)
         {
             if (dead) return;
