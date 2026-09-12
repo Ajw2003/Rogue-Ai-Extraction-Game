@@ -5,6 +5,10 @@
         "RogueAi.Voice",
         "RogueAi.Spells",
         "RogueAi.Castle",
+        "RogueAi.Loot",
+        "RogueAi.Acoustics",
+        "RogueAi.Alarm",
+        "PurrNet.Runtime",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],
