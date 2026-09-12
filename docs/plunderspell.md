@@ -5,6 +5,8 @@
 
 Status: pitch / design bible v0.2 — no implementation yet.
 Illustrated mood board: `docs/plunderspell-moodboard.html` (open it in a browser).
+Plain-English handbook — every system explained end to end, for someone new to the game:
+[`docs/plunderspell-handbook.md`](plunderspell-handbook.md) (illustrated: `plunderspell-handbook.html`).
 Engineering plan: [`docs/plans/plunderspell.md`](plans/plunderspell.md).
 
 *A note on the voice: the pitch is written to be read aloud, and it is written by a herald who is

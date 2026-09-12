@@ -1,0 +1,816 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>html{color-scheme:dark light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Plunderspell Handbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Eczar:wght@500;600;700&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Overpass+Mono:wght@400;600&display=swap">
+</head>
+<body>
+
+<style>
+/* ─────────────────────────────────────────────────────────────
+   PLUNDERSPELL — handbook
+   Reference-manual layout: sticky contents rail, one reading
+   column. Same pigment identity as the bible and the deck.
+   ───────────────────────────────────────────────────────────── */
+:root{
+  --bone-black:#14120E; --ash:#1E1A14; --ash-hi:#282318;
+  --vellum:#DCD2BA; --vellum-dim:#9C9279; --vellum-faint:#6A6352;
+  --verdigris:#5FA288; --orpiment:#C9A227; --madder:#C4542E; --lapis:#8878B0;
+  --line:#332D22; --line-soft:#262119;
+  --ff-display:"Eczar",Georgia,"Times New Roman",serif;
+  --ff-body:"Spectral",Georgia,serif;
+  --ff-mono:"Overpass Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --grain:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='180' height='180' filter='url(%23n)' opacity='0.38'/></svg>");
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bone-black); color:var(--vellum);
+  font-family:var(--ff-body); font-size:17px; line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:5;
+  background-image:var(--grain);opacity:.24;mix-blend-mode:overlay}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+
+.page{max-width:1220px;margin:0 auto;padding-inline:20px}
+.layout{display:grid;grid-template-columns:1fr;gap:40px}
+@media (min-width:980px){
+  .layout{grid-template-columns:216px minmax(0,1fr);gap:56px;align-items:start}
+  .toc{position:sticky;top:28px;max-height:calc(100svh - 56px);overflow-y:auto}
+}
+
+/* ── contents rail ───────────────────────────────────── */
+.toc{padding-block:8px}
+.toc .lbl{font-family:var(--ff-mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--vellum-faint);margin-bottom:14px}
+.toc ol{list-style:none;margin:0;padding:0;counter-reset:t}
+.toc li{counter-increment:t;margin-bottom:2px}
+.toc a{
+  display:flex;gap:10px;text-decoration:none;color:var(--vellum-dim);
+  font-size:.86rem;line-height:1.35;padding:6px 8px 6px 0;border-left:2px solid transparent;padding-left:12px;
+  transition:color .15s ease,border-color .15s ease;
+}
+.toc a::before{content:counter(t,decimal-leading-zero);font-family:var(--ff-mono);font-size:10px;color:var(--vellum-faint);padding-top:3px}
+.toc a:hover{color:var(--vellum)}
+.toc a.on{color:var(--verdigris);border-left-color:var(--verdigris)}
+.toc a.on::before{color:var(--verdigris)}
+.toc a:focus-visible{outline:2px solid var(--verdigris);outline-offset:2px}
+
+/* ── masthead ────────────────────────────────────────── */
+.mast{padding-block:clamp(44px,8vw,84px) 30px}
+.sigil{display:block;width:clamp(54px,7vw,72px);height:auto;margin-bottom:22px}
+.mast .sub{font-family:var(--ff-mono);font-size:11.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--orpiment);margin-bottom:22px}
+.mast h1{font-family:var(--ff-display);font-size:clamp(2.9rem,10vw,6.4rem);font-weight:700;letter-spacing:-.032em;line-height:.9;margin:0 0 .2em}
+.mast h1 em{font-style:normal;color:var(--verdigris)}
+.mast .standfirst{font-size:clamp(1.08rem,2.2vw,1.32rem);line-height:1.55;font-weight:300;max-width:60ch;color:var(--vellum)}
+.epigraph{
+  margin-top:28px;padding:16px 0 16px 22px;border-left:2px solid var(--line);
+  font-style:italic;color:var(--vellum-dim);font-size:.98rem;max-width:56ch;
+}
+.epigraph span{display:block;font-style:normal;font-family:var(--ff-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--vellum-faint);margin-top:10px}
+
+/* ── sections ────────────────────────────────────────── */
+section{padding-block:52px;border-top:1px solid var(--line-soft);scroll-margin-top:20px}
+h2{font-family:var(--ff-display);font-size:clamp(1.65rem,3.6vw,2.35rem);font-weight:700;letter-spacing:-.012em;line-height:1.14;margin:0 0 .5em;text-wrap:balance}
+h3{font-family:var(--ff-display);font-size:1.22rem;font-weight:600;margin:34px 0 .4em;text-wrap:balance}
+h4{font-family:var(--ff-display);font-size:1.03rem;font-weight:600;margin:0 0 .35em}
+p{margin:0 0 1.05em;max-width:68ch}
+p:last-child{margin-bottom:0}
+.lede{font-size:1.12rem;line-height:1.6;font-weight:300}
+.dim{color:var(--vellum-dim)}
+.mono{font-family:var(--ff-mono);font-variant-numeric:tabular-nums;font-size:.92em}
+strong{font-weight:600;color:var(--vellum)}
+em.term{font-style:normal;color:var(--verdigris)}
+a{color:var(--verdigris)}
+ul{max-width:68ch;padding-left:1.1em;margin:0 0 1.05em}
+li{margin-bottom:.42em}
+li::marker{color:var(--vellum-faint)}
+
+.eyebrow{font-family:var(--ff-mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--vellum-faint);margin-bottom:14px}
+
+/* ── callout ─────────────────────────────────────────── */
+.note{
+  border:1px solid var(--line);background:var(--ash);padding:18px 20px;margin:26px 0;max-width:68ch;
+}
+.note .t{font-family:var(--ff-mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--verdigris);margin-bottom:8px}
+.note p{margin-bottom:0;font-size:.94rem;color:var(--vellum-dim)}
+.note.herald{border-color:var(--line-soft);background:transparent;border-left:2px solid var(--orpiment);border-right:0;border-top:0;border-bottom:0;padding:8px 0 8px 22px}
+.note.herald p{font-family:var(--ff-display);font-size:1.06rem;line-height:1.45;color:var(--vellum);font-style:italic}
+
+/* ── data blocks ─────────────────────────────────────── */
+.grid{display:grid;gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);margin:24px 0}
+.grid>div{background:var(--ash);padding:20px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(228px,1fr))}
+.grid p{font-size:.91rem;color:var(--vellum-dim);line-height:1.55;margin:0}
+.kicker{font-family:var(--ff-mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--vellum-faint);margin-bottom:9px}
+
+.tablewrap{overflow-x:auto;border:1px solid var(--line-soft);margin:24px 0}
+table{border-collapse:collapse;width:100%;min-width:560px}
+thead th{font-family:var(--ff-mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--vellum-faint);text-align:left;font-weight:400;padding:12px 15px;background:var(--bone-black);border-bottom:1px solid var(--line)}
+td{padding:12px 15px;border-bottom:1px solid var(--line-soft);vertical-align:top;font-size:.9rem;background:var(--ash);line-height:1.5}
+tbody tr:last-child td{border-bottom:0}
+td.num{font-family:var(--ff-mono);font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--vellum-dim)}
+.word{font-family:var(--ff-display);font-weight:600;font-size:1.02rem;letter-spacing:.03em;color:var(--lapis);white-space:nowrap}
+.misfire{color:var(--madder);font-style:italic}
+
+/* ── figures ─────────────────────────────────────────── */
+figure{margin:30px 0;border:1px solid var(--line-soft);background:var(--ash);padding:22px 20px 0}
+figure svg{width:100%;height:auto;display:block;color:var(--vellum)}
+figcaption{
+  font-size:.85rem;color:var(--vellum-dim);line-height:1.55;
+  padding:16px 0;border-top:1px solid var(--line-soft);margin-top:20px;
+}
+figcaption b{color:var(--vellum);font-weight:600}
+
+/* ── QoL list ────────────────────────────────────────── */
+.qol{display:grid;gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);margin:22px 0}
+.qol .row{background:var(--ash);padding:16px 20px;display:grid;grid-template-columns:210px 1fr;gap:20px}
+.qol .row .n{font-family:var(--ff-display);font-size:1rem;font-weight:600;color:var(--vellum)}
+.qol .row .d{font-size:.9rem;color:var(--vellum-dim);line-height:1.55}
+@media (max-width:640px){.qol .row{grid-template-columns:1fr;gap:6px}}
+
+/* ── not-this list ───────────────────────────────────── */
+.nots{display:grid;gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);margin:22px 0}
+.nots div{background:var(--ash);padding:15px 20px;display:grid;grid-template-columns:22px 1fr;gap:14px;align-items:baseline}
+.nots .x{color:var(--madder);font-family:var(--ff-mono);font-size:14px}
+.nots p{font-size:.91rem;color:var(--vellum-dim);margin:0;max-width:none}
+.nots b{color:var(--vellum);font-weight:600}
+
+/* ── FAQ ─────────────────────────────────────────────── */
+.faq{border:1px solid var(--line-soft);margin:22px 0}
+.faq details{border-bottom:1px solid var(--line-soft);background:var(--ash)}
+.faq details:last-child{border-bottom:0}
+.faq summary{
+  cursor:pointer;padding:15px 20px;font-family:var(--ff-display);font-size:1.02rem;font-weight:600;
+  list-style:none;display:flex;justify-content:space-between;gap:16px;align-items:baseline;
+}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font-family:var(--ff-mono);color:var(--verdigris);font-size:15px}
+.faq details[open] summary::after{content:"−"}
+.faq summary:hover{background:var(--ash-hi)}
+.faq summary:focus-visible{outline:2px solid var(--verdigris);outline-offset:-2px}
+.faq .a{padding:0 20px 17px;font-size:.93rem;color:var(--vellum-dim);line-height:1.6}
+.faq .a p{max-width:66ch}
+
+/* ── glossary ────────────────────────────────────────── */
+.gloss{display:grid;gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);margin:22px 0}
+.gloss div{background:var(--ash);padding:14px 20px;display:grid;grid-template-columns:150px 1fr;gap:20px}
+.gloss dt,.gloss .t{font-family:var(--ff-display);font-weight:600;color:var(--verdigris);font-size:.98rem}
+.gloss .d{font-size:.89rem;color:var(--vellum-dim);line-height:1.55}
+@media (max-width:640px){.gloss div{grid-template-columns:1fr;gap:4px}}
+
+footer{padding-block:44px 70px;border-top:1px solid var(--line-soft);color:var(--vellum-faint);font-family:var(--ff-mono);font-size:10.5px;letter-spacing:.1em}
+</style>
+
+<div class="page">
+
+<header class="mast">
+  <svg class="sigil" viewBox="0 0 100 100" role="img" aria-label="Plunderspell sigil: a key crossed with a wand inside a summoning ring">
+    <circle cx="50" cy="50" r="42" fill="none" stroke="#332D22" stroke-width="1.5"/>
+    <circle cx="50" cy="50" r="34" fill="none" stroke="#5FA288" stroke-width="1" stroke-dasharray="3 5"/>
+    <path d="M32 68 L66 34" stroke="#C9A227" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <circle cx="30" cy="70" r="6.5" fill="none" stroke="#C9A227" stroke-width="3"/>
+    <path d="M58 42 l7 7 M63 37 l6 6" stroke="#C9A227" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M68 68 L34 34" stroke="#8878B0" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <circle cx="70" cy="70" r="4" fill="#8878B0"/>
+  </svg>
+  <div class="sub">The complete handbook</div>
+  <h1>Plunder<em>spell</em></h1>
+  <p class="standfirst">A four-player co-operative heist game set in the past. You play a wizard who is bad at wizardry and worse with money. You break into castles, take everything you can physically carry, and try to get back out. You cast your spells by saying the words aloud into your microphone.</p>
+  <div class="epigraph">
+    Four friends, whisper-shouting a dead language at a locked door, carrying a stolen altarpiece down a staircase, badly.
+    <span>The shortest honest description of the game</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <nav class="toc" aria-label="Contents">
+    <div class="lbl">Contents</div>
+    <ol>
+      <li><a href="#premise">The premise</a></li>
+      <li><a href="#session">One session, start to finish</a></li>
+      <li><a href="#voice">Casting with your voice</a></li>
+      <li><a href="#physics">Objects, weight and violence</a></li>
+      <li><a href="#loot">Loot and what it is worth</a></li>
+      <li><a href="#alarm">Noise and the household</a></li>
+      <li><a href="#death">Dying, and being carried</a></li>
+      <li><a href="#castles">How castles are built</a></li>
+      <li><a href="#ages">The four Ages</a></li>
+      <li><a href="#lair">The lair and progression</a></li>
+      <li><a href="#unique">What makes it different</a></li>
+      <li><a href="#qol">Quality of life</a></li>
+      <li><a href="#not">What it is not</a></li>
+      <li><a href="#faq">Common questions</a></li>
+      <li><a href="#glossary">Glossary</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+  <!-- ══════════ 1 PREMISE ══════════ -->
+  <section id="premise">
+    <div class="eyebrow">Section one</div>
+    <h2>The premise</h2>
+    <p class="lede">You and up to three friends are wizards. Not good ones. You share a damp lair, a great deal of debt, and one genuinely remarkable possession: a portal that opens onto the past.</p>
+    <p>You are not heroes and there is no quest. You are in the business of theft. Every night you open the portal onto some century that is richer than yours, break into a castle, take as much as your arms can hold, and run back through before anyone catches you. Then you sell it, pay down what you owe, and do it again.</p>
+    <p>The wizardry is real but unreliable. You know perhaps forty words of power, and to use one you must <strong>say it out loud</strong> — which works beautifully right up until you are frightened, out of breath, or being chased down a spiral staircase by a man with a poleaxe. Then you fumble the syllables, and the spell does something else entirely.</p>
+    <p>That gap — between the spell you meant and the spell you got — is where the game lives.</p>
+
+    <div class="note">
+      <div class="t">The short version</div>
+      <p>A co-operative first-person heist game for one to four players. Around 25 to 40 minutes per run. You steal physical objects, carry them out by hand, and cast spells by speaking. PC, with everything running on your own machine and a friend's — there are no servers.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ 2 SESSION ══════════ -->
+  <section id="session">
+    <div class="eyebrow">Section two</div>
+    <h2>One session, start to finish</h2>
+    <p class="lede">The clearest way to understand Plunderspell is to walk through a single run. Everything below is one continuous session, and the whole game is made of repetitions of this shape.</p>
+
+    <h3>Before you go — the lair</h3>
+    <p>You start in the lair. It is the only place that persists between runs, and it is where everything you own lives. Here you choose which of your forty-odd incantations you are taking (you cannot carry all of them), pick one physical weapon, and choose which century to open the portal onto. You also see what you owe, which is always more than you have.</p>
+    <p>There is no time pressure in the lair. Take as long as you like.</p>
+
+    <h3>Going through</h3>
+    <p>Everyone steps through the portal together. You arrive outside a castle — one that was assembled by the game moments ago and that nobody, including the person hosting, has seen before. It is night. You have no map.</p>
+    <p>From this point a timer runs. It is generous, and it is visible, and when it expires the portal home closes.</p>
+
+    <h3>Getting in and going deeper</h3>
+    <p>Castles are built as a series of rings, each harder to enter than the last, with the treasure concentrated at the centre. You break in at the outside and work inward — over the curtain wall, across the bailey, into the keep, and if you are brave, down into the crypt beneath it.</p>
+    <p>The deeper you go, the more everything is worth. This is also the part of the castle furthest from the way out, which is entirely the point.</p>
+
+    <h3>Taking things</h3>
+    <p>When you find something valuable you pick it up — physically. A candlestick goes under one arm. A chest takes both hands and slows you down. A full altarpiece cannot be lifted by one person at all; someone has to take the other end, and the two of you have to get it down the stairs together without letting go.</p>
+    <p>There is no inventory screen, at any point, ever.</p>
+
+    <h3>Being noticed</h3>
+    <p>The castle has people in it, and they react to sound. Not to a scripted trigger — to actual noise, travelling outward from wherever it was made. Footsteps carry a little. A shouted incantation carries a lot. A window breaking carries further. A hand cannon carries to the whole building.</p>
+    <p>The household wakes in stages, and each stage is louder and harder to undo than the last. At the top of that ladder is the <em class="term">hue and cry</em>: bells, gates dropping, every living thing in the castle converging on you at once.</p>
+
+    <h3>Getting out</h3>
+    <p>Now you have to carry all of it back out, through everything you woke up on the way in. This is the part people remember. Somebody will drop something irreplaceable. Somebody will say the wrong word. Somebody will die and have to be carried, which means somebody else has to put the gold down.</p>
+    <p><strong>Only what physically crosses back through the portal comes home.</strong> Not what you had, not what you saw — what you were actually holding when you stepped through.</p>
+
+    <h3>Afterwards</h3>
+    <p>Back in the lair, everything you carried is valued and added to the pile. You pay what is due. You spend what is left on new words, better weapons, or improvements to the lair. Then you go again.</p>
+
+    <figure>
+      <svg viewBox="0 0 780 210" role="img" aria-label="A raid timeline. The lair has no timer. Stepping through the portal starts the raid clock. Pressure rises as players move inward through the castle and peaks during the escape, then drops to zero back at the lair. Only items carried through the portal are kept.">
+        <defs>
+          <marker id="hb-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <polygon points="0,0 10,5 0,10" fill="currentColor"/>
+          </marker>
+        </defs>
+        <!-- pressure curve -->
+        <polyline points="60,160 180,158 300,128 420,96 540,44 600,40 660,150 740,158"
+                  fill="none" stroke="#C4542E" stroke-width="2.5" stroke-linejoin="round"/>
+        <text x="548" y="28" fill="#C4542E" font-family="Overpass Mono, monospace" font-size="11" text-anchor="middle">pressure peaks</text>
+        <!-- baseline -->
+        <line x1="60" y1="175" x2="740" y2="175" stroke="currentColor" stroke-width="1" opacity="0.35"/>
+        <!-- stages -->
+        <g font-family="Overpass Mono, monospace" font-size="11" fill="currentColor">
+          <circle cx="60" cy="175" r="4" fill="#5FA288"/><text x="60" y="196" text-anchor="middle">lair</text>
+          <circle cx="180" cy="175" r="4" fill="#8878B0"/><text x="180" y="196" text-anchor="middle">portal</text>
+          <circle cx="360" cy="175" r="4" fill="currentColor"/><text x="360" y="196" text-anchor="middle">break in</text>
+          <circle cx="540" cy="175" r="4" fill="#C9A227"/><text x="540" y="196" text-anchor="middle">the vault</text>
+          <circle cx="660" cy="175" r="4" fill="#C4542E"/><text x="660" y="196" text-anchor="middle">escape</text>
+          <circle cx="740" cy="175" r="4" fill="#5FA288"/><text x="740" y="196" text-anchor="middle">lair</text>
+        </g>
+        <!-- timer bracket -->
+        <line x1="180" y1="88" x2="740" y2="88" stroke="#8878B0" stroke-width="1.5" stroke-dasharray="5 4" marker-start="url(#hb-arrow)" marker-end="url(#hb-arrow)" opacity="0.85"/>
+        <text x="460" y="79" fill="#8878B0" font-family="Overpass Mono, monospace" font-size="11" text-anchor="middle">raid clock runs · portal closes at zero</text>
+        <text x="60" y="79" fill="currentColor" font-family="Overpass Mono, monospace" font-size="11" opacity="0.6">no clock</text>
+      </svg>
+      <figcaption><b>The shape of a run.</b> The lair is untimed; the clock starts at the portal. Tension climbs as you move inward because value and distance-from-the-exit climb together — so the hardest part of the game is always the journey back out, carrying everything.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ══════════ 3 VOICE ══════════ -->
+  <section id="voice">
+    <div class="eyebrow">Section three · core system</div>
+    <h2>Casting with your voice</h2>
+    <p class="lede">This is the feature the game is built around, so it is worth being precise about how it actually works.</p>
+
+    <h3>The mechanic</h3>
+    <p>You hold down a key — the <em class="term">cast key</em> — and speak an incantation. The game listens while the key is held, matches what you said against its list of known words, and resolves the result the moment you finish. It takes roughly a fifth of a second.</p>
+    <p>It is <strong>push-to-cast</strong>, never always-listening. The microphone is only read while you are holding the key down, so the game cannot hear your room, and you cannot cast by accident during a conversation.</p>
+    <p>Recognition happens <strong>entirely on your own computer</strong>. A small speech model ships inside the game. No audio is uploaded anywhere, there is no account or subscription involved, and it works with your internet connection off.</p>
+
+    <h3>Three possible outcomes</h3>
+    <p>When you release the key, one of exactly three things happens — and the middle one is the interesting one.</p>
+
+    <figure>
+      <svg viewBox="0 0 760 300" role="img" aria-label="The voice casting pipeline. Holding the cast key opens the microphone. Speech is matched on the player's own machine against a fixed list of about forty incantations. A confident match casts the spell. A near match casts the misfire twin instead. No match does nothing and costs no resources.">
+        <defs>
+          <marker id="hb-a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <polygon points="0,0 10,5 0,10" fill="currentColor"/>
+          </marker>
+        </defs>
+        <!-- chain -->
+        <rect x="20" y="118" width="132" height="58" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="86" y="143" text-anchor="middle" fill="currentColor" font-family="Overpass Mono, monospace" font-size="12">hold key,</text>
+        <text x="86" y="160" text-anchor="middle" fill="currentColor" font-family="Overpass Mono, monospace" font-size="12">speak</text>
+
+        <line x1="152" y1="147" x2="208" y2="147" stroke="currentColor" stroke-width="1.5" marker-end="url(#hb-a2)"/>
+
+        <rect x="208" y="106" width="150" height="82" fill="none" stroke="#5FA288" stroke-width="1.5"/>
+        <text x="283" y="132" text-anchor="middle" fill="#5FA288" font-family="Overpass Mono, monospace" font-size="12">match on your</text>
+        <text x="283" y="149" text-anchor="middle" fill="#5FA288" font-family="Overpass Mono, monospace" font-size="12">own machine</text>
+        <text x="283" y="170" text-anchor="middle" fill="currentColor" font-family="Overpass Mono, monospace" font-size="11" opacity="0.65">~40 words</text>
+
+        <!-- three branches -->
+        <line x1="358" y1="147" x2="410" y2="147" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="410" y1="52" x2="410" y2="244" stroke="currentColor" stroke-width="1.5"/>
+
+        <line x1="410" y1="52" x2="472" y2="52" stroke="#5FA288" stroke-width="1.5" marker-end="url(#hb-a2)"/>
+        <rect x="472" y="26" width="268" height="52" fill="none" stroke="#5FA288" stroke-width="1.5"/>
+        <text x="488" y="48" fill="#5FA288" font-family="Overpass Mono, monospace" font-size="12">confident match</text>
+        <text x="488" y="66" fill="currentColor" font-family="Overpass Mono, monospace" font-size="11" opacity="0.8">the spell you meant</text>
+
+        <line x1="410" y1="147" x2="472" y2="147" stroke="#C4542E" stroke-width="2" marker-end="url(#hb-a2)"/>
+        <rect x="472" y="121" width="268" height="52" fill="none" stroke="#C4542E" stroke-width="2"/>
+        <text x="488" y="143" fill="#C4542E" font-family="Overpass Mono, monospace" font-size="12">near match</text>
+        <text x="488" y="161" fill="currentColor" font-family="Overpass Mono, monospace" font-size="11" opacity="0.8">the misfire twin — authored, not random</text>
+
+        <line x1="410" y1="244" x2="472" y2="244" stroke="currentColor" stroke-width="1.5" marker-end="url(#hb-a2)" opacity="0.6"/>
+        <rect x="472" y="218" width="268" height="52" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.6"/>
+        <text x="488" y="240" fill="currentColor" font-family="Overpass Mono, monospace" font-size="12" opacity="0.75">no match</text>
+        <text x="488" y="258" fill="currentColor" font-family="Overpass Mono, monospace" font-size="11" opacity="0.6">nothing happens, nothing is spent</text>
+      </svg>
+      <figcaption><b>Why a near match is not a failure state.</b> Unrecognised speech costs you nothing, so the game never punishes an accent or a cough. A <em>near</em> match — a real word, said badly — is the only branch that surprises you, and every one of those outcomes is written by hand rather than rolled at random.</figcaption>
+    </figure>
+
+    <h3>The words</h3>
+    <p>There are around forty incantations. They are deliberately chosen to sound unlike one another, so the game rarely confuses two — and deliberately easy to slur when you are panicking, which is where the misfires come from. A sample:</p>
+
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Say this</th><th>What it does</th><th>Cast time</th><th>Fumble it, and</th></tr></thead>
+        <tbody>
+          <tr><td class="word">IGNIS</td><td>A dart of fire. Cheap and fast, and it sets tapestries and thatch alight, which is usually not what you wanted.</td><td class="num">180 ms</td><td class="misfire">your own beard catches</td></tr>
+          <tr><td class="word">FRANGO</td><td>Shatters things — masonry, locks, bars. Also every fragile thing you happen to be carrying.</td><td class="num">210 ms</td><td class="misfire">the floor beneath you</td></tr>
+          <tr><td class="word">LEVO</td><td>Lifts an object at range. The workhorse: grab, swing, stack, or throw anything with weight.</td><td class="num">190 ms</td><td class="misfire">lifts you instead, badly</td></tr>
+          <tr><td class="word">AURUM VOCO</td><td>For four seconds, everything valuable glows through walls. You glow too, and everyone can see it.</td><td class="num">340 ms</td><td class="misfire">the gold screams</td></tr>
+          <tr><td class="word">TONITRUS</td><td>A thunderclap that shoves. Clears a doorway, drops a portcullis, launches a friend.</td><td class="num">260 ms</td><td class="misfire">every light goes out</td></tr>
+          <tr><td class="word">SOMNUS</td><td>Sleep — and it must be <strong>whispered</strong>. The game measures your volume, so shouting it wakes the room instead.</td><td class="num">220 ms</td><td class="misfire">a loud noise, right where you are</td></tr>
+          <tr><td class="word">CADAVER SURGE</td><td>Raises a corpse as a porter. Slow, obedient, carries loot for you, and follows you home.</td><td class="num">480 ms</td><td class="misfire">it rises disobedient</td></tr>
+          <tr><td class="word">PORTA</td><td>Tears open an emergency way home, here and now. Ruinously expensive.</td><td class="num">200 ms</td><td class="misfire">opens on the wrong century</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Volume is part of the input</h3>
+    <p>The game hears <em>how loudly</em> you speak as well as <em>what</em> you say. Some spells demand a whisper and refuse to work if you shout them. Others want a real shout and fizzle if you mumble. It is the only mechanic we know of that asks you to be brave in your own living room.</p>
+
+    <div class="note">
+      <div class="t">If you can't or won't speak</div>
+      <p>Every single incantation can also be bound to a key and cast silently. Voice is the intended way to play; it is never the required way. Nobody is locked out of the game for being mute, for sharing walls with a sleeping household, or for simply not wanting to shout Latin at a monitor.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ 4 PHYSICS ══════════ -->
+  <section id="physics">
+    <div class="eyebrow">Section four · core system</div>
+    <h2>Objects, weight and violence</h2>
+    <p class="lede">Every object in the world is a real physical body with mass. That single decision produces most of the game's behaviour, so it is worth stating plainly what follows from it.</p>
+
+    <h3>There is no separate combat system</h3>
+    <p>Damage is calculated from how fast something was moving when it hit. That is the whole rule. A sword is a heavy object with a sharp end that you swung quickly; a dropped chest is a heavy object that was moving downward. The game does not distinguish between them, and neither should you.</p>
+    <p>The practical consequence is that the castle itself is an armoury. A portcullis dropped on someone. A wardrobe shoved down a stairwell. A chandelier cut loose over a dining hall. A friend, launched across a room by a mispronounced <span class="word" style="font-size:1em">TONITRUS</span>, who lands on a guard.</p>
+
+    <h3>Carrying things</h3>
+    <ul>
+      <li><strong>Small items</strong> — under a stone — are pocketed and do not slow you down.</li>
+      <li><strong>One-handed items</strong> occupy an arm. You can still fight, but not with both hands.</li>
+      <li><strong>Two-handed items</strong> occupy you completely. You can walk and you can drop them. That is all.</li>
+      <li><strong>Two-person items</strong> cannot be lifted alone at all. Someone takes each end, and you have to move in agreement — through doorways, down stairs, and around corners that were not designed with you in mind.</li>
+    </ul>
+    <p>You can also grab, rotate, push out, pull in, and throw anything you are holding. Creatures included: a small enough enemy can be picked up, carried, throttled, and thrown at a larger one.</p>
+
+    <h3>Fragility</h3>
+    <p>Stained glass, reliquaries, painted manuscripts and alchemical glassware all break on hard impact — and the impact that breaks them is computed the same way damage is. The richest things in any castle are the least able to survive you panicking, which is a design decision rather than an accident.</p>
+
+    <div class="note herald">
+      <p>Nobody wrote the jokes. They are what happens when a microphone and the laws of physics are permitted to fail at the same instant.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ 5 LOOT ══════════ -->
+  <section id="loot">
+    <div class="eyebrow">Section five · core system</div>
+    <h2>Loot and what it is worth</h2>
+    <p class="lede">Every valuable object carries three numbers, and you can read all three by looking at it. There are no menus and no rarity colours.</p>
+
+    <div class="grid g3">
+      <div><div class="kicker">Worth</div><h4>What it sells for</h4><p>Its value back at the lair, in coin. Shown when you look at an object, so you are never guessing whether something is worth the trouble.</p></div>
+      <div><div class="kicker">Bulk</div><h4>Measured in stone</h4><p>How much of you it occupies. This is the real currency of a run — you are not limited by a bag size, you are limited by arms and stairs.</p></div>
+      <div><div class="kicker">Fragility</div><h4>How easily it breaks</h4><p>Whether it survives being dropped, thrown, or caught in a blast. The most valuable items are usually the most delicate.</p></div>
+    </div>
+
+    <p>A silver ewer is worth a little, weighs 2 stone, and tucks under one arm. A reliquary is worth a great deal, weighs 3, and shatters if you so much as fall over. The altarpiece in the chapel is worth more than everything else in the building put together, weighs 14, needs two of you, and will not fit through the window you came in by.</p>
+    <p>This is the entire inventory system. Greed is legible without a single number on the interface, because greed looks like a person struggling down a staircase with both arms full.</p>
+  </section>
+
+  <!-- ══════════ 6 ALARM ══════════ -->
+  <section id="alarm">
+    <div class="eyebrow">Section six · core system</div>
+    <h2>Noise and the household</h2>
+    <p class="lede">The castle is not a set of enemies waiting in rooms. It is a household that is currently asleep, and your entire relationship with it is governed by sound.</p>
+    <p>Noise is a real event with a location and a loudness. It spreads outward, gets quieter with distance, and is muffled by walls and doors. Anyone it reaches responds according to how loud it was by the time it arrived. Nothing here is a scripted trigger — which means the same castle plays differently depending purely on how carefully you move through it.</p>
+
+    <figure>
+      <svg viewBox="0 0 760 250" role="img" aria-label="The four alarm states. Calm, Stirred, Roused, and Hue and Cry. Noise pushes the household up through the states. Calm and Stirred decay back down on their own if you stay quiet, but Roused and Hue and Cry do not decay during the raid.">
+        <defs>
+          <marker id="hb-a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <polygon points="0,0 10,5 0,10" fill="currentColor"/>
+          </marker>
+          <marker id="hb-a3g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <polygon points="0,0 10,5 0,10" fill="#5FA288"/>
+          </marker>
+        </defs>
+        <!-- states -->
+        <rect x="16" y="96" width="150" height="66" fill="none" stroke="#5FA288" stroke-width="1.5"/>
+        <text x="91" y="124" text-anchor="middle" fill="#5FA288" font-family="Eczar, serif" font-size="16" font-weight="600">Calm</text>
+        <text x="91" y="145" text-anchor="middle" fill="currentColor" font-family="Overpass Mono, monospace" font-size="11" opacity="0.7">patrol routes</text>
+
+        <rect x="214" y="96" width="150" height="66" fill="none" stroke="#C9A227" stroke-width="1.5"/>
+        <text x="289" y="124" text-anchor="middle" fill="#C9A227" font-family="Eczar, serif" font-size="16" font-weight="600">Stirred</text>
+        <text x="289" y="145" text-anchor="middle" fill="currentColor" font-family="Overpass Mono, monospace" font-size="11" opacity="0.7">one guard checks</text>
+
+        <rect x="412" y="96" width="150" height="66" fill="none" stroke="#C4542E" stroke-width="1.5"/>
+        <text x="487" y="124" text-anchor="middle" fill="#C4542E" font-family="Eczar, serif" font-size="16" font-weight="600">Roused</text>
+        <text x="487" y="145" text-anchor="middle" fill="currentColor" font-family="Overpass Mono, monospace" font-size="11" opacity="0.7">they sweep in pairs</text>
+
+        <rect x="610" y="96" width="134" height="66" fill="none" stroke="#C4542E" stroke-width="2.5"/>
+        <text x="677" y="124" text-anchor="middle" fill="#C4542E" font-family="Eczar, serif" font-size="16" font-weight="600">Hue &amp; Cry</text>
+        <text x="677" y="145" text-anchor="middle" fill="currentColor" font-family="Overpass Mono, monospace" font-size="11" opacity="0.7">bells, gates, all of them</text>
+
+        <!-- escalation arrows -->
+        <line x1="166" y1="118" x2="212" y2="118" stroke="currentColor" stroke-width="1.5" marker-end="url(#hb-a3)"/>
+        <line x1="364" y1="118" x2="410" y2="118" stroke="currentColor" stroke-width="1.5" marker-end="url(#hb-a3)"/>
+        <line x1="562" y1="118" x2="608" y2="118" stroke="currentColor" stroke-width="1.5" marker-end="url(#hb-a3)"/>
+
+        <g font-family="Overpass Mono, monospace" font-size="10.5" fill="currentColor" opacity="0.85">
+          <text x="189" y="84" text-anchor="middle">a sound</text>
+          <text x="189" y="70" text-anchor="middle">carries</text>
+          <text x="387" y="84" text-anchor="middle">a body or</text>
+          <text x="387" y="70" text-anchor="middle">breakage found</text>
+          <text x="585" y="84" text-anchor="middle">you are seen</text>
+          <text x="585" y="70" text-anchor="middle">carrying</text>
+        </g>
+
+        <!-- decay -->
+        <path d="M289 162 L289 205 L91 205 L91 164" fill="none" stroke="#5FA288" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#hb-a3g)"/>
+        <text x="190" y="224" text-anchor="middle" fill="#5FA288" font-family="Overpass Mono, monospace" font-size="11">stay quiet ~45s and it settles</text>
+
+        <text x="580" y="205" text-anchor="middle" fill="#C4542E" font-family="Overpass Mono, monospace" font-size="11">no way back down — these hold for the rest of the raid</text>
+        <line x1="412" y1="188" x2="744" y2="188" stroke="#C4542E" stroke-width="1" stroke-dasharray="3 4" opacity="0.7"/>
+      </svg>
+      <figcaption><b>The one-way door is between Stirred and Roused.</b> Below it, patience fixes your mistakes — freeze, wait, and the castle forgets. Above it, nothing you do calms the building down, and the run becomes a question of how much you can carry out before it closes around you.</figcaption>
+    </figure>
+
+    <h3>Roughly how loud things are</h3>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Action</th><th>Carries</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>Walking, crouched</td><td class="num">almost nothing</td><td>The default way to move if you have any sense.</td></tr>
+          <tr><td>Running</td><td class="num">a room or two</td><td>Fine in open ground, expensive indoors.</td></tr>
+          <tr><td>A spoken incantation</td><td class="num">several rooms</td><td>Casting is never free — the word itself is a noise.</td></tr>
+          <tr><td>Breaking a window or a lock</td><td class="num">a wing</td><td>Fast entry, and everyone nearby now knows where you came in.</td></tr>
+          <tr><td>Armour or a chest hitting stone</td><td class="num">a wing</td><td>The most common way a careful run ends.</td></tr>
+          <tr><td>A hand cannon or a grenado</td><td class="num">the whole castle</td><td>There is no quiet way to use gunpowder.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Note what this does to the voice system: <strong>casting a spell is itself a noise</strong>, and whispering <span class="word" style="font-size:1em">SOMNUS</span> is quieter than shouting it. The two core systems are wired directly into each other, rather than sitting side by side.</p>
+  </section>
+
+  <!-- ══════════ 7 DEATH ══════════ -->
+  <section id="death">
+    <div class="eyebrow">Section seven · core system</div>
+    <h2>Dying, and being carried</h2>
+    <p class="lede">Death is not the end of your run, and it is not free either. It converts you from a person into a problem.</p>
+    <p>When you go down, you drop everything you were carrying where you fall. Your body becomes an object weighing 12 stone — which is to say, a two-handed item that somebody now has to choose to pick up.</p>
+    <p>If a teammate carries you through the portal, you are revived back at the lair for a fee. If nobody does, you lose the weapon and incantations you brought on that run, but <strong>nothing you had already banked</strong>. Your lair, your money, and your unlocks are never at risk.</p>
+    <p>The cost is not really the fee. It is that a pair of hands carrying you is a pair of hands not carrying gold — so every death is a live, arguable decision about what your friend is worth in coin, made out loud, under time pressure, while something is chasing you.</p>
+
+    <div class="note">
+      <div class="t">Nobody sits and watches</div>
+      <p>A downed player stays in the world as a spectator who can still speak, still ping locations, and still see what their friends are doing — which in practice means they spend the time giving directions and being ignored. The wait is never longer than the run.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ 8 CASTLES ══════════ -->
+  <section id="castles">
+    <div class="eyebrow">Section eight · core system</div>
+    <h2>How castles are built</h2>
+    <p class="lede">Every castle is generated fresh, and no two runs use the same one. But they are not random tangles of corridors — they are built the way real castles were built, and that structure is what makes them readable.</p>
+    <p>A castle is a set of nested rings. You enter at the outside and each ring inward is better defended and richer than the last.</p>
+
+    <figure>
+      <svg viewBox="0 0 620 420" role="img" aria-label="Concentric castle plan. Four nested rings from outside in: curtain wall, outer bailey, inner ward, and keep, with the crypt at the centre. Value rises toward the centre. The player enters at the outer edge and must retreat back out along the same path while carrying loot.">
+        <defs>
+          <marker id="hb-a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <polygon points="0,0 10,5 0,10" fill="#C4542E"/>
+          </marker>
+          <marker id="hb-a5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <polygon points="0,0 10,5 0,10" fill="currentColor"/>
+          </marker>
+        </defs>
+        <!-- rings -->
+        <circle cx="300" cy="210" r="186" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+        <circle cx="300" cy="210" r="144" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.6"/>
+        <circle cx="300" cy="210" r="100" fill="#C9A227" fill-opacity="0.05" stroke="#C9A227" stroke-width="1.5" stroke-opacity="0.55"/>
+        <circle cx="300" cy="210" r="56" fill="#C9A227" fill-opacity="0.12" stroke="#C9A227" stroke-width="2"/>
+        <circle cx="300" cy="210" r="20" fill="#C9A227" fill-opacity="0.3" stroke="#C9A227" stroke-width="2"/>
+
+        <!-- ring labels -->
+        <g font-family="Overpass Mono, monospace" font-size="11.5" fill="currentColor">
+          <text x="300" y="44" text-anchor="middle">curtain wall</text>
+          <text x="300" y="86" text-anchor="middle" opacity="0.85">outer bailey</text>
+          <text x="300" y="130" text-anchor="middle" fill="#C9A227">inner ward</text>
+          <text x="300" y="172" text-anchor="middle" fill="#C9A227">keep</text>
+        </g>
+        <text x="300" y="215" text-anchor="middle" fill="#C9A227" font-family="Eczar, serif" font-size="13" font-weight="600">crypt</text>
+
+        <!-- entry -->
+        <line x1="300" y1="404" x2="300" y2="272" stroke="currentColor" stroke-width="2" marker-end="url(#hb-a5)"/>
+        <text x="300" y="418" text-anchor="middle" fill="currentColor" font-family="Overpass Mono, monospace" font-size="11.5">you break in here</text>
+
+        <!-- retreat -->
+        <path d="M330 228 C 430 280 470 330 452 386" fill="none" stroke="#C4542E" stroke-width="2.5" marker-end="url(#hb-a4)"/>
+        <text x="516" y="330" fill="#C4542E" font-family="Overpass Mono, monospace" font-size="11.5" text-anchor="middle">the way out,</text>
+        <text x="516" y="347" fill="#C4542E" font-family="Overpass Mono, monospace" font-size="11.5" text-anchor="middle">arms full,</text>
+        <text x="516" y="364" fill="#C4542E" font-family="Overpass Mono, monospace" font-size="11.5" text-anchor="middle">everyone awake</text>
+
+        <!-- value gradient -->
+        <line x1="96" y1="210" x2="264" y2="210" stroke="#C9A227" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#hb-a4)" opacity="0.75"/>
+        <text x="150" y="198" fill="#C9A227" font-family="Overpass Mono, monospace" font-size="11.5">worth rises inward</text>
+      </svg>
+      <figcaption><b>The plan is the tension.</b> Because value increases toward the centre, the richest room is always the furthest from the exit — so a successful raid guarantees a long retreat through every part of the castle you have already disturbed. No separate escape sequence has to be designed; the layout produces one.</figcaption>
+    </figure>
+
+    <h3>How the pieces fit</h3>
+    <p>Rooms are hand-built by artists as modules, each with labelled connection points — a door here, an arrow-loop there, a staircase going up, a murder-hole in the ceiling. The generator fits them together by matching those points, which is why the results look like architecture rather than a maze.</p>
+    <p>Every generated castle is then checked by the game before you ever see it, to prove there is a route from the crypt back to a way out. If there is not, it is thrown away and a new one is built.</p>
+
+    <div class="note">
+      <div class="t">Why everyone sees the same castle</div>
+      <p>The host picks a single random number and sends it to everyone. Each player's machine then builds the identical castle from that number alone. Nothing about the building is sent over the network, which is why a four-hundred-room fortress costs no more to play than an empty field.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ 9 AGES ══════════ -->
+  <section id="ages">
+    <div class="eyebrow">Section nine</div>
+    <h2>The four Ages</h2>
+    <p class="lede">Your lair sits outside of time, so a century is a destination rather than a chapter. Each has its own architecture, riches, defenders and weapons, and you choose which one to open the portal onto before each run.</p>
+
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Age</th><th>What it looks like</th><th>What you steal</th><th>What you can carry</th></tr></thead>
+        <tbody>
+          <tr><td><strong>The Bronze Age</strong><br><span class="num">c. 1200 BC</span></td><td>Mud-brick palace complexes, painted plaster, low ceilings and firelight. Many defenders, barely armoured.</td><td>Ingots, faience, ceremonial bronze, sealed amphorae</td><td>Khopesh, sling, oxhide shield, fire-pot</td></tr>
+          <tr><td><strong>The High Medieval</strong><br><span class="num">c. 1250</span></td><td>Stone keeps, curtain walls, spiral stairs. Small garrison in good steel. The Age you learn the game on.</td><td>Reliquaries, altar plate, illuminated psalters, coin</td><td>Arming sword, mace, crossbow, boiling oil</td></tr>
+          <tr><td><strong>The Late Medieval</strong><br><span class="num">c. 1450</span></td><td>Fortresses within fortresses, murder-holes and crooked gates, built to stop people like you. Guards hunt in pairs.</td><td>Plate armour, tapestry, banking ledgers, jewels</td><td>Poleaxe, hand cannon, pavise, caltrops</td></tr>
+          <tr><td><strong>The Age of Powder</strong><br><span class="num">c. 1620</span></td><td>Wide halls, enormous windows, glass everywhere — and magazines of black powder that turn any fight into demolition.</td><td>Cabinets of curiosity, mirrors, astrolabes, silver</td><td>Wheellock pistol, rapier, grenado, petard</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>The rule that matters</h3>
+    <p><strong>Anything you carry out of one Age, you can carry into another.</strong> Nothing stops you taking a wheellock pistol from 1620 back to 1200 BC, where gunpowder does not exist and nobody has any idea what to do about it.</p>
+    <p>This is deliberate, and it will not be balanced away. It is the game's progression: every Age you unlock makes every earlier Age easier and stranger, and the fun of a late run is watching a century meet a weapon it has no answer for.</p>
+
+    <div class="note herald">
+      <p>A wheellock pistol is a curiosity in 1620 and an act of God in 1200 BC. We will not be correcting that.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ 10 LAIR ══════════ -->
+  <section id="lair">
+    <div class="eyebrow">Section ten</div>
+    <h2>The lair and progression</h2>
+    <p class="lede">The lair is your hub, your home, and the only thing that survives a run. It is also the reason you go back out.</p>
+
+    <h3>Debt</h3>
+    <p>You owe money. The amount is due on a schedule regardless of whether you raid, which means standing still is not a neutral choice — it is a losing one. This is the game's pressure valve: it never forces you out on any particular night, but it makes the decision to go a real one.</p>
+
+    <h3>What you spend on</h3>
+    <div class="grid g2">
+      <div><div class="kicker">Words</div><h4>The lexicon</h4><p>New incantations, and more slots to carry them in. You will always know more words than you can take on a single run, so a loadout is a genuine choice.</p></div>
+      <div><div class="kicker">Iron</div><h4>Weapons</h4><p>Bought, repaired, or dragged home from a century that had not invented them yet. Each has real weight, so arming yourself costs carrying capacity.</p></div>
+      <div><div class="kicker">Stone</div><h4>Lair upgrades</h4><p>A better portal reaches further back. A strongroom protects more. A workshop repairs what broke. These persist permanently.</p></div>
+      <div><div class="kicker">Company</div><h4>The household</h4><p>Porters raised from the dead, and other things you should probably not have brought home, which live in the lair and make themselves useful.</p></div>
+    </div>
+    <p>Progression is entirely horizontal in difficulty terms: you do not become tougher, you become better equipped and better spoken. A late-game wizard still dies to a single well-swung poleaxe.</p>
+  </section>
+
+  <!-- ══════════ 11 UNIQUE ══════════ -->
+  <section id="unique">
+    <div class="eyebrow">Section eleven</div>
+    <h2>What makes it different</h2>
+    <p class="lede">Plenty of games share one of these. The combination is what makes Plunderspell a different thing rather than a variation.</p>
+
+    <div class="grid g2">
+      <div>
+        <div class="kicker">01</div>
+        <h4>Your voice is the controller</h4>
+        <p>Not voice chat, and not a novelty command layer bolted onto a normal game. Speaking is the primary way you use your main ability, and the game reads both your words and your volume.</p>
+      </div>
+      <div>
+        <div class="kicker">02</div>
+        <h4>Failure is authored, not punished</h4>
+        <p>Mishearing produces a specific, hand-written wrong spell rather than an error message. The system's weakest point is deliberately converted into its best source of comedy.</p>
+      </div>
+      <div>
+        <div class="kicker">03</div>
+        <h4>No inventory, anywhere</h4>
+        <p>Everything you steal is a physical object occupying real space in your hands. Greed is a posture and a walking speed, not a number in a corner of the screen.</p>
+      </div>
+      <div>
+        <div class="kicker">04</div>
+        <h4>Two-person carries</h4>
+        <p>The best loot in the game cannot be taken by one player. Co-operation is enforced by physics rather than by a lock that needs two keys.</p>
+      </div>
+      <div>
+        <div class="kicker">05</div>
+        <h4>Casting is loud</h4>
+        <p>Your magic and the stealth system are the same system. Using your abilities is what gets you caught, so every spell is a cost-benefit decision rather than a cooldown.</p>
+      </div>
+      <div>
+        <div class="kicker">06</div>
+        <h4>Anachronism as progression</h4>
+        <p>Instead of bigger numbers, you get to break earlier centuries with later technology. Power fantasy through historical unfairness.</p>
+      </div>
+      <div>
+        <div class="kicker">07</div>
+        <h4>Architecture that generates its own tension</h4>
+        <p>Because castles are built as rings with the treasure at the centre, the escape sequence is produced by the level's shape rather than designed separately for each map.</p>
+      </div>
+      <div>
+        <div class="kicker">08</div>
+        <h4>Your friend's body has a price</h4>
+        <p>Reviving is not a button. It is twelve stone of cargo competing directly with the gold, and the argument about it happens out loud, while running.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 12 QOL ══════════ -->
+  <section id="qol">
+    <div class="eyebrow">Section twelve</div>
+    <h2>Quality of life</h2>
+    <p class="lede">A game about shouting into a microphone with friends has an unusually long list of ways to make someone uncomfortable. Most of these exist because of that.</p>
+
+    <h3>Voice, comfort and access</h3>
+    <div class="qol">
+      <div class="row"><div class="n">Push-to-cast, never open mic</div><div class="d">The microphone is only read while you hold the cast key. The game cannot hear your room, and you can never cast by accident mid-conversation.</div></div>
+      <div class="row"><div class="n">Every word has a key</div><div class="d">All forty incantations can be bound and cast silently. Voice is the intended way to play, never a requirement — and the two input methods are equally strong, so nobody is choosing between comfort and winning.</div></div>
+      <div class="row"><div class="n">Separate from voice chat</div><div class="d">Casting does not transmit to your friends' headsets as chat audio. They hear your incantation in the game world, positioned where your character is, which is the point — but it is not double-broadcast.</div></div>
+      <div class="row"><div class="n">First-run calibration</div><div class="d">A short setup that checks your microphone level, has you say three words, and tells you honestly whether it is hearing you well before you ever load into a raid.</div></div>
+      <div class="row"><div class="n">"Heard as" readout</div><div class="d">A small line of text shows what the game understood, every time. When something unexpected happens you always know whether it was you, the game, or the design.</div></div>
+      <div class="row"><div class="n">Loudness meter</div><div class="d">Because some spells require a whisper and others a shout, a simple on-screen meter shows how loud the game is hearing you, so volume is never a guessing game.</div></div>
+      <div class="row"><div class="n">Incantation subtitles</div><div class="d">You see what your teammates cast as readable text above them. Useful in chaos, essential for deaf and hard-of-hearing players, and funnier than hearing it.</div></div>
+    </div>
+
+    <h3>Playing with other people</h3>
+    <div class="qol">
+      <div class="row"><div class="n">Drop in, drop out</div><div class="d">Players can join a lair between runs and leave at any time. Leaving mid-raid does not end anyone else's run.</div></div>
+      <div class="row"><div class="n">The host can leave</div><div class="d">If the person hosting disconnects, the session moves to someone else instead of collapsing. Nobody loses a raid because a friend's router died.</div></div>
+      <div class="row"><div class="n">Rejoin in progress</div><div class="d">Drop out and you can come back into the same raid, at the portal, with whatever you were carrying still lying where you fell.</div></div>
+      <div class="row"><div class="n">Markers without talking</div><div class="d">A ping system for loot, exits, danger and "come here" — so a silent player, or one who has just been told to shut up, is still a full participant.</div></div>
+      <div class="row"><div class="n">Regroup beacon</div><div class="d">One player can raise a marker every party member can see through walls. Getting separated in a dark castle is a good story once and a frustration twice.</div></div>
+      <div class="row"><div class="n">Solo is a real mode</div><div class="d">One player gets adjusted loot values and no two-person carries in the critical path, rather than a four-player raid you are expected to survive alone.</div></div>
+    </div>
+
+    <h3>Respecting your time and your eyes</h3>
+    <div class="qol">
+      <div class="row"><div class="n">The clock is always visible</div><div class="d">You always know how long is left. A run ends when it ends, and the game never quietly extends itself.</div></div>
+      <div class="row"><div class="n">Nothing expires</div><div class="d">No battle pass, no season, no daily login, nothing you lose by not playing for a month. Going out is driven by debt inside the fiction, not by anxiety outside it.</div></div>
+      <div class="row"><div class="n">Save the last 45 seconds</div><div class="d">One keypress writes the previous three-quarters of a minute to a video file. In a game whose whole appeal is the thing that just happened, asking people to have had recording software running is absurd.</div></div>
+      <div class="row"><div class="n">Honest run summary</div><div class="d">Afterwards: who carried what, what broke and what it had been worth, and the run's worst misfire, credited by name.</div></div>
+      <div class="row"><div class="n">Flash and shake controls</div><div class="d">Explosions, fire and impacts can be reduced independently. Camera shake, head-bob and field of view are all adjustable, and none of them are tied to difficulty.</div></div>
+      <div class="row"><div class="n">Readable in the dark</div><div class="d">Valuables are marked by shape as well as by gold, so the game's one load-bearing colour never carries information on its own. Subtitle size and background are adjustable, and every control remaps.</div></div>
+    </div>
+  </section>
+
+  <!-- ══════════ 13 NOT ══════════ -->
+  <section id="not">
+    <div class="eyebrow">Section thirteen</div>
+    <h2>What it is not</h2>
+    <p class="lede">Extraction games carry a lot of baggage. It is worth being explicit about which parts Plunderspell does not have, because several of them are the first thing people assume.</p>
+    <div class="nots">
+      <div><span class="x">✕</span><p><b>Not player-versus-player.</b> Nobody is hunting you but the castle. There are no other squads, no betrayal mechanics, and no way to steal from a stranger.</p></div>
+      <div><span class="x">✕</span><p><b>You do not lose your progress.</b> A failed run costs you the loadout you took and the loot you were carrying. Your lair, your money, your words and your upgrades are never at risk.</p></div>
+      <div><span class="x">✕</span><p><b>Not a live service.</b> No seasons, no battle pass, no rotating storefront, no reason to log in on a Tuesday.</p></div>
+      <div><span class="x">✕</span><p><b>No microtransactions.</b> Everything in the game is bought with the money you stole inside the game.</p></div>
+      <div><span class="x">✕</span><p><b>Not always-online.</b> Sessions are hosted by one of the players. There is no matchmaking service to go down and nothing to queue for.</p></div>
+      <div><span class="x">✕</span><p><b>Not a horror game.</b> It is dark, and it is tense, and things chase you — but the register is comedy. Nothing in it is trying to frighten you for its own sake.</p></div>
+    </div>
+  </section>
+
+  <!-- ══════════ 14 FAQ ══════════ -->
+  <section id="faq">
+    <div class="eyebrow">Section fourteen</div>
+    <h2>Common questions</h2>
+    <div class="faq">
+      <details open>
+        <summary>Do I need a microphone?<span></span></summary>
+        <div class="a"><p>No. Every incantation can be bound to a key and cast silently, and a key-bound player is exactly as capable as a speaking one. You will have a different kind of fun, but not less of it.</p></div>
+      </details>
+      <details>
+        <summary>Is my voice being sent anywhere?<span></span></summary>
+        <div class="a"><p>No. Recognition runs on your own machine, using a model that ships inside the game. No audio leaves your computer, there is no account attached to it, and the system works with your internet disconnected.</p></div>
+      </details>
+      <details>
+        <summary>What if the game can't understand my accent?<span></span></summary>
+        <div class="a"><p>Unrecognised speech does nothing at all and costs you nothing — there is no penalty for being misheard. The vocabulary is deliberately small and the words chosen to sound unlike one another, and accent coverage is tested as a core requirement rather than a late polish task. And the key bindings are always there.</p></div>
+      </details>
+      <details>
+        <summary>Can I play on my own?<span></span></summary>
+        <div class="a"><p>Yes. Solo is a supported mode with its own tuning — adjusted values and no two-person carries standing between you and finishing a run. It is a quieter, more careful game alone, and a genuinely different one.</p></div>
+      </details>
+      <details>
+        <summary>How long is a session?<span></span></summary>
+        <div class="a"><p>A single raid runs 25 to 40 minutes, and the clock is visible throughout. Time spent in the lair between raids is untimed. You can comfortably play exactly one.</p></div>
+      </details>
+      <details>
+        <summary>What happens if I die?<span></span></summary>
+        <div class="a"><p>You drop what you were carrying and become a 12-stone body. A teammate can carry you through the portal to revive you for a fee. If nobody does, you lose the weapon and words you brought on that run — but nothing you had already banked, and nothing permanent.</p></div>
+      </details>
+      <details>
+        <summary>Is it scary?<span></span></summary>
+        <div class="a"><p>Tense rather than frightening. It is dark and things chase you, but the tone is comic — much closer to a heist going wrong than to horror. Flash, shake and gore settings are all adjustable.</p></div>
+      </details>
+      <details>
+        <summary>Can my friend join halfway through?<span></span></summary>
+        <div class="a"><p>Between raids, always. Mid-raid, they can join at the portal. And if someone's connection drops, the session moves to another player rather than ending.</p></div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ══════════ 15 GLOSSARY ══════════ -->
+  <section id="glossary">
+    <div class="eyebrow">Section fifteen</div>
+    <h2>Glossary</h2>
+    <p class="lede">Most of these are real historical terms, used the way the period used them.</p>
+    <div class="gloss">
+      <div><span class="t">Bailey</span><span class="d">The open courtyard inside a castle's outer wall. Usually the first place you can be seen from a height.</span></div>
+      <div><span class="t">Bulk</span><span class="d">How much of you an object occupies, measured in stone. The real constraint on a run.</span></div>
+      <div><span class="t">Extraction</span><span class="d">Getting back through the portal. Only what you are physically holding at that moment comes home.</span></div>
+      <div><span class="t">Hue and cry</span><span class="d">The historical obligation for a whole community to pursue a fleeing criminal. Here, the top alarm state — bells, gates, everyone.</span></div>
+      <div><span class="t">Incantation</span><span class="d">One of the roughly forty words of power. Spoken aloud, or bound to a key.</span></div>
+      <div><span class="t">Keep</span><span class="d">The fortified tower at a castle's centre. The rich part, and the hard part.</span></div>
+      <div><span class="t">The lair</span><span class="d">Your persistent hub, outside of time. The only thing a bad run cannot take from you.</span></div>
+      <div><span class="t">Misfire</span><span class="d">What you get when an incantation is recognised as its near neighbour. Written by hand, never random.</span></div>
+      <div><span class="t">Porter</span><span class="d">A raised corpse that carries loot for you. Slow, obedient, and it follows you home.</span></div>
+      <div><span class="t">Stone</span><span class="d">The unit of bulk, after the historical measure of weight. A silver ewer is 2; a body is 12.</span></div>
+      <div><span class="t">Stratum</span><span class="d">One of the four Ages, named as archaeological layers because you dig down through them.</span></div>
+      <div><span class="t">Ward</span><span class="d">One ring of a castle's defences. Castles here are built as nested wards, poorest outside, richest within.</span></div>
+    </div>
+  </section>
+
+  <footer>
+    PLUNDERSPELL · HANDBOOK v1.0 · A CO-OPERATIVE HEIST GAME FOR 1–4 PLAYERS · PC / STEAM
+  </footer>
+
+  </main>
+</div>
+</div>
+
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  var targets = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+
+  function mark(){
+    var best = 0, bestTop = -Infinity;
+    for (var i = 0; i < targets.length; i++){
+      if (!targets[i]) continue;
+      var top = targets[i].getBoundingClientRect().top - 90;
+      if (top <= 0 && top > bestTop){ bestTop = top; best = i; }
+    }
+    for (var j = 0; j < links.length; j++){
+      links[j].classList.toggle('on', j === best);
+    }
+  }
+
+  var tick;
+  window.addEventListener('scroll', function(){
+    clearTimeout(tick);
+    tick = setTimeout(mark, 60);
+  }, {passive:true});
+  mark();
+})();
+</script>
+</body>
+</html>
