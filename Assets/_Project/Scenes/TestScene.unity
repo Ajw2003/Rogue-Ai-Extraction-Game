@@ -131,7 +131,6 @@ GameObject:
   - component: {fileID: 1047984683}
   - component: {fileID: 1047984682}
   - component: {fileID: 1047984681}
-  - component: {fileID: 1047984680}
   m_Layer: 0
   m_Name: TestPlanet
   m_TagString: Untagged
@@ -139,22 +138,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1047984680
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1047984679}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7de115f9516a4f54fa396a57c1937f44, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: RogueAi.Gravity::GravitySource
-  type: 0
-  gravityStrength: 9.81
-  influenceRadius: 450
-  localGravityDirection: {x: 0, y: -1, z: 0}
 --- !u!23 &1047984681
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -359,7 +342,6 @@ GameObject:
   - component: {fileID: 1898533589}
   - component: {fileID: 1898533588}
   - component: {fileID: 1898533587}
-  - component: {fileID: 1898533586}
   - component: {fileID: 1898533585}
   m_Layer: 0
   m_Name: TestItem
@@ -384,19 +366,6 @@ MonoBehaviour:
   _rotationSpeed: 10
   _damageMultiplier: 2
   _damageCooldown: 0.5
---- !u!114 &1898533586
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1898533584}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cc836c0fb95722544ad77353f1738ca7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: RogueAi.Gravity::GravityReceiver
-  _alignmentSpeed: 10
 --- !u!54 &1898533587
 Rigidbody:
   m_ObjectHideFlags: 0

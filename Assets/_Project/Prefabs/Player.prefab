@@ -126,7 +126,6 @@ GameObject:
   - component: {fileID: 3521724619880839382}
   - component: {fileID: 8339978337336298540}
   - component: {fileID: 1882235948596881410}
-  - component: {fileID: 8378038919563880394}
   - component: {fileID: 5845973335706416536}
   - component: {fileID: 7962204930486381791}
   - component: {fileID: 9111867752775346081}
@@ -204,19 +203,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &8378038919563880394
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8511867752775346080}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cc836c0fb95722544ad77353f1738ca7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: RogueAi.Gravity::GravityReceiver
-  _alignmentSpeed: 10
 --- !u!114 &5845973335706416536
 MonoBehaviour:
   m_ObjectHideFlags: 0

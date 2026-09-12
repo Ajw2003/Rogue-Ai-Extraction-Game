@@ -3,7 +3,6 @@
     "rootNamespace": "",
     "references": [
         "RogueAi.Core",
-        "RogueAi.Gravity",
         "Unity.InputSystem"
     ],
     "includePlatforms": [],

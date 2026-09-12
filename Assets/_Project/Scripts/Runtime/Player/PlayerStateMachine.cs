@@ -4,12 +4,11 @@ using UnityEngine;
 
 namespace StateMachine
 {
-    // The merged controller: Rigidbody-based movement (from the old PlayerStateMachine lineage)
-    // driven in the gravity-relative frame supplied by GravityReceiver (the math from the old
-    // RawMathPlayerController lineage). See GravityReceiver for force application and alignment,
-    // and PlayerWalkState/PlayerJumpState for how movement is expressed against receiver.Up
-    // instead of world Vector3.up.
-    [RequireComponent(typeof(GravityReceiver))]
+    // The merged controller: Rigidbody-based movement driven against standard world gravity
+    // (Physics.gravity, -Y). The Rigidbody uses Unity's built-in gravity (useGravity = true) and
+    // rotation is frozen so the body stays upright; PlayerWalkState/PlayerJumpState express
+    // movement against world Vector3.up.
+    [RequireComponent(typeof(Rigidbody))]
     public class PlayerStateMachine : BaseStateMachine, IHealth, IChokeDamageSource
     {
         public float CurrentHealth => _health;
@@ -33,7 +32,6 @@ namespace StateMachine
         public Vector2 MovementDirection { get; set; }
 
         public Rigidbody _rb;
-        public GravityReceiver GravityReceiver { get; private set; }
 
         public float walkSpeed;
         public float JumpForce;
@@ -98,9 +96,8 @@ namespace StateMachine
 
             CameraTransform.localRotation = Quaternion.Euler(_xRotation, 0f, 0f);
 
-            // Space.Self: rotates around the transform's own up axis, which GravityReceiver keeps
-            // aligned to the current planet's up, so this stays correct without referencing Up
-            // directly.
+            // Space.Self: rotates around the transform's own up axis. With rotation frozen and
+            // standard world gravity the body stays upright, so local up matches world up.
             transform.Rotate(Vector3.up * mouseX);
         }
 
@@ -125,7 +122,12 @@ namespace StateMachine
             IdleState = new PlayerIdleState(this);
             JumpState = new PlayerJumpState(this);
             _rb = GetComponent<Rigidbody>();
-            GravityReceiver = GetComponent<GravityReceiver>();
+
+            // Standard world gravity: let the physics engine apply Physics.gravity (-Y). Rotation
+            // stays owned by look input only, so freeze it here (previously done by GravityReceiver).
+            _rb.useGravity = true;
+            _rb.freezeRotation = true;
+
             _health = _maxHealth;
         }
 
@@ -203,13 +205,13 @@ namespace StateMachine
             ApplyExtraFallGravity();
         }
 
-        // Ground check in the gravity frame: a SphereCast along -up, with proportional
+        // Ground check against world up: a SphereCast along -Y, with proportional
         // error-correction snapping the body to the target ride height. This is what removes the
         // camera jitter a hard position snap would cause - ported from the old transform-based
         // controller's UpdateGravity.
         private void GroundCheck()
         {
-            Vector3 up = GravityReceiver.Up;
+            Vector3 up = Vector3.up;
             Vector3 origin = transform.position + up * 0.5f;
             float verticalSpeed = Vector3.Dot(_rb.linearVelocity, up);
 
@@ -224,12 +226,10 @@ namespace StateMachine
             }
         }
 
-        // GravityReceiver applies its force every FixedUpdate regardless of contact, so without
-        // this the downward speed integrates without bound while SnapToGroundHeight holds the
-        // position - the body fights itself hard enough to read as continuous jumping. The
-        // transform-based controller this was ported from avoided it by only integrating gravity
-        // while airborne and zeroing its vertical velocity on every grounded frame; the Rigidbody
-        // merge kept the snap and dropped both halves of that.
+        // Rigidbody gravity integrates downward speed every FixedUpdate regardless of contact, so
+        // without this the downward speed grows without bound while SnapToGroundHeight holds the
+        // position - the body fights itself hard enough to read as continuous jumping. Zeroing the
+        // vertical (along-up) velocity component on every grounded frame keeps it planted.
         private void CancelVelocityAlongUp(Vector3 up, float verticalSpeed)
         {
             _rb.linearVelocity -= up * verticalSpeed;
@@ -247,16 +247,13 @@ namespace StateMachine
             _rb.MovePosition(_rb.position - up * correction);
         }
 
-        // Extra weight while falling, expressed as additional force along the current gravity
-        // direction rather than world -Y, so it still points at the planet under custom gravity.
+        // Extra weight while falling, expressed as additional force along world gravity
+        // (Physics.gravity, -Y) on top of the Rigidbody's built-in gravity, for a snappier arc.
         private void ApplyExtraFallGravity()
         {
             if (IsGrounded) return;
-            if (GravityReceiver.DominantSource == null) return;
 
-            Vector3 gravityDirection = -GravityReceiver.Up;
-            float strength = GravityReceiver.DominantSource.gravityStrength;
-            _rb.AddForce(gravityDirection * strength * (FallMultiplier - 1), ForceMode.Acceleration);
+            _rb.AddForce(Physics.gravity * (FallMultiplier - 1f), ForceMode.Acceleration);
         }
 
         public void Dead()

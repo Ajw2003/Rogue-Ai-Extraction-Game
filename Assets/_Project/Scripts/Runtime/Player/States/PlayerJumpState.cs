@@ -11,7 +11,7 @@ public class PlayerJumpState : PlayerState
 
     public override void Enter()
     {
-        Vector3 up = _stateMachine.GravityReceiver.Up;
+        Vector3 up = Vector3.up;
         _stateMachine._rb.AddForce(up * _stateMachine.JumpForce, ForceMode.Impulse);
         _jumpTime = Time.time;
     }
@@ -29,7 +29,7 @@ public class PlayerJumpState : PlayerState
 
     private void HandleAirSteering()
     {
-        Vector3 up = _stateMachine.GravityReceiver.Up;
+        Vector3 up = Vector3.up;
         Vector3 moveInput = CameraRelativeInputOnGravityPlane(up);
         if (moveInput.sqrMagnitude <= 0.01f) return;
 

@@ -2,11 +2,9 @@ using Interfaces;
 using UnityEngine;
 using UnityEngine.AI;
 
-// Physical grab/carry/throw. Gravity is delegated entirely to GravityReceiver: this component
-// never touches Rigidbody.useGravity, so a held or thrown item falls toward whatever planet owns
-// it instead of along world -Y.
+// Physical grab/carry/throw. Uses standard world gravity: the Rigidbody has useGravity = true,
+// so a released or thrown item falls along world -Y (Physics.gravity).
 [RequireComponent(typeof(Rigidbody))]
-[RequireComponent(typeof(GravityReceiver))]
 public class Item : MonoBehaviour
 {
     private Rigidbody _rb;
@@ -37,6 +35,9 @@ public class Item : MonoBehaviour
         _monsterHealth = GetComponent<IHealth>();
         _carryableCreature = GetComponent<ICarryableCreature>();
         _agent = GetComponent<NavMeshAgent>();
+
+        // Standard world gravity now that the custom gravity module is gone.
+        _rb.useGravity = true;
 
         _rb.interpolation = RigidbodyInterpolation.Interpolate;
         _rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
