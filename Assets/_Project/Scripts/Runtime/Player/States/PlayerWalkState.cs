@@ -15,7 +15,7 @@ public class PlayerWalkState : PlayerState
             return;
         }
 
-        Vector3 up = _stateMachine.GravityReceiver.Up;
+        Vector3 up = Vector3.up;
         Vector3 moveDirection = CameraRelativeInputOnGravityPlane(up);
 
         // Preserve the velocity component along up so this doesn't interfere with jumping/falling.

@@ -10,12 +10,9 @@ using UnityEngine.SceneManagement;
 public static class TestSceneBuilder
 {
     // Judgement calls - tune here rather than hunting through the generated scene.
-    // At radius 25 the horizon sat about two body-lengths away and a lap took under half a minute,
-    // which made the curvature read as a bug rather than a planet. 80 walks a lap in roughly 80
-    // seconds at PlayerWalkSpeed.
-    private const float PlanetRadius = 80f;
-    private const float PlanetInfluenceRadius = 200f;
-    private const float PlanetGravityStrength = 9.81f;
+    // Standard world gravity (Physics.gravity, -Y) is used, so the test surface is a large flat
+    // ground plane at the origin rather than a spherical planet.
+    private const float GroundSize = 200f;
     private const float PlayerCapsuleHeight = 2f;
     private const float PlayerCapsuleRadius = 0.5f;
     private const float PlayerWalkSpeed = 6f;
@@ -38,12 +35,12 @@ public static class TestSceneBuilder
         BuildSceneLight();
         BuildManagers();
 
-        GameObject planet = BuildPlanet();
+        GameObject ground = BuildGround();
         GameObject playerPrefab = BuildPlayerPrefab();
         GameObject player = (GameObject)PrefabUtility.InstantiatePrefab(playerPrefab, scene);
-        BuildTestItem(planet.transform);
+        BuildTestItem(ground.transform);
 
-        player.transform.position = new Vector3(0f, PlanetRadius + PlayerGroundedHeight + PlayerCapsuleHeight * 0.5f, 0f);
+        player.transform.position = new Vector3(0f, PlayerGroundedHeight + PlayerCapsuleHeight * 0.5f, 0f);
 
         EnsureSceneFolderExists();
         EditorSceneManager.SaveScene(scene, ScenePath);
@@ -70,20 +67,17 @@ public static class TestSceneBuilder
         new GameObject("ItemManager").AddComponent<ItemManager>();
     }
 
-    private static GameObject BuildPlanet()
+    // A large flat ground plane at the origin. Standard world gravity (-Y) pulls the player and
+    // items straight down onto it, so no GravitySource is needed.
+    private static GameObject BuildGround()
     {
-        GameObject planet = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        planet.name = "TestPlanet";
-        planet.transform.position = Vector3.zero;
-        // The primitive sphere mesh has a radius of 0.5, so scale it up to PlanetRadius.
-        planet.transform.localScale = Vector3.one * (PlanetRadius * 2f);
+        GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        ground.name = "TestGround";
+        ground.transform.position = new Vector3(0f, -0.5f, 0f);
+        // Wide, thin slab whose top surface sits at y = 0.
+        ground.transform.localScale = new Vector3(GroundSize, 1f, GroundSize);
 
-        GravitySource gravitySource = planet.AddComponent<GravitySource>();
-        gravitySource.type = GravitySource.GravityType.Spherical;
-        gravitySource.gravityStrength = PlanetGravityStrength;
-        gravitySource.influenceRadius = PlanetInfluenceRadius;
-
-        return planet;
+        return ground;
     }
 
     private static GameObject BuildPlayerPrefab()
@@ -95,8 +89,7 @@ public static class TestSceneBuilder
         capsule.height = PlayerCapsuleHeight;
         capsule.radius = PlayerCapsuleRadius;
 
-        // Adding PlayerStateMachine pulls in Rigidbody and GravityReceiver via their
-        // [RequireComponent] chain (PlayerStateMachine -> GravityReceiver -> Rigidbody).
+        // Adding PlayerStateMachine pulls in Rigidbody via its [RequireComponent] attribute.
         PlayerStateMachine stateMachine = player.AddComponent<PlayerStateMachine>();
         stateMachine.walkSpeed = PlayerWalkSpeed;
         stateMachine.JumpForce = PlayerJumpForce;
@@ -136,15 +129,15 @@ public static class TestSceneBuilder
         serialized.ApplyModifiedPropertiesWithoutUndo();
     }
 
-    private static void BuildTestItem(Transform planetTransform)
+    private static void BuildTestItem(Transform groundTransform)
     {
         GameObject item = GameObject.CreatePrimitive(PrimitiveType.Cube);
         item.name = "TestItem";
         item.transform.localScale = Vector3.one * ItemSize;
-        item.transform.position = new Vector3(3f, PlanetRadius + ItemSize, 0f);
+        item.transform.position = new Vector3(3f, ItemSize, 0f);
 
-        // Item's [RequireComponent] chain pulls in Rigidbody and GravityReceiver; CreatePrimitive
-        // already gave the cube a BoxCollider for the grab/throw physics to act on.
+        // Item's [RequireComponent] pulls in a Rigidbody (useGravity = true at runtime);
+        // CreatePrimitive already gave the cube a BoxCollider for the grab/throw physics.
         item.AddComponent<Item>();
     }
 
