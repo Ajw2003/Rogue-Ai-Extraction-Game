@@ -4,7 +4,9 @@
     "references": [
         "RogueAi.Core",
         "RogueAi.Items",
-        "RogueAi.Player"
+        "RogueAi.Player",
+        "RogueAi.Voice",
+        "RogueAi.Spells"
     ],
     "includePlatforms": [
         "Editor"
