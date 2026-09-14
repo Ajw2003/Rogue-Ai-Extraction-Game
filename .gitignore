@@ -109,6 +109,3 @@ InitTestScene*.unity*
 # Vosk native/managed binaries (drop Vosk.dll + libvosk.dll and define VOSK_PRESENT)
 /[Aa]ssets/Plugins/x86_64/*.dll
 /[Aa]ssets/Plugins/x86_64/libvosk*
-
-# Regenerable preview renders, not shipped assets.
-Tools/AssetPipeline/previews/

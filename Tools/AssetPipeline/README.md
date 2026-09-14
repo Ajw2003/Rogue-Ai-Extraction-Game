@@ -80,8 +80,11 @@ blender -b -P Tools/AssetPipeline/render_previews.py   # -> previews/<Key>.png
 python3 Tools/AssetPipeline/make_contact_sheet.py      # -> previews/_contact_sheet.png
 ```
 
-`previews/` is gitignored — it's a regenerable visualization aid, not a
-shipped asset.
+`previews/` is committed so reviewers can see the props without a Unity
+Editor or Blender install. Re-run the two commands above and commit the
+result whenever a builder or the palette changes — the PNGs aren't
+authoritative (the FBX/GLB exports are); they're a rendering of them and
+will drift out of date if regenerated and not recommitted.
 
 ## Adding a new prop
 
