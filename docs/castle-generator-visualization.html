@@ -92,7 +92,7 @@
     border-bottom: 1px solid var(--line-strong);
     margin-bottom: 20px;
   }
-  .titleblock { display: flex; flex-direction: column; gap: 6px; max-width: 46ch; }
+  .titleblock { display: flex; flex-direction: column; gap: 6px; max-width: 48ch; }
   .eyebrow {
     font-family: "IBM Plex Mono", monospace;
     font-size: 0.72rem;
@@ -195,35 +195,43 @@
   /* ---- map ---- */
   .mapwrap { padding: 14px; }
   svg#map { width: 100%; height: auto; display: block; }
-  .room-rect { stroke: var(--surface); stroke-width: 2; cursor: pointer; }
-  .room-rect.selected { stroke: var(--ink); stroke-width: 2.5; }
-  .room-rect:hover { filter: brightness(1.12); }
-  .conn-line { stroke: var(--line-strong); stroke-width: 2; }
+  .isoNote { margin: 0 16px 2px; font-size: 0.72rem; color: var(--ink-dim); font-style: italic; }
+
+  .room-face { stroke: none; }
+  .room-face-left { filter: brightness(0.86); }
+  .room-face-right { filter: brightness(0.64); }
+  .room-top { stroke: var(--surface); stroke-width: 1.1; cursor: pointer; }
+  .room-top.selected { stroke: var(--ink); stroke-width: 2; }
+  .room-group { cursor: pointer; }
+  .room-group:hover .room-top { filter: brightness(1.12); }
+  .door-notch { fill: var(--surface-2); opacity: 0.92; }
+
+  .conn-line { stroke: var(--line-strong); stroke-width: 1.6; opacity: 0.75; }
   .path-line {
     fill: none;
     stroke: var(--accent);
-    stroke-width: 4.5;
+    stroke-width: 2.6;
     stroke-linecap: round;
     stroke-linejoin: round;
-    stroke-dasharray: 1 10;
-    opacity: 0.92;
+    stroke-dasharray: 0.6 5.5;
+    opacity: 0.95;
   }
-  .marker-glyph { font-size: 15px; font-family: "IBM Plex Sans", sans-serif; pointer-events: none; }
-  .grid-tick { stroke: var(--line); stroke-width: 1; }
+  .marker-glyph { font-family: "IBM Plex Sans", sans-serif; pointer-events: none; }
   .room-label {
     font-family: "IBM Plex Mono", monospace;
-    font-size: 6.4px;
+    font-weight: 600;
     fill: var(--accent-ink);
     pointer-events: none;
-    text-anchor: middle;
   }
 
   /* ---- legend ---- */
   .legend { padding: 14px 16px; display: flex; flex-direction: column; gap: 9px; }
   .legend-row { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
+  .legend-row.note { color: var(--ink-dim); font-size: 0.78rem; }
   .swatch { width: 14px; height: 14px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,0.12); }
   .legend-row .n { margin-left: auto; font-family: "IBM Plex Mono", monospace; color: var(--ink-dim); font-size: 0.8rem; }
   .legend-glyph { width: 14px; text-align: center; flex: none; font-size: 14px; }
+  .legend-notch { width: 14px; height: 10px; flex: none; background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: 1px; }
 
   /* ---- status banner ---- */
   .status {
@@ -277,7 +285,7 @@
     <div class="titleblock">
       <span class="eyebrow">Plunderspell &mdash; Milestone 2a</span>
       <h1>Castle Generator</h1>
-      <p class="dek">Live layout preview of <code class="mono">ProceduralCastleGenerator.cs</code> &mdash; five concentric rings placed outward from the crypt, each module wired to an already-built neighbour.</p>
+      <p class="dek">Isometric blockout preview of <code class="mono">ProceduralCastleGenerator.cs</code> &mdash; five concentric rings grown outward from the crypt, each module's height set by zone and its doorway cut into whichever wall faces an already-built neighbour.</p>
     </div>
     <div class="controls">
       <div class="field">
@@ -291,7 +299,7 @@
       <div class="checks">
         <label class="check"><input type="checkbox" id="toggleConn" checked /><span>Connections</span></label>
         <label class="check"><input type="checkbox" id="togglePath" checked /><span>Extraction path</span></label>
-        <label class="check"><input type="checkbox" id="toggleLabels" /><span>Room labels</span></label>
+        <label class="check"><input type="checkbox" id="toggleLabels" checked /><span>Room labels</span></label>
       </div>
     </div>
   </header>
@@ -299,12 +307,13 @@
   <main>
     <div class="panel">
       <div class="panel-head">
-        <h2>Layout &mdash; plan view</h2>
+        <h2>Layout &mdash; isometric blockout</h2>
         <span class="meta tnum" id="mapMeta">&nbsp;</span>
       </div>
       <div class="mapwrap">
-        <svg id="map" viewBox="0 0 100 100" role="img" aria-label="Generated castle floor plan"></svg>
+        <svg id="map" viewBox="0 0 100 100" role="img" aria-label="Generated castle isometric blockout"></svg>
       </div>
+      <p class="isoNote">Block heights, shading and door cut-outs are a stylized blockout &mdash; every entry in <code class="mono">CastleRoomRegistry.asset</code> still has an empty <code class="mono">Prefab</code> field, so there is no mesh art yet to preview directly.</p>
       <div class="status" id="pathStatus"></div>
       <div style="height:14px"></div>
     </div>
@@ -319,6 +328,8 @@
         <div style="border-top:1px solid var(--line); margin: 3px 0;"></div>
         <div class="legend-row"><span class="legend-glyph">&#9733;</span>Crypt entry (path start)</div>
         <div class="legend-row"><span class="legend-glyph">&#9873;</span>Extraction exit (path end)</div>
+        <div class="legend-row"><span class="legend-notch"></span>Doorway to a connected room</div>
+        <div class="legend-row note">Taller block = a higher-weight zone (Keep is the tallest; Curtain Wall the lowest). Click any room for its full name.</div>
       </div>
 
       <div class="panel">
@@ -337,7 +348,7 @@
   </main>
 
   <footer>
-    Ported line-for-line from <code>Assets/_Project/Scripts/Runtime/Castle/{ProceduralCastleGenerator,CastlePathValidator}.cs</code> on branch <code>plunderspell-dev</code> (Milestone 2a, merged from <code>feature/m2-castle-gen</code>): the same ring radii, room-count ranges, axis-priority placement and A* validator, re-run in JS with a seeded generator standing in for .NET&rsquo;s <code>System.Random</code> &mdash; so a given seed number won&rsquo;t reproduce Unity&rsquo;s exact roll sequence, but every structural rule (ring order, weighted room pools, &ge;2 inward-link check, 4-connectivity) matches the source.
+    Ported line-for-line from <code>Assets/_Project/Scripts/Runtime/Castle/{ProceduralCastleGenerator,CastlePathValidator}.cs</code> on branch <code>plunderspell-dev</code> (Milestone 2a, merged from <code>feature/m2-castle-gen</code>): the same ring radii, room-count ranges, axis-priority placement and A* validator, re-run in JS with a seeded generator standing in for .NET&rsquo;s <code>System.Random</code> &mdash; so a given seed number won&rsquo;t reproduce Unity&rsquo;s exact roll sequence, but every structural rule (ring order, weighted room pools, &ge;2 inward-link check, 4-connectivity) matches the source. Room heights/shading are this preview's own invention, standing in for the meshes the registry doesn't have yet.
   </footer>
 </div>
 
@@ -367,8 +378,10 @@
   // ---------------------------------------------------------------------
   // Zone + registry data (mirrors CastleRoomRegistry.asset)
   // ---------------------------------------------------------------------
-  const ZONES = ["Crypt", "Keep", "InnerWard", "OuterBailey", "CurtainWall"];
   const ZONE_LABEL = { Crypt: "Crypt", Keep: "Keep", InnerWard: "Inner Ward", OuterBailey: "Outer Bailey", CurtainWall: "Curtain Wall" };
+  const ZONE_VAR = { Crypt: "--z-crypt", Keep: "--z-keep", InnerWard: "--z-innerward", OuterBailey: "--z-outerbailey", CurtainWall: "--z-curtainwall" };
+  // Not sourced from the C#: relative block heights standing in for absent meshes.
+  const ZONE_HEIGHT = { Crypt: 0.34, CurtainWall: 0.55, OuterBailey: 0.85, InnerWard: 1.05, Keep: 1.55 };
 
   const POOL = {
     CurtainWall: [["GatehouseModule",1],["WallStraight",4],["WallCorner",3],["Bastion",2],["Drawbridge",1]],
@@ -567,7 +580,11 @@
   }
 
   // ---------------------------------------------------------------------
-  // Rendering
+  // Rendering: an isometric (2:1) blockout. Each room is a diamond top
+  // face plus two shaded side faces (the two sides an iso camera can see),
+  // extruded by a per-zone height. A door notch is drawn on a side face
+  // whenever that side's grid neighbour is actually occupied, so every
+  // opening drawn corresponds to a real 4-connectivity edge.
   // ---------------------------------------------------------------------
   const SVG_NS = "http://www.w3.org/2000/svg";
   const el = (tag, attrs) => {
@@ -575,6 +592,20 @@
     for (const k in attrs) n.setAttribute(k, attrs[k]);
     return n;
   };
+
+  const TW = 10;          // top-face half-width
+  const TH = 5;            // top-face half-height (2:1 iso ratio)
+  const UNIT_H = 15;        // px-equivalent per world height unit
+  const FOOTPRINT = 0.92;    // block footprint within its cell (leaves a seam)
+
+  const isoCenter = (gx, gy) => ({ x: (gx - gy) * TW, y: (gx + gy) * TH });
+
+  // "GatehouseModule" -> "GM", "CryptChamberFinal" -> "CCF", "WallStraight" -> "WS"
+  function abbreviate(roomId) {
+    const words = roomId.match(/[A-Z][a-z0-9]*/g) || [roomId];
+    if (words.length === 1) return words[0].slice(0, 3).toUpperCase();
+    return words.map((w) => w[0]).join("").slice(0, 4).toUpperCase();
+  }
 
   let current = null;
   let selectedIdx = null;
@@ -585,68 +616,121 @@
     const data = current;
     const modules = data.modules;
 
-    let minX = modules[0].x, maxX = minX, minY = modules[0].y, maxY = minY;
-    for (const m of modules) { minX = Math.min(minX, m.x); maxX = Math.max(maxX, m.x); minY = Math.min(minY, m.y); maxY = Math.max(maxY, m.y); }
-    const pad = 1;
-    minX -= pad; maxX += pad; minY -= pad; maxY += pad;
-    const cols = maxX - minX + 1, rows = maxY - minY + 1;
-    const cell = 100 / Math.max(cols, rows);
-    svg.setAttribute("viewBox", `0 0 ${cols * cell} ${rows * cell}`);
+    // Bounding box in screen space, including footprint half-extents and block height.
+    let minSX = Infinity, maxSX = -Infinity, minSY = Infinity, maxSY = -Infinity;
+    for (const m of modules) {
+      const c = isoCenter(m.x, m.y);
+      const hpx = ZONE_HEIGHT[m.zone] * UNIT_H;
+      minSX = Math.min(minSX, c.x - TW);
+      maxSX = Math.max(maxSX, c.x + TW);
+      minSY = Math.min(minSY, c.y - TH - hpx);
+      maxSY = Math.max(maxSY, c.y + TH);
+    }
+    const marginX = TW * 0.7, marginY = TH * 2.2;
+    const vbX = minSX - marginX, vbY = minSY - marginY;
+    const vbW = (maxSX - minSX) + marginX * 2, vbH = (maxSY - minSY) + marginY * 2;
+    svg.setAttribute("viewBox", `${vbX} ${vbY} ${vbW} ${vbH}`);
 
-    const cx = (x) => (x - minX) * cell + cell / 2;
-    const cy = (y) => (maxY - y) * cell + cell / 2; // flip Y so +y (north) draws upward
+    const topCenter = (gx, gy, hpx) => { const c = isoCenter(gx, gy); return { x: c.x, y: c.y - hpx }; };
 
-    // faint grid paper
-    const gridGroup = el("g", {});
-    for (let gx = 0; gx <= cols; gx++) gridGroup.appendChild(el("line", { class: "grid-tick", x1: gx * cell, y1: 0, x2: gx * cell, y2: rows * cell }));
-    for (let gy = 0; gy <= rows; gy++) gridGroup.appendChild(el("line", { class: "grid-tick", x1: 0, y1: gy * cell, x2: cols * cell, y2: gy * cell }));
-    svg.appendChild(gridGroup);
-
-    // connection lines (module -> its placement parent)
+    // connection lines: every real 4-connectivity edge (what CastlePathValidator treats as walkable)
     if (document.getElementById("toggleConn").checked) {
       const connGroup = el("g", {});
+      const seen = new Set();
       for (const m of modules) {
-        if (!m.parent) continue;
-        const pIdx = data.occupied.get(m.parent);
-        if (pIdx === undefined) continue;
-        const p = modules[pIdx];
-        connGroup.appendChild(el("line", { class: "conn-line", x1: cx(m.x), y1: cy(m.y), x2: cx(p.x), y2: cy(p.y) }));
+        for (const [dx, dy] of FOUR_DIRS) {
+          const nIdx = data.occupied.get(key(m.x + dx, m.y + dy));
+          if (nIdx === undefined) continue;
+          const pairKey = nIdx < data.occupied.get(key(m.x, m.y)) ? `${nIdx}|${data.occupied.get(key(m.x, m.y))}` : `${data.occupied.get(key(m.x, m.y))}|${nIdx}`;
+          if (seen.has(pairKey)) continue;
+          seen.add(pairKey);
+          const n = modules[nIdx];
+          const a = topCenter(m.x, m.y, ZONE_HEIGHT[m.zone] * UNIT_H);
+          const b = topCenter(n.x, n.y, ZONE_HEIGHT[n.zone] * UNIT_H);
+          connGroup.appendChild(el("line", { class: "conn-line", x1: a.x, y1: a.y, x2: b.x, y2: b.y }));
+        }
       }
       svg.appendChild(connGroup);
     }
 
-    // extraction path overlay
+    // rooms, painter's algorithm: draw back-to-front so nearer blocks occlude farther ones
+    const showLabels = document.getElementById("toggleLabels").checked;
+    const order = modules.map((_, i) => i).sort((a, b) => (modules[a].x + modules[a].y) - (modules[b].x + modules[b].y));
+    const roomLayer = el("g", {});
+
+    for (const idx of order) {
+      const m = modules[idx];
+      const hpx = ZONE_HEIGHT[m.zone] * UNIT_H;
+      const c = isoCenter(m.x, m.y);
+      const topY = c.y - hpx;
+      const tw = TW * FOOTPRINT, th = TH * FOOTPRINT;
+
+      const N = [c.x, topY - th], E = [c.x + tw, topY], S = [c.x, topY + th], W = [c.x - tw, topY];
+      const colorVar = `var(${ZONE_VAR[m.zone]})`;
+
+      const g = el("g", { class: "room-group", "data-idx": idx });
+      g.addEventListener("click", () => { selectedIdx = idx; render(); showDetail(idx); });
+
+      g.appendChild(el("polygon", {
+        class: "room-face room-face-left",
+        points: `${S[0]},${S[1]} ${W[0]},${W[1]} ${W[0]},${W[1] + hpx} ${S[0]},${S[1] + hpx}`,
+        fill: colorVar
+      }));
+      g.appendChild(el("polygon", {
+        class: "room-face room-face-right",
+        points: `${S[0]},${S[1]} ${E[0]},${E[1]} ${E[0]},${E[1] + hpx} ${S[0]},${S[1] + hpx}`,
+        fill: colorVar
+      }));
+
+      // door notches only where the corresponding grid neighbour is actually occupied
+      if (data.occupied.has(key(m.x + 1, m.y))) {
+        const mx = (S[0] + E[0]) / 2, my = (S[1] + E[1]) / 2;
+        g.appendChild(el("rect", { class: "door-notch", x: mx - tw * 0.15, y: my + hpx * 0.22, width: tw * 0.3, height: Math.max(1, hpx * 0.5), rx: 0.6 }));
+      }
+      if (data.occupied.has(key(m.x, m.y + 1))) {
+        const mx = (S[0] + W[0]) / 2, my = (S[1] + W[1]) / 2;
+        g.appendChild(el("rect", { class: "door-notch", x: mx - tw * 0.15, y: my + hpx * 0.22, width: tw * 0.3, height: Math.max(1, hpx * 0.5), rx: 0.6 }));
+      }
+
+      g.appendChild(el("polygon", {
+        class: "room-top" + (idx === selectedIdx ? " selected" : ""),
+        points: `${N[0]},${N[1]} ${E[0]},${E[1]} ${S[0]},${S[1]} ${W[0]},${W[1]}`,
+        fill: colorVar
+      }));
+
+      const title = el("title", {});
+      title.textContent = `${m.roomId} — ${ZONE_LABEL[m.zone]} (${m.x}, ${m.y})`;
+      g.appendChild(title);
+
+      if (m.isCryptEntry || m.isExtractionExit) {
+        const glyph = el("text", {
+          class: "marker-glyph", x: c.x, y: topY, "text-anchor": "middle", "dominant-baseline": "central",
+          "font-size": th * 1.35, fill: "var(--accent-ink)"
+        });
+        glyph.textContent = m.isCryptEntry ? "★" : "⚑";
+        g.appendChild(glyph);
+      } else if (showLabels) {
+        const label = el("text", {
+          class: "room-label", x: c.x, y: topY, "text-anchor": "middle", "dominant-baseline": "central",
+          "font-size": th * 0.92
+        });
+        label.textContent = abbreviate(m.roomId);
+        g.appendChild(label);
+      }
+
+      roomLayer.appendChild(g);
+    }
+    svg.appendChild(roomLayer);
+
+    // extraction path overlay, floating just above the top faces it threads through
     if (document.getElementById("togglePath").checked && data.pathResult && data.pathResult.found) {
-      const pts = data.pathResult.hops.map((idx) => `${cx(modules[idx].x)},${cy(modules[idx].y)}`).join(" ");
+      const pts = data.pathResult.hops.map((idx) => {
+        const m = modules[idx];
+        const t = topCenter(m.x, m.y, ZONE_HEIGHT[m.zone] * UNIT_H);
+        return `${t.x},${t.y - 1.6}`;
+      }).join(" ");
       svg.appendChild(el("polyline", { class: "path-line", points: pts }));
     }
-
-    // rooms
-    const showLabels = document.getElementById("toggleLabels").checked;
-    const roomGroup = el("g", {});
-    const zoneVar = { Crypt: "--z-crypt", Keep: "--z-keep", InnerWard: "--z-innerward", OuterBailey: "--z-outerbailey", CurtainWall: "--z-curtainwall" };
-    modules.forEach((m, idx) => {
-      const size = cell * 0.82;
-      const rx = cx(m.x) - size / 2, ry = cy(m.y) - size / 2;
-      const rect = el("rect", {
-        class: "room-rect" + (idx === selectedIdx ? " selected" : ""),
-        x: rx, y: ry, width: size, height: size, rx: Math.max(1.2, cell * 0.06),
-        fill: `var(${zoneVar[m.zone]})`,
-        "data-idx": idx
-      });
-      rect.addEventListener("click", () => { selectedIdx = idx; render(); showDetail(idx); });
-      roomGroup.appendChild(rect);
-
-      if (m.isCryptEntry) roomGroup.appendChild(el("text", { class: "marker-glyph", x: cx(m.x), y: cy(m.y) + cell * 0.16, "text-anchor": "middle", fill: "var(--accent-ink)" })).textContent = "★";
-      if (m.isExtractionExit) roomGroup.appendChild(el("text", { class: "marker-glyph", x: cx(m.x), y: cy(m.y) + cell * 0.16, "text-anchor": "middle", fill: "var(--accent-ink)" })).textContent = "⚑";
-
-      if (showLabels) {
-        const t = el("text", { class: "room-label", x: cx(m.x), y: cy(m.y) + size / 2 - cell * 0.07 });
-        t.textContent = m.roomId.replace(/([A-Z])/g, " $1").trim().split(" ")[0];
-        roomGroup.appendChild(t);
-      }
-    });
-    svg.appendChild(roomGroup);
 
     document.getElementById("mapMeta").textContent = `seed ${data.seed} · ${modules.length} rooms`;
   }
@@ -669,14 +753,13 @@
   }
 
   function renderRingTable(stats) {
-    const zoneVar = { Crypt: "--z-crypt", Keep: "--z-keep", InnerWard: "--z-innerward", OuterBailey: "--z-outerbailey", CurtainWall: "--z-curtainwall" };
     const tbody = document.querySelector("#ringTable tbody");
     tbody.innerHTML = "";
     for (const s of stats) {
       const tr = document.createElement("tr");
       const warn = s.inwardLinks < 2;
       tr.innerHTML = `
-        <td><span class="zone-dot" style="background:var(${zoneVar[s.zone]})"></span>${ZONE_LABEL[s.zone]}</td>
+        <td><span class="zone-dot" style="background:var(${ZONE_VAR[s.zone]})"></span>${ZONE_LABEL[s.zone]}</td>
         <td class="tnum">${s.radius}</td>
         <td class="tnum">${s.rolled} <span style="color:var(--ink-dim)">(${s.min}–${s.max})</span></td>
         <td class="tnum">${s.placed}</td>
