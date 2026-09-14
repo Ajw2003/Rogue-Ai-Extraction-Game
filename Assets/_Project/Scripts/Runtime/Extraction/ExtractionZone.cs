@@ -141,6 +141,17 @@ namespace RogueAi.Extraction
         // Test / integration seams (network-free mutation of the tracked lists)
         // -----------------------------------------------------------------------------------------
 
+        /// <summary>
+        /// Sets the raid length. Used by scene tooling and by the director when a raid's duration
+        /// depends on the era. Takes effect on the next spawn, or immediately when already running.
+        /// </summary>
+        public void SetRaidDuration(float seconds)
+        {
+            RaidDurationSeconds = Mathf.Max(1f, seconds);
+            if (!_extractionComplete.value)
+                _timeRemaining.value = RaidDurationSeconds;
+        }
+
         /// <summary>Test seam: register a pickup as being inside the zone.</summary>
         public void TrackLoot(LootPickup pickup)
         {

@@ -27,6 +27,9 @@ export DOTNET_NOLOGO=1
 echo "==> Building gameplay assemblies (headless)"
 "$DOTNET" build "$HERE/Plunderspell.Headless/Plunderspell.Headless.csproj" -v minimal --nologo
 
+echo "==> Building editor tooling (headless)"
+"$DOTNET" build "$HERE/Plunderspell.Headless.Editor/Plunderspell.Headless.Editor.csproj" -v minimal --nologo
+
 if [ "${1:-}" = "--build" ]; then
   echo "==> Build only; skipping tests."
   exit 0

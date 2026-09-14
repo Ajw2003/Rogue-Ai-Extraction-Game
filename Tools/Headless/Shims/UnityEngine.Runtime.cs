@@ -256,19 +256,39 @@ namespace UnityEngine
     public class Renderer : Component { public bool enabled = true; public Material material; public Material sharedMaterial; }
     public class MeshRenderer : Renderer { }
     public class SkinnedMeshRenderer : Renderer { }
-    public class Material : Object { public Color color; public Material() { } public Material(Material src) { } }
+    public class Material : Object
+    {
+        public Color color;
+        public Shader shader;
+        public Material() { }
+        public Material(Material src) { }
+        public Material(Shader shader) => this.shader = shader;
+        public void SetColor(string name, Color value) => color = value;
+        public void SetFloat(string name, float value) { }
+    }
     public class Mesh : Object { }
     public class MeshFilter : Component { public Mesh mesh; public Mesh sharedMesh; }
     public class Sprite : Object { }
     public class Texture : Object { }
-    public class Texture2D : Texture { public Texture2D(int w, int h) { } }
+    public class Texture2D : Texture
+    {
+        public Texture2D(int w, int h) { }
+        public void SetPixel(int x, int y, Color colour) { }
+        public void Apply() { }
+    }
     public class ParticleSystem : Component
     {
         public bool IsPlaying { get; private set; }
         public void Play() => IsPlaying = true;
         public void Stop() => IsPlaying = false;
     }
-    public class Light : Behaviour { public float intensity = 1f; public Color color; }
+    public class Light : Behaviour
+    {
+        public float intensity = 1f;
+        public Color color;
+        public LightType type = LightType.Point;
+        public float range = 10f;
+    }
     public struct Ray
     {
         public Vector3 origin;
@@ -512,10 +532,19 @@ namespace UnityEngine
             return Raycast(start, d.normalized, out _, d.magnitude, layerMask);
         }
 
-        /// <summary>Slab-method ray/AABB intersection, restricted to a finite segment length.</summary>
+        /// <summary>
+        /// Slab-method ray/AABB intersection, restricted to a finite segment length.
+        ///
+        /// A collider containing the origin reports no hit, matching Unity: "Raycasts will not detect
+        /// Colliders for which the raycast origin is inside the collider." Without this, a player's
+        /// own trigger volume swallows every interaction ray they cast.
+        /// </summary>
         private static bool SegmentIntersectsBounds(Vector3 origin, Vector3 dir, float length, Bounds b, out float distance)
         {
             distance = 0f;
+            if (b.Contains(origin))
+                return false;
+
             float tMin = 0f, tMax = length;
             Vector3 lo = b.min, hi = b.max;
 
@@ -682,4 +711,100 @@ namespace UnityEngine.Serialization
     {
         public FormerlySerializedAsAttribute(string oldName) { }
     }
+}
+
+namespace UnityEngine
+{
+    // --- IMGUI ---------------------------------------------------------------------------------
+    // The raid HUD draws with IMGUI so the game is legible before any canvas is authored. Headlessly
+    // there is no screen, so these types exist to compile and to let layout code run; drawing is a
+    // no-op. What the HUD SAYS is tested through RaidHudModel, which needs none of this.
+
+    public struct Rect
+    {
+        public float x, y, width, height;
+        public Rect(float x, float y, float width, float height)
+        {
+            this.x = x; this.y = y; this.width = width; this.height = height;
+        }
+        public float xMin => x;
+        public float yMin => y;
+        public float xMax => x + width;
+        public float yMax => y + height;
+        public Vector2 center => new Vector2(x + width * 0.5f, y + height * 0.5f);
+        public bool Contains(Vector2 p) => p.x >= x && p.x <= xMax && p.y >= y && p.y <= yMax;
+    }
+
+    public enum TextAnchor { UpperLeft, UpperCenter, UpperRight, MiddleLeft, MiddleCenter, MiddleRight, LowerLeft, LowerCenter, LowerRight }
+    public enum FontStyle { Normal, Bold, Italic, BoldAndItalic }
+
+    public class GUIStyleState { public Color textColor = Color.white; public Texture2D background; }
+
+    public class GUIStyle
+    {
+        public int fontSize;
+        public FontStyle fontStyle;
+        public TextAnchor alignment;
+        public GUIStyleState normal = new GUIStyleState();
+        public GUIStyle() { }
+        public GUIStyle(GUIStyle other)
+        {
+            fontSize = other.fontSize;
+            fontStyle = other.fontStyle;
+            alignment = other.alignment;
+            normal = new GUIStyleState { textColor = other.normal.textColor, background = other.normal.background };
+        }
+    }
+
+    public class GUISkin { public GUIStyle label { get; } = new GUIStyle(); public GUIStyle box { get; } = new GUIStyle(); public GUIStyle button { get; } = new GUIStyle(); }
+
+    public static class GUI
+    {
+        public static GUISkin skin { get; } = new GUISkin();
+        public static Color color { get; set; } = Color.white;
+        public static void Label(Rect rect, string text) { }
+        public static void Label(Rect rect, string text, GUIStyle style) { }
+        public static void Box(Rect rect, string text) { }
+        public static bool Button(Rect rect, string text) => false;
+        public static void DrawTexture(Rect rect, Texture texture) { }
+    }
+
+    public static class GUILayout
+    {
+        public static void Label(string text) { }
+        public static void Label(string text, GUIStyle style) { }
+        public static bool Button(string text) => false;
+        public static void BeginArea(Rect rect) { }
+        public static void EndArea() { }
+        public static void BeginHorizontal() { }
+        public static void EndHorizontal() { }
+        public static void BeginVertical() { }
+        public static void EndVertical() { }
+        public static void Space(float pixels) { }
+        public static void FlexibleSpace() { }
+    }
+
+    public static class GUILayoutUtility
+    {
+        public static Rect GetRect(float width, float height) => new Rect(0f, 0f, width, height);
+    }
+
+    public static class Screen
+    {
+        public static int width { get; set; } = 1920;
+        public static int height { get; set; } = 1080;
+    }
+}
+
+namespace UnityEngine
+{
+    public enum PrimitiveType { Sphere, Capsule, Cylinder, Cube, Plane, Quad }
+    public enum LightType { Spot, Directional, Point, Area }
+
+    public class Shader : Object
+    {
+        public static Shader Find(string name) => new Shader { name = name };
+    }
+
+    public class AudioListener : Behaviour { }
 }

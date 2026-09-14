@@ -52,4 +52,18 @@ namespace Interfaces
         void Open();
         void Close();
     }
+
+    /// <summary>
+    /// A door that tells being opened by hand apart from being forced. Porta ignores both and just
+    /// calls <see cref="IOpenable.Open"/>; a player's hands do not, which is what makes a locked door
+    /// a decision — spend a word, or make a noise.
+    /// </summary>
+    public interface IHandOpenable : IOpenable
+    {
+        /// <summary>Open it by hand. False when locked or barred.</summary>
+        bool TryOpenByHand();
+
+        /// <summary>Shoulder it open. Always works, always loud.</summary>
+        bool ForceOpen();
+    }
 }

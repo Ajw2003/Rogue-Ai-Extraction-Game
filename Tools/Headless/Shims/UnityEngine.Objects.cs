@@ -88,8 +88,8 @@ namespace UnityEngine
         public static T Instantiate<T>(T original, Transform parent) where T : Object =>
             Instantiate(original, Vector3.zero, Quaternion.identity, parent);
 
-        public static T[] FindObjectsOfType<T>() where T : Component => Scene.FindComponents<T>().ToArray();
-        public static T FindObjectOfType<T>() where T : Component => Scene.FindComponents<T>().FirstOrDefault();
+        public static T[] FindObjectsOfType<T>() where T : Component => SceneRegistry.FindComponents<T>().ToArray();
+        public static T FindObjectOfType<T>() where T : Component => SceneRegistry.FindComponents<T>().FirstOrDefault();
         public static T[] FindObjectsByType<T>(FindObjectsSortMode mode) where T : Component => FindObjectsOfType<T>();
         public static T FindFirstObjectByType<T>() where T : Component => FindObjectOfType<T>();
         public static T FindAnyObjectByType<T>() where T : Component => FindObjectOfType<T>();
@@ -97,8 +97,11 @@ namespace UnityEngine
 
     public enum FindObjectsSortMode { None, InstanceID }
 
-    /// <summary>The headless stand-in for the active scene: every live GameObject is registered here.</summary>
-    public static class Scene
+    /// <summary>
+    /// The headless stand-in for the active scene: every live GameObject is registered here. Named
+    /// SceneRegistry rather than Scene so it cannot be confused with UnityEngine.SceneManagement.Scene.
+    /// </summary>
+    public static class SceneRegistry
     {
         private static readonly List<GameObject> _objects = new List<GameObject>();
 
@@ -143,7 +146,7 @@ namespace UnityEngine
             transform = new Transform();
             transform.BindTo(this);
             _components.Add(transform);
-            Scene.Register(this);
+            SceneRegistry.Register(this);
         }
 
         public GameObject(string name, params Type[] componentTypes) : this(name)
@@ -202,12 +205,31 @@ namespace UnityEngine
 
         public bool CompareTag(string other) => tag == other;
 
+        /// <summary>Builds a primitive with the collider and renderer the real one would have.</summary>
+        public static GameObject CreatePrimitive(PrimitiveType type)
+        {
+            var go = new GameObject(type.ToString());
+            go.AddComponent<MeshFilter>();
+            go.AddComponent<MeshRenderer>();
+            switch (type)
+            {
+                case PrimitiveType.Sphere: go.AddComponent<SphereCollider>(); break;
+                case PrimitiveType.Capsule: go.AddComponent<CapsuleCollider>(); break;
+                case PrimitiveType.Plane:
+                case PrimitiveType.Quad:
+                case PrimitiveType.Cube:
+                case PrimitiveType.Cylinder:
+                default: go.AddComponent<BoxCollider>(); break;
+            }
+            return go;
+        }
+
         public static GameObject Find(string name) =>
-            Scene.AllObjects.FirstOrDefault(g => g != null && g.name == name);
+            SceneRegistry.AllObjects.FirstOrDefault(g => g != null && g.name == name);
         public static GameObject FindGameObjectWithTag(string tag) =>
-            Scene.AllObjects.FirstOrDefault(g => g != null && g.tag == tag);
+            SceneRegistry.AllObjects.FirstOrDefault(g => g != null && g.tag == tag);
         public static GameObject[] FindGameObjectsWithTag(string tag) =>
-            Scene.AllObjects.Where(g => g != null && g.tag == tag).ToArray();
+            SceneRegistry.AllObjects.Where(g => g != null && g.tag == tag).ToArray();
         public Component GetComponent(Type t) => _components.FirstOrDefault(t.IsInstanceOfType);
         public T[] GetComponents<T>() => _components.OfType<T>().ToArray();
         public void GetComponents<T>(List<T> results) { results.Clear(); results.AddRange(_components.OfType<T>()); }
@@ -280,7 +302,7 @@ namespace UnityEngine
             }
             _components.Clear();
             transform.SetParent(null, false);
-            Scene.Unregister(this);
+            SceneRegistry.Unregister(this);
         }
 
         /// <summary>Shallow clone used by Instantiate: copies component types and public field values.</summary>

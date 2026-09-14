@@ -17,7 +17,7 @@ namespace RogueAi.Castle
     /// The alarm raises the stakes directly: at <see cref="AlarmState.Roused"/> and above the castle
     /// locks its doors, so a raid that got loud on the way in has to spend words getting out.
     /// </summary>
-    public class CastleDoor : NetworkBehaviour, IOpenable
+    public class CastleDoor : NetworkBehaviour, IHandOpenable
     {
         [Header("State")]
         [Tooltip("Locked doors need Porta (or a key); an unlocked door opens by hand.")]
