@@ -70,6 +70,7 @@ namespace RogueAi.EditorTools
             GameObject guardPrefab = BuildGuardPrefab();
 
             AlarmFSMManager alarm = BuildAlarm();
+            BuildLockdown(alarm);
             LairHubManager lair = BuildLair();
             ExtractionZone extraction = BuildExtractionZone();
             ProceduralCastleGenerator generator = BuildGenerator(registry);
@@ -343,7 +344,23 @@ namespace RogueAi.EditorTools
             var go = new GameObject("LootSpawner");
             var spawner = go.AddComponent<LootSpawner>();
             spawner.Table = table;
+
+            // Aurum Voco needs somewhere for its coin to land, or the spell conjures nothing.
+            var gold = ScriptableObject.CreateInstance<LootItem>();
+            gold.DisplayName = "Conjured Coin";
+            gold.Worth = 40f;
+            gold.Bulk = 1f;
+            gold.Fragility = 999f;   // coin does not shatter
+            SaveAsset(gold, $"{DataDirectory}/Loot_Conjured_Coin.asset");
+
+            go.AddComponent<ConjuredGoldSpawner>().Configure(gold, BuildLootPrefab());
             return spawner;
+        }
+
+        private static void BuildLockdown(AlarmFSMManager alarm)
+        {
+            var go = new GameObject("CastleLockdown");
+            go.AddComponent<CastleLockdown>().Configure(alarm);
         }
 
         private static GuardSpawner BuildGuardSpawner(GameObject guardPrefab)
@@ -406,7 +423,8 @@ namespace RogueAi.EditorTools
             root.AddComponent<AcousticEmitter>();
             root.AddComponent<FootstepNoiseEmitter>();
             root.AddComponent<PushToCastController>();
-            root.AddComponent<SpellCastingSystem>();
+            SpellCastingSystem casting = root.AddComponent<SpellCastingSystem>();
+            casting.SetLexicon(LoadLexicon());
             root.AddComponent<FreeLookPlaytestController>();
 
             LootInteractor interactor = root.AddComponent<LootInteractor>();
@@ -423,6 +441,20 @@ namespace RogueAi.EditorTools
             var presenter = go.AddComponent<RaidHudPresenter>();
             presenter.Configure(director, extraction, alarm, lair, interactor);
             go.AddComponent<RaidHudView>();
+        }
+
+        /// <summary>
+        /// The authored spellbook. Without it every phrase resolves to None and casting does nothing,
+        /// which would make the built scene look like the voice pipeline is broken when it is only
+        /// unwired.
+        /// </summary>
+        private static SpellLexicon LoadLexicon()
+        {
+            const string path = "Assets/_Project/Data/Spells/SpellLexicon.asset";
+            var lexicon = AssetDatabase.LoadAssetAtPath<SpellLexicon>(path);
+            if (lexicon == null)
+                Debug.LogWarning($"Plunderspell: no SpellLexicon at {path}; casting will fizzle.");
+            return lexicon;
         }
 
         // --- Assets -------------------------------------------------------------------------

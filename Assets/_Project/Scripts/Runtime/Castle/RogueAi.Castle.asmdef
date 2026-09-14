@@ -4,7 +4,8 @@
     "references": [
         "PurrNet.Runtime",
         "RogueAi.Core",
-        "RogueAi.Acoustics"
+        "RogueAi.Acoustics",
+        "RogueAi.Alarm"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

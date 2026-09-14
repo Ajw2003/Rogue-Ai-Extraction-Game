@@ -127,6 +127,9 @@ namespace RogueAi.Raid
 
             SetPhase(RaidPhase.Generating);
 
+            // The zone carries the last raid's result until it is re-armed.
+            _extractionZone?.ResetForNewRaid();
+
             _seed.value = _fixedSeed != 0 ? _fixedSeed : NewSeed();
             BuildCastle(_seed.value);
 

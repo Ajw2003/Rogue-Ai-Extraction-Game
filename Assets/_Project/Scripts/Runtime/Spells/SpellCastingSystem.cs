@@ -41,6 +41,24 @@ namespace RogueAi.Spells
             if (!isOwner)
                 return;
 
+            Subscribe();
+        }
+
+        /// <summary>
+        /// Offline there is no spawn event, so without this a single-player scene would never listen
+        /// for voice and casting — the entire point of the game — would silently do nothing.
+        /// </summary>
+        private void Start()
+        {
+            if (!isSpawned)
+                Subscribe();
+        }
+
+        private void Subscribe()
+        {
+            if (_subscribed)
+                return;
+
             if (_lexicon == null)
                 Debug.LogWarning("[SpellCast] No SpellLexicon assigned — every phrase will fizzle (None).");
 
@@ -55,6 +73,9 @@ namespace RogueAi.Spells
                 Debug.LogWarning("[SpellCast] No voice service available.");
             }
         }
+
+        /// <summary>Assigns the spellbook at runtime, for tooling-built scenes and tests.</summary>
+        public void SetLexicon(SpellLexicon lexicon) => _lexicon = lexicon;
 
         protected override void OnDespawned()
         {
@@ -87,7 +108,14 @@ namespace RogueAi.Spells
             else
                 Debug.Log($"[SpellCast] Local cast {resolved} (Volume: {result.Volume})");
 
-            // Ask the server to broadcast this cast to everyone (incl. us) for a shared log.
+            // Offline there is no server to ask, so resolve it here. Spawned, the server owns it.
+            if (!isSpawned)
+            {
+                int affected = ExecuteEffect(resolved, result.Volume, this);
+                BroadcastCast(resolved, result.Volume, this, default, affected);
+                return;
+            }
+
             ServerCast(resolved, result.Volume, this);
         }
 

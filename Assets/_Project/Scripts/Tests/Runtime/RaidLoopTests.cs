@@ -365,6 +365,31 @@ namespace RogueAi.Tests
         // --- Spawning ----------------------------------------------------------------------
 
         [Test]
+        public void Test_ASecondRaidIsWinnableToo()
+        {
+            RaidDirector director = MakeDirector(out _, out ExtractionZone zone, out _);
+
+            director.SetFixedSeed(101);
+            director.StartRaid(HistoricalEra.BronzeAge);
+            zone.ResolveLocally();
+            director.ReturnToLair();
+
+            director.SetFixedSeed(202);
+            director.StartRaid(HistoricalEra.BronzeAge);
+
+            Assert.IsFalse(zone.ExtractionComplete,
+                "The zone must be re-armed, or the second raid can never be left.");
+            Assert.Greater(zone.TimeRemaining, 0f, "…and its clock restarted.");
+
+            LootPickup haul = MakePickup(MakeItem("Second Raid Haul", 300f));
+            zone.TrackLoot(haul);
+            zone.ResolveLocally();
+
+            Assert.AreEqual(300f, director.LastWorthExtracted, 0.001f,
+                "A second raid must pay out like the first.");
+        }
+
+        [Test]
         public void Test_TheGarrisonIsDeterministicAndAvoidsTheExit()
         {
             var generator = MakeGenerator();

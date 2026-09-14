@@ -12,7 +12,9 @@
         "RogueAi.Alarm",
         "RogueAi.Acoustics",
         "RogueAi.Guards",
-        "RogueAi.Status"
+        "RogueAi.Status",
+        "RogueAi.Spells",
+        "RogueAi.Voice"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

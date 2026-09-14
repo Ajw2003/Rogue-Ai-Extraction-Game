@@ -46,15 +46,30 @@ namespace RogueAi.Extraction
         {
             base.OnSpawned();
             if (isServer)
-            {
-                _timeRemaining.value = RaidDurationSeconds;
-                _extractionComplete.value = false;
-            }
+                ResetClock();
+        }
+
+        /// <summary>
+        /// Offline (single-player, or a scene played without starting a host) there is no spawn
+        /// event, so the clock would sit at zero and the raid would end the instant it began. The
+        /// authority checks below all read "spawned AND not the server" for the same reason: an
+        /// unspawned object is its own authority.
+        /// </summary>
+        private void Awake()
+        {
+            if (!isSpawned)
+                ResetClock();
+        }
+
+        private void ResetClock()
+        {
+            _timeRemaining.value = RaidDurationSeconds;
+            _extractionComplete.value = false;
         }
 
         private void Update()
         {
-            if (!isServer || _extractionComplete.value)
+            if ((isSpawned && !isServer) || _extractionComplete.value)
                 return;
 
             _timeRemaining.value -= Time.deltaTime;
@@ -111,7 +126,7 @@ namespace RogueAi.Extraction
 
         private void OnTriggerEnter(Collider other)
         {
-            if (!isServer)
+            if (isSpawned && !isServer)
                 return;
 
             var pickup = other.GetComponentInParent<LootPickup>();
@@ -125,7 +140,7 @@ namespace RogueAi.Extraction
 
         private void OnTriggerExit(Collider other)
         {
-            if (!isServer)
+            if (isSpawned && !isServer)
                 return;
 
             var pickup = other.GetComponentInParent<LootPickup>();
@@ -150,6 +165,21 @@ namespace RogueAi.Extraction
             RaidDurationSeconds = Mathf.Max(1f, seconds);
             if (!_extractionComplete.value)
                 _timeRemaining.value = RaidDurationSeconds;
+        }
+
+        /// <summary>
+        /// Re-arms the zone for a new raid: clock back to full, extraction un-resolved, and both
+        /// tracked lists emptied.
+        ///
+        /// Without this a second raid is unwinnable — the zone stays flagged complete from the last
+        /// one, so <see cref="TriggerExtraction"/> returns immediately and the players can never
+        /// leave with anything.
+        /// </summary>
+        public void ResetForNewRaid()
+        {
+            _lootInZone.Clear();
+            _playersInZone.Clear();
+            ResetClock();
         }
 
         /// <summary>Test seam: register a pickup as being inside the zone.</summary>
