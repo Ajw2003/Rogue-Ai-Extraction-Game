@@ -29,6 +29,7 @@ namespace RogueAi.Tests
         [TearDown]
         public void TearDown()
         {
+            RogueAi.Guards.CastleGuard.ClearIntruders();
             foreach (Object o in _spawned)
                 if (o != null)
                     Object.DestroyImmediate(o);
@@ -387,6 +388,23 @@ namespace RogueAi.Tests
 
             Assert.AreEqual(300f, director.LastWorthExtracted, 0.001f,
                 "A second raid must pay out like the first.");
+        }
+
+        [Test]
+        public void Test_PlayersStayVisibleToGuardsAcrossRaids()
+        {
+            RaidDirector director = MakeDirector(out _, out ExtractionZone zone, out _);
+
+            var playerGo = Track(new GameObject("Player"));
+            playerGo.AddComponent<RogueAi.Guards.IntruderTag>();
+
+            director.SetFixedSeed(55);
+            director.StartRaid(HistoricalEra.BronzeAge);
+            zone.ResolveLocally();
+
+            Assert.Contains(playerGo.transform,
+                (System.Collections.ICollection)RogueAi.Guards.CastleGuard.Intruders,
+                "A surviving player must still be visible to guards in the next raid.");
         }
 
         [Test]

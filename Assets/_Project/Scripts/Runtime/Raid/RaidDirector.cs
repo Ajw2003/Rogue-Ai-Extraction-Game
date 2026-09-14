@@ -213,7 +213,10 @@ namespace RogueAi.Raid
             _lair?.ApplyExtractionResult(worthExtracted);
             _lootSpawner?.Clear();
             _guardSpawner?.Clear();
-            CastleGuard.ClearIntruders();
+
+            // Deliberately NOT clearing CastleGuard.Intruders: IntruderTag owns that list by
+            // component lifetime, and wiping it here would leave every surviving player invisible
+            // to guards for the rest of the session.
 
             SetPhase(RaidPhase.Resolved);
             RaidResolved?.Invoke(worthExtracted, playersSaved);
