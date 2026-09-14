@@ -106,3 +106,7 @@ InitTestScene*.unity*
 # Vosk native/managed binaries (drop Vosk.dll + libvosk.dll and define VOSK_PRESENT)
 /[Aa]ssets/Plugins/x86_64/*.dll
 /[Aa]ssets/Plugins/x86_64/libvosk*
+
+# Headless verification harness build output
+Tools/Headless/**/bin/
+Tools/Headless/**/obj/
