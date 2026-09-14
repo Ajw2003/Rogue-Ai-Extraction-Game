@@ -5,6 +5,8 @@ Runs only inside Blender's Python (imports bpy/bmesh/mathutils). Keeps the
 per-asset builder functions in builders.py short: build a part with a
 primitive helper, immediately tag it with a pigment, move on.
 """
+import math
+
 import bmesh
 import bpy
 from mathutils import Matrix, Vector
@@ -52,6 +54,37 @@ def add_cylinder(bm, radius, depth, loc=(0, 0, 0), rot=None, segments=10,
     bmesh.ops.transform(bm, matrix=m, verts=verts)
     faces = list({f for v in verts for f in v.link_faces})
     return faces
+
+
+def add_lathe(bm, profile, segments=16, loc=(0, 0, 0)):
+    """Solid of revolution about Z from a (radius, height) profile.
+
+    Use this where a shape's read depends on a real turned silhouette —
+    a plate's concave well, a bowl, a stem — rather than a stack of
+    frustums, which can only ever be convex. The profile is an open
+    outline traced from the underside round to the top face; both ends
+    should sit near (but not on) the axis, and the open ends left by the
+    sweep get capped, so the result is one closed manifold shell.
+    """
+    before = set(bm.verts)
+    verts = [bm.verts.new((x, 0.0, z)) for x, z in profile]
+    edges = [bm.edges.new((verts[i], verts[i + 1])) for i in range(len(verts) - 1)]
+
+    bmesh.ops.spin(
+        bm, geom=edges + verts, cent=(0, 0, 0), axis=(0, 0, 1), dvec=(0, 0, 0),
+        angle=2 * math.pi, steps=segments, use_merge=True,
+    )
+    bmesh.ops.remove_doubles(bm, verts=[v for v in bm.verts if v not in before], dist=1e-6)
+
+    lathe_verts = [v for v in bm.verts if v not in before]
+    owned = set(lathe_verts)
+    open_ends = [e for e in bm.edges if e.is_boundary and all(v in owned for v in e.verts)]
+    if open_ends:
+        bmesh.ops.holes_fill(bm, edges=open_ends, sides=0)
+
+    if any(loc):
+        bmesh.ops.transform(bm, matrix=Matrix.Translation(Vector(loc)), verts=lathe_verts)
+    return list({f for v in lathe_verts for f in v.link_faces})
 
 
 def add_sphere(bm, radius, loc=(0, 0, 0), segments=12, rings=8, scale=(1, 1, 1)):

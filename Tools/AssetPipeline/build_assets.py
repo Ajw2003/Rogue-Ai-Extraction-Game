@@ -46,7 +46,8 @@ def build_one(spec) -> tuple[object, list[str]]:
 
     obj = mk.finalize_to_object(bm, spec["key"], mk.used_pigments(), PALETTE_PNG)
     issues = val.validate_object(obj, spec["tri_budget"])
-    return obj, issues
+    tris = sum(len(p.vertices) - 2 for p in obj.data.polygons)
+    return obj, issues, tris
 
 
 def export_fbx(obj, spec) -> str:
@@ -141,24 +142,24 @@ def main():
     any_failed = False
 
     for spec in asset_specs.ALL_SPECS:
-        obj, issues = build_one(spec)
+        obj, issues, tris = build_one(spec)
         fbx_path = export_fbx(obj, spec)
         export_glb_for_validation(obj, spec)
         issues += reimport_and_diff(fbx_path, obj)
 
         ok = len(issues) == 0
         any_failed |= not ok
-        results.append((spec["key"], ok, issues, fbx_path))
+        results.append((spec["key"], ok, issues, tris, spec["tri_budget"]))
 
     print("\n" + "=" * 70)
     print("PLUNDERSPELL ASSET PIPELINE — build report")
     print("=" * 70)
-    for key, ok, issues, fbx_path in results:
+    for key, ok, issues, tris, budget in results:
         status = "PASS" if ok else "FAIL"
-        print(f"[{status}] {key:20s} -> {fbx_path}")
+        print(f"[{status}] {key:20s} {tris:5d} tris / {budget} budget")
         for issue in issues:
             print(f"         - {issue}")
-    n_pass = sum(1 for _, ok, _, _ in results if ok)
+    n_pass = sum(1 for r in results if r[1])
     print("-" * 70)
     print(f"{n_pass}/{len(results)} assets passed all checks.")
     print("=" * 70)

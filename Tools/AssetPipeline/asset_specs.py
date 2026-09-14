@@ -21,7 +21,9 @@ LOOT_SPECS = [
     dict(key="CopperPot",    builder="build_copper_pot",    tri_budget=400, subdir="Loot"),
     dict(key="GoldenGoblet", builder="build_golden_goblet", tri_budget=350, subdir="Loot"),
     dict(key="HeavyChest",   builder="build_heavy_chest",   tri_budget=700, subdir="Loot"),
-    dict(key="SilverPlate",  builder="build_silver_plate",  tri_budget=300, subdir="Loot"),
+    # lathed rather than stacked discs (real dished well), which legitimately
+    # costs more than the other small loot pieces
+    dict(key="SilverPlate",  builder="build_silver_plate",  tri_budget=420, subdir="Loot"),
 ]
 
 ALL_SPECS = WEAPON_SPECS + LOOT_SPECS
