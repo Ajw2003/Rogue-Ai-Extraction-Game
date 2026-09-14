@@ -76,7 +76,7 @@ namespace RogueAi.Extraction
             if (_timeRemaining.value <= 0f)
             {
                 _timeRemaining.value = 0f;
-                TriggerExtraction();
+                ResolveExtraction();
             }
         }
 
@@ -85,16 +85,30 @@ namespace RogueAi.Extraction
         /// counts saved players, marks complete, broadcasts the result and raises the event.
         /// </summary>
         [ServerRpc(requireOwnership: false)]
-        public void TriggerExtraction()
+        public void TriggerExtraction() => ResolveExtraction();
+
+        /// <summary>
+        /// The actual resolution, separate from the RPC that carries it.
+        ///
+        /// PurrNet rewrites an [ServerRpc] method at build time into a send: its body runs on the
+        /// server after a round trip, and on an UNSPAWNED object it does not run at all. Offline —
+        /// single-player, or a scene played without starting a host — calling the RPC would
+        /// therefore silently do nothing, so the clock expiring and <c>RaidDirector</c> both call
+        /// this directly and let the RPC be the networked door onto it.
+        /// </summary>
+        public void ResolveExtraction()
         {
             if (_extractionComplete.value)
                 return;
 
             float totalWorth = ComputeWorth(_lootInZone);
             int playersSaved = _playersInZone.Count;
-
             _extractionComplete.value = true;
-            BroadcastExtractionResult(totalWorth, playersSaved);
+
+            if (isSpawned && isServer)
+                BroadcastExtractionResult(totalWorth, playersSaved);
+            else
+                ApplyExtractionResult(totalWorth, playersSaved);
         }
 
         /// <summary>
@@ -114,7 +128,10 @@ namespace RogueAi.Extraction
         }
 
         [ObserversRpc(bufferLast: true)]
-        private void BroadcastExtractionResult(float worth, int saved)
+        private void BroadcastExtractionResult(float worth, int saved) => ApplyExtractionResult(worth, saved);
+
+        /// <summary>Presentation half: mark complete locally and raise the event on this peer.</summary>
+        private void ApplyExtractionResult(float worth, int saved)
         {
             _extractionComplete.value = true;
             ExtractionResolved?.Invoke(worth, saved);
@@ -196,13 +213,12 @@ namespace RogueAi.Extraction
                 _playersInZone.Add(identity);
         }
 
-        /// <summary>Test seam: resolve the extraction without an RPC round-trip.</summary>
+        /// <summary>Test seam: resolve the extraction and report what it paid out.</summary>
         public (float worth, int saved) ResolveLocally()
         {
             float worth = ComputeWorth(_lootInZone);
             int saved = _playersInZone.Count;
-            _extractionComplete.value = true;
-            ExtractionResolved?.Invoke(worth, saved);
+            ResolveExtraction();
             return (worth, saved);
         }
 

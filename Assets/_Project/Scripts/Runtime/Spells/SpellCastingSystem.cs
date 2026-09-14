@@ -108,11 +108,12 @@ namespace RogueAi.Spells
             else
                 Debug.Log($"[SpellCast] Local cast {resolved} (Volume: {result.Volume})");
 
-            // Offline there is no server to ask, so resolve it here. Spawned, the server owns it.
+            // Offline there is no server to ask — and the [ServerRpc]/[ObserversRpc] wrappers would
+            // send nothing and run nothing on an unspawned object — so resolve and present here.
             if (!isSpawned)
             {
                 int affected = ExecuteEffect(resolved, result.Volume, this);
-                BroadcastCast(resolved, result.Volume, this, default, affected);
+                PresentCast(resolved, result.Volume, this, default, affected);
                 return;
             }
 
@@ -158,6 +159,13 @@ namespace RogueAi.Spells
         /// </summary>
         [ObserversRpc(bufferLast: false)]
         private void BroadcastCast(SpellId spellId, CastVolume volume, NetworkIdentity caster,
+            PlayerID sender, int affected) => PresentCast(spellId, volume, caster, sender, affected);
+
+        /// <summary>
+        /// Presentation half, callable without an RPC. Must stay side-effect-free apart from logging
+        /// and the local event: the effect has already happened on the server.
+        /// </summary>
+        private static void PresentCast(SpellId spellId, CastVolume volume, NetworkIdentity caster,
             PlayerID sender, int affected)
         {
             string who = caster != null ? caster.name : sender.ToString();

@@ -44,6 +44,9 @@ namespace RogueAi.Guards
         [Tooltip("How close counts as having reached a destination, in metres.")]
         [SerializeField] private float _arrivalDistance = 1.0f;
 
+        [Tooltip("Degrees per second the guard turns toward where it is heading.")]
+        [SerializeField] private float _turnSpeed = 240f;
+
         [Header("Patrol")]
         [Tooltip("Points walked in order. With fewer than two, the guard stands its post.")]
         [SerializeField] private List<Transform> _patrolRoute = new List<Transform>();
@@ -234,7 +237,7 @@ namespace RogueAi.Guards
             {
                 case GuardAlertState.Incapacitated:
                     MoveTo(null);
-                    break;
+                    return;
 
                 case GuardAlertState.Chasing:
                     MoveTo(seen != null ? seen.position : _lastKnownIntruderPosition);
@@ -257,6 +260,8 @@ namespace RogueAi.Guards
                     Patrol();
                     break;
             }
+
+            Steer(deltaTime, speed);
         }
 
         private void Patrol()
@@ -282,18 +287,54 @@ namespace RogueAi.Guards
         private void MoveTo(Vector3? destination)
         {
             Destination = destination;
-            if (_agent == null || !_agent.isOnNavMesh)
+
+            if (_agent != null && _agent.isOnNavMesh)
+            {
+                if (destination.HasValue)
+                {
+                    _agent.isStopped = false;
+                    _agent.SetDestination(destination.Value);
+                }
+                else
+                {
+                    _agent.isStopped = true;
+                }
+                return;
+            }
+
+            _steerTarget = destination;
+        }
+
+        /// <summary>
+        /// Where the guard is steering itself when there is no NavMeshAgent to do it. Applied in
+        /// <see cref="Steer"/> rather than here so movement is tied to delta time.
+        /// </summary>
+        private Vector3? _steerTarget;
+
+        /// <summary>
+        /// Straight-line movement for a guard without a NavMeshAgent on a baked mesh.
+        ///
+        /// A procedurally generated castle has no baked NavMesh — it does not exist until the seed is
+        /// known — so without this every guard in a generated raid can see and hear but never take a
+        /// step, which reads as the AI being broken. It walks into walls where an agent would route
+        /// around them; that is the honest trade for guards that move at all. Bake a mesh at runtime
+        /// and they use it instead, automatically.
+        /// </summary>
+        private void Steer(float deltaTime, float speed)
+        {
+            if (!_steerTarget.HasValue || speed <= 0f || deltaTime <= 0f)
                 return;
 
-            if (destination.HasValue)
-            {
-                _agent.isStopped = false;
-                _agent.SetDestination(destination.Value);
-            }
-            else
-            {
-                _agent.isStopped = true;
-            }
+            Vector3 target = _steerTarget.Value;
+            Vector3 flat = new Vector3(target.x - transform.position.x, 0f, target.z - transform.position.z);
+            if (flat.sqrMagnitude <= _arrivalDistance * _arrivalDistance)
+                return;
+
+            Vector3 direction = flat.normalized;
+            transform.position += direction * (speed * deltaTime);
+
+            Quaternion facing = Quaternion.LookRotation(direction, Vector3.up);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, facing, _turnSpeed * deltaTime);
         }
 
         private bool HasArrivedAt(Vector3 position) =>

@@ -109,14 +109,22 @@ namespace RogueAi.Loot
             if (Focus.IsBeingCarried && Focus.CurrentCarryMode == CarryMode.Dual &&
                 Focus.SecondaryCarrierNetId == null && Focus.PrimaryCarrierNetId != this)
             {
-                Focus.RequestSecondaryPickup(this);
+                if (isSpawned)
+                    Focus.RequestSecondaryPickup(this);
+                else
+                    Focus.PerformSecondaryPickup(this);
                 return;
             }
 
             if (Focus.IsBeingCarried)
                 return;
 
-            Focus.RequestPickup(this);
+            // Spawned, the server decides; offline the RPC wrapper would run nothing at all.
+            if (isSpawned)
+                Focus.RequestPickup(this);
+            else
+                Focus.PerformPickup(this);
+
             Carried = Focus;
         }
 
@@ -125,7 +133,12 @@ namespace RogueAi.Loot
         {
             if (Carried == null)
                 return;
-            Carried.RequestDrop();
+
+            if (isSpawned)
+                Carried.RequestDrop();
+            else
+                Carried.PerformDrop();
+
             Carried = null;
         }
 

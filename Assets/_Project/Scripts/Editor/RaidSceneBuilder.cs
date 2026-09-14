@@ -430,7 +430,9 @@ namespace RogueAi.EditorTools
             LootInteractor interactor = root.AddComponent<LootInteractor>();
             interactor.SetEye(eye.transform);
 
-            CastleGuard.RegisterIntruder(root.transform);
+            // A runtime tag, not a build-time RegisterIntruder call: the static list a builder
+            // populates at edit time is empty by the time anyone presses Play.
+            root.AddComponent<IntruderTag>();
             return root;
         }
 

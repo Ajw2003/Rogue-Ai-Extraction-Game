@@ -187,10 +187,18 @@ namespace RogueAi.Raid
 
             SetPhase(RaidPhase.Extracting);
 
-            if (_extractionZone != null)
+            if (_extractionZone == null)
+            {
+                ApplyResult(0f, 0);
+                return;
+            }
+
+            // Offline the [ServerRpc] wrapper would send nothing and run nothing, so go straight to
+            // the resolver; spawned, the RPC is the right door because a client may be asking.
+            if (isSpawned)
                 _extractionZone.TriggerExtraction();
             else
-                ApplyResult(0f, 0);
+                _extractionZone.ResolveExtraction();
         }
 
         /// <summary>

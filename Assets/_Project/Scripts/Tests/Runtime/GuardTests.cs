@@ -254,6 +254,52 @@ namespace RogueAi.Tests
                 "A guard that spots you shouts, and the shout reaches the alarm.");
         }
 
+        // --- Moving -------------------------------------------------------------------------
+
+        [Test]
+        public void Test_AGuardWithoutANavMeshStillWalksToTheNoise()
+        {
+            CastleGuard guard = MakeGuard(Vector3.zero);
+            var noiseAt = new Vector3(0f, 0f, 10f);
+
+            guard.OnNoiseHeard(new NoiseEvent(noiseAt, 0.7f, NoiseType.GlassBreak));
+
+            for (int i = 0; i < 20; i++)
+                guard.Tick(0.1f);
+
+            Assert.Less(Vector3.Distance(guard.transform.position, noiseAt), 10f,
+                "A procedural castle has no baked NavMesh; guards must still be able to move.");
+        }
+
+        [Test]
+        public void Test_AnIncapacitatedGuardDoesNotDrift()
+        {
+            CastleGuard guard = MakeGuard(Vector3.zero);
+            guard.OnNoiseHeard(new NoiseEvent(new Vector3(0f, 0f, 10f), 0.7f, NoiseType.GlassBreak));
+            guard.GetComponent<StatusEffectReceiver>().Stun(30f);
+
+            Vector3 before = guard.transform.position;
+            for (int i = 0; i < 20; i++)
+                guard.Tick(0.1f);
+
+            Assert.AreEqual(before.z, guard.transform.position.z, 0.001f,
+                "A stunned guard must stay exactly where it fell.");
+        }
+
+        [Test]
+        public void Test_IntruderTagRegistersAndUnregisters()
+        {
+            var go = Track(new GameObject("TaggedPlayer"));
+            go.AddComponent<IntruderTag>();
+
+            Assert.Contains(go.transform, (System.Collections.ICollection)CastleGuard.Intruders,
+                "A tagged player must be visible to guards at runtime.");
+
+            Object.DestroyImmediate(go);
+            Assert.IsFalse(CastleGuard.Intruders.Contains(go.transform),
+                "…and must stop being watched for once it is gone.");
+        }
+
         // --- Damage -------------------------------------------------------------------------
 
         [Test]

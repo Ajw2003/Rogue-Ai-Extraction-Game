@@ -164,7 +164,14 @@ namespace RogueAi.Loot
         /// waits for a second carrier. Server-authoritative so ownership transfer cannot race.
         /// </summary>
         [ServerRpc(requireOwnership: false)]
-        public void RequestPickup(NetworkIdentity picker)
+        public void RequestPickup(NetworkIdentity picker) => PerformPickup(picker);
+
+        /// <summary>
+        /// The pickup itself, separate from the RPC that carries it. PurrNet rewrites an [ServerRpc]
+        /// into a send, and on an UNSPAWNED object it runs nothing at all — so offline callers use
+        /// this directly rather than silently failing to pick anything up.
+        /// </summary>
+        public void PerformPickup(NetworkIdentity picker)
         {
             if (IsBroken || picker == null)
                 return;
@@ -209,7 +216,12 @@ namespace RogueAi.Loot
         /// primary carrier's hand socket via a <see cref="ConfigurableJoint"/>.
         /// </summary>
         [ServerRpc(requireOwnership: false)]
-        public void RequestSecondaryPickup(NetworkIdentity secondaryPicker)
+        public void RequestSecondaryPickup(NetworkIdentity secondaryPicker) =>
+            PerformSecondaryPickup(secondaryPicker);
+
+        /// <summary>Takes the other end of a heavy item. See <see cref="PerformPickup"/> on why this
+        /// is separate from the RPC.</summary>
+        public void PerformSecondaryPickup(NetworkIdentity secondaryPicker)
         {
             if (IsBroken || secondaryPicker == null || PrimaryCarrierNetId == null)
                 return;
@@ -258,13 +270,18 @@ namespace RogueAi.Loot
 
         /// <summary>Release request — drops the item back into free physics and clears carry state.</summary>
         [ServerRpc(requireOwnership: false)]
-        public void RequestDrop()
+        public void RequestDrop() => PerformDrop();
+
+        /// <summary>Puts the item down. See <see cref="PerformPickup"/> on why this is separate from
+        /// the RPC.</summary>
+        public void PerformDrop()
         {
             _isBeingCarried.value = false;
             CurrentCarryMode = CarryMode.None;
 
-            // Return ownership to the server (no player owner).
-            GiveOwnership((PlayerID?)null);
+            // Return ownership to the server (no player owner). Only meaningful once spawned.
+            if (isSpawned)
+                GiveOwnership((PlayerID?)null);
 
             transform.SetParent(null, true);
 
