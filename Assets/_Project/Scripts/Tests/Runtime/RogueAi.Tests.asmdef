@@ -12,6 +12,7 @@
         "RogueAi.Extraction",
         "RogueAi.Lair",
         "RogueAi.Status",
+        "RogueAi.Raid",
         "PurrNet.Runtime",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
