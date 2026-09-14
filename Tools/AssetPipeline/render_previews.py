@@ -10,6 +10,7 @@ three-point rig, and renders one PNG per asset into
 Tools/AssetPipeline/previews/. Also stitches all 13 into one contact sheet
 (previews/_contact_sheet.png) for a quick side-by-side look.
 """
+import hashlib
 import math
 import os
 import sys
@@ -19,6 +20,7 @@ from mathutils import Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import asset_specs  # noqa: E402
+import manifest  # noqa: E402
 import palette as pal  # noqa: E402
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -144,20 +146,46 @@ def render(spec):
     return out_path
 
 
+def _rig_version() -> str:
+    """Hash of this file, so changing the camera or lights invalidates every
+    cached preview without anyone having to remember to bump a number."""
+    with open(os.path.abspath(__file__), "rb") as fh:
+        return hashlib.sha256(fh.read()).hexdigest()[:12]
+
+
 def main():
+    argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+    force = "--force" in argv
+
+    rig = _rig_version()
+    recorded = manifest.load()
     clear_scene()
-    setup_world_background()
-    paths = []
+
+    rendered = 0
     for spec in asset_specs.ALL_SPECS:
+        key = spec["key"]
+        entry = recorded.get(key, {})
+        want = f"{entry.get('content', '?')}:{rig}"
+        out_path = os.path.join(OUT_DIR, f"{key}.png")
+
+        # Cycles' sampling is not byte-reproducible, so re-rendering an
+        # unchanged prop would churn ~450KB of PNG for no visual difference.
+        if not force and entry.get("preview") == want and os.path.isfile(out_path):
+            print(f"unchanged {key}")
+            continue
+
         clear_scene()
         setup_world_background()
         obj = import_asset(spec)
         frame_and_light(obj)
-        path = render(spec)
-        paths.append(path)
-        print(f"rendered {spec['key']} -> {path}")
+        render(spec)
+        rendered += 1
+        recorded.setdefault(key, {})["preview"] = want
+        print(f"rendered {key} -> {out_path}")
 
-    print("renders complete; run make_contact_sheet.py (plain python3) to build the sheet")
+    manifest.save(recorded)
+    print(f"{rendered} preview(s) re-rendered; "
+          "run make_contact_sheet.py (plain python3) to build the sheet")
 
 
 if __name__ == "__main__":
