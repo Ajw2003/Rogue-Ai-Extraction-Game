@@ -16,6 +16,9 @@
 *.blend1
 *.blend1.meta
 
+# Tools/AssetPipeline is plain python run via `blender -b -P`, not a Unity asset.
+Tools/AssetPipeline/__pycache__/
+
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
 /[Mm]emoryCaptures/
