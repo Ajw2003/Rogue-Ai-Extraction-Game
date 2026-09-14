@@ -1,11 +1,8 @@
 {
-    "name": "RogueAi.Spells",
-    "rootNamespace": "RogueAi.Spells",
+    "name": "RogueAi.Status",
+    "rootNamespace": "RogueAi.Status",
     "references": [
-        "RogueAi.Voice",
-        "RogueAi.Core",
-        "RogueAi.Acoustics",
-        "PurrNet.Runtime"
+        "RogueAi.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
