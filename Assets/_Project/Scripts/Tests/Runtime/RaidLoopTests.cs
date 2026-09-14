@@ -365,6 +365,39 @@ namespace RogueAi.Tests
         // --- Spawning ----------------------------------------------------------------------
 
         [Test]
+        public void Test_TheGarrisonIsDeterministicAndAvoidsTheExit()
+        {
+            var generator = MakeGenerator();
+
+            for (int seed = 1; seed <= 15; seed++)
+            {
+                ProceduralCastleData castle = generator.Generate(seed);
+
+                List<GuardPlacement> a = GuardPlacementPlanner.Plan(castle, seed);
+                List<GuardPlacement> b = GuardPlacementPlanner.Plan(castle, seed);
+
+                Assert.AreEqual(a.Count, b.Count, $"Seed {seed}: the garrison must be deterministic.");
+
+                foreach (GuardPlacement g in a)
+                {
+                    Assert.AreNotEqual(castle.ExtractionExitIndex, g.ModuleIndex,
+                        $"Seed {seed}: a guard on the exit turns every raid into the same fight.");
+                    Assert.Greater(g.PatrolRoute.Count, 0, "Every guard must have somewhere to walk.");
+                }
+            }
+        }
+
+        [Test]
+        public void Test_GuardsAreDenserDeeperIn()
+        {
+            Assert.Greater(GuardPlacementPlanner.DensityFor(CastleZone.Keep),
+                GuardPlacementPlanner.DensityFor(CastleZone.CurtainWall),
+                "The rooms worth entering must be the rooms being watched.");
+            Assert.AreEqual(0f, GuardPlacementPlanner.DensityFor(CastleZone.Keep, 0f),
+                "Density scale 0 must disable the garrison entirely.");
+        }
+
+        [Test]
         public void Test_SpawnedLootMatchesThePlanAndIsClearedAfterTheRaid()
         {
             RaidDirector director = MakeDirector(out _, out ExtractionZone zone, out LootSpawner spawner);

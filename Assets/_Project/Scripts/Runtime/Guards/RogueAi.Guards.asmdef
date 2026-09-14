@@ -1,17 +1,11 @@
 {
-    "name": "RogueAi.Raid",
-    "rootNamespace": "RogueAi.Raid",
+    "name": "RogueAi.Guards",
+    "rootNamespace": "RogueAi.Guards",
     "references": [
         "PurrNet.Runtime",
         "RogueAi.Core",
-        "RogueAi.Castle",
-        "RogueAi.Loot",
-        "RogueAi.Extraction",
-        "RogueAi.Lair",
-        "RogueAi.Inventory",
-        "RogueAi.Alarm",
         "RogueAi.Acoustics",
-        "RogueAi.Guards",
+        "RogueAi.Alarm",
         "RogueAi.Status"
     ],
     "includePlatforms": [],

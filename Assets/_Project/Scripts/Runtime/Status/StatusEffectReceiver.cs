@@ -28,6 +28,7 @@ namespace RogueAi.Status
         [SerializeField] private Rigidbody _body;
 
         private IHealth _health;
+        private bool _healthResolved;
 
         private float _burnRemaining;
         private float _burnDps;
@@ -56,9 +57,29 @@ namespace RogueAi.Status
 
         private void Awake()
         {
-            _health = _healthSource as IHealth ?? GetComponent<IHealth>();
             if (_body == null)
                 _body = GetComponent<Rigidbody>();
+        }
+
+        /// <summary>
+        /// The health that burn damage lands on, resolved on first use rather than in Awake.
+        ///
+        /// This must stay lazy. A [RequireComponent(typeof(StatusEffectReceiver))] actor — a guard,
+        /// say — causes this component to be added FIRST, so its Awake runs before the actor's own
+        /// component exists. Resolving in Awake finds nothing and the actor silently never takes
+        /// burn damage.
+        /// </summary>
+        private IHealth Health
+        {
+            get
+            {
+                if (_healthResolved && _health != null)
+                    return _health;
+
+                _health = _healthSource as IHealth ?? GetComponent<IHealth>();
+                _healthResolved = _health != null;
+                return _health;
+            }
         }
 
         private void Update() => Tick(Time.deltaTime);
@@ -81,11 +102,12 @@ namespace RogueAi.Status
                 _burnRemaining -= deltaTime;
 
                 // Apply in whole points so a 0.016s frame does not spam sub-pixel damage events.
-                if (_pendingBurnDamage >= 1f && _health != null)
+                IHealth health = Health;
+                if (_pendingBurnDamage >= 1f && health != null)
                 {
                     float toApply = Mathf.Floor(_pendingBurnDamage);
                     _pendingBurnDamage -= toApply;
-                    _health.TakeDamage(toApply);
+                    health.TakeDamage(toApply);
                 }
 
                 if (_burnRemaining <= 0f)

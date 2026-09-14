@@ -3,6 +3,7 @@ using PurrNet;
 using RogueAi.Alarm;
 using RogueAi.Castle;
 using RogueAi.Extraction;
+using RogueAi.Guards;
 using RogueAi.Inventory;
 using RogueAi.Lair;
 using UnityEngine;
@@ -32,6 +33,9 @@ namespace RogueAi.Raid
 
         [Tooltip("Spawns the haul into the generated castle.")]
         [SerializeField] private LootSpawner _lootSpawner;
+
+        [Tooltip("Spawns the garrison into the generated castle.")]
+        [SerializeField] private GuardSpawner _guardSpawner;
 
         [Tooltip("The zone that ends the raid.")]
         [SerializeField] private ExtractionZone _extractionZone;
@@ -154,8 +158,11 @@ namespace RogueAi.Raid
 
             // Only the server populates the world; clients receive the loot objects as spawned network
             // objects rather than instantiating their own copies.
-            if (_lootSpawner != null && (!isSpawned || isServer))
-                _lootSpawner.SpawnFor(Castle, seed);
+            if (!isSpawned || isServer)
+            {
+                _lootSpawner?.SpawnFor(Castle, seed);
+                _guardSpawner?.SpawnFor(Castle, seed);
+            }
 
             return Castle;
         }
@@ -194,6 +201,8 @@ namespace RogueAi.Raid
 
             _lair?.ApplyExtractionResult(worthExtracted);
             _lootSpawner?.Clear();
+            _guardSpawner?.Clear();
+            CastleGuard.ClearIntruders();
 
             SetPhase(RaidPhase.Resolved);
             RaidResolved?.Invoke(worthExtracted, playersSaved);
@@ -298,7 +307,7 @@ namespace RogueAi.Raid
         /// <summary>Wires the director up from code, for tests and for scenes built by tooling.</summary>
         public void Configure(ProceduralCastleGenerator generator, LootSpawner spawner,
             ExtractionZone zone, LairHubManager lair, AlarmFSMManager alarm = null,
-            CastleNetworkManager castleNetwork = null)
+            CastleNetworkManager castleNetwork = null, GuardSpawner guardSpawner = null)
         {
             UnsubscribeFromZone();
 
@@ -308,6 +317,7 @@ namespace RogueAi.Raid
             _lair = lair;
             _alarm = alarm;
             _castleNetwork = castleNetwork;
+            _guardSpawner = guardSpawner;
 
             SubscribeToZone();
         }
