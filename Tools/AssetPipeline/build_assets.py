@@ -11,6 +11,11 @@ the scratch dir for the standalone trimesh validator, then re-import that
 GLB and diff vertex/triangle counts against the pre-export mesh to catch
 anything the exporter silently dropped.
 
+An asset whose mesh fingerprint still matches asset_manifest.json is
+validated but NOT re-exported, so a no-op rebuild leaves the committed
+FBX files untouched (see manifest.py for why that matters). Pass --force
+after `--` to re-export everything regardless.
+
 Exits 1 if any asset fails any check, printing every issue found so the
 next edit knows exactly what to fix.
 """
@@ -23,6 +28,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import asset_specs  # noqa: E402
 import builders  # noqa: E402
+import manifest  # noqa: E402
 import mesh_kit as mk  # noqa: E402
 import validate_in_blender as val  # noqa: E402
 
@@ -47,13 +53,16 @@ def build_one(spec) -> tuple[object, list[str]]:
     obj = mk.finalize_to_object(bm, spec["key"], mk.used_pigments(), PALETTE_PNG)
     issues = val.validate_object(obj, spec["tri_budget"])
     tris = sum(len(p.vertices) - 2 for p in obj.data.polygons)
-    return obj, issues, tris
+    return obj, issues, tris, manifest.fingerprint_mesh(obj)
+
+
+def fbx_path_for(spec) -> str:
+    return os.path.join(MODELS_ROOT, spec["subdir"], f"{spec['key']}.fbx")
 
 
 def export_fbx(obj, spec) -> str:
-    out_dir = os.path.join(MODELS_ROOT, spec["subdir"])
-    os.makedirs(out_dir, exist_ok=True)
-    out_path = os.path.join(out_dir, f"{spec['key']}.fbx")
+    out_path = fbx_path_for(spec)
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
 
     for o in bpy.context.selected_objects:
         o.select_set(False)
@@ -137,31 +146,58 @@ def reimport_and_diff(fbx_path: str, obj) -> list[str]:
 
 
 def main():
+    argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+    force = "--force" in argv
+
+    if os.environ.get("PYTHONHASHSEED") != "0":
+        print("WARNING: PYTHONHASHSEED is not 0 — Blender's FBX exporter derives "
+              "object UIDs from salted string hashes, so exports will differ "
+              "byte-for-byte between runs. Use run_pipeline.sh.")
+
     clear_scene()
+    recorded = manifest.load()
     results = []
     any_failed = False
 
     for spec in asset_specs.ALL_SPECS:
-        obj, issues, tris = build_one(spec)
-        fbx_path = export_fbx(obj, spec)
+        key = spec["key"]
+        obj, issues, tris, fingerprint = build_one(spec)
+        fbx_path = fbx_path_for(spec)
+
+        unchanged = (
+            not force
+            and os.path.isfile(fbx_path)
+            and recorded.get(key, {}).get("content") == fingerprint
+        )
+        if not unchanged:
+            export_fbx(obj, spec)
+        # the GLB is scratch-only (gate 2 reads it), so always refresh it
         export_glb_for_validation(obj, spec)
         issues += reimport_and_diff(fbx_path, obj)
 
         ok = len(issues) == 0
         any_failed |= not ok
-        results.append((spec["key"], ok, issues, tris, spec["tri_budget"]))
+        if ok:
+            entry = dict(recorded.get(key, {}))
+            entry.update(content=fingerprint, tris=tris, budget=spec["tri_budget"])
+            recorded[key] = entry
+        results.append((key, ok, issues, tris, spec["tri_budget"], unchanged))
+
+    manifest.save(recorded)
 
     print("\n" + "=" * 70)
     print("PLUNDERSPELL ASSET PIPELINE — build report")
     print("=" * 70)
-    for key, ok, issues, tris, budget in results:
+    for key, ok, issues, tris, budget, unchanged in results:
         status = "PASS" if ok else "FAIL"
-        print(f"[{status}] {key:20s} {tris:5d} tris / {budget} budget")
+        note = "unchanged" if unchanged else "EXPORTED"
+        print(f"[{status}] {key:20s} {tris:5d} tris / {budget:4d} budget   {note}")
         for issue in issues:
             print(f"         - {issue}")
     n_pass = sum(1 for r in results if r[1])
+    n_written = sum(1 for r in results if not r[5])
     print("-" * 70)
-    print(f"{n_pass}/{len(results)} assets passed all checks.")
+    print(f"{n_pass}/{len(results)} assets passed all checks; {n_written} re-exported.")
     print("=" * 70)
 
     sys.exit(1 if any_failed else 0)

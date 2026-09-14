@@ -19,10 +19,48 @@ per-era kit lists) for where the shapes and colours come from.
 ## Regenerating everything
 
 ```bash
-python3 Tools/AssetPipeline/make_palette_texture.py   # only needed if palette.py changes
-blender -b -P Tools/AssetPipeline/build_assets.py
+Tools/AssetPipeline/run_pipeline.sh            # palette -> build -> validate -> render -> sheet
+Tools/AssetPipeline/run_pipeline.sh --force    # ignore the manifest, rebuild everything
+```
+
+Run it through the wrapper rather than calling the steps by hand: it sets
+`PYTHONHASHSEED=0`, which the pipeline needs to be reproducible (see
+below). The individual steps still work standalone if you need them:
+
+```bash
+python3 Tools/AssetPipeline/make_palette_texture.py   # only if palette.py changes
+PYTHONHASHSEED=0 blender -b -P Tools/AssetPipeline/build_assets.py
 python3 Tools/AssetPipeline/validate_asset.py --all
 ```
+
+## Reproducibility: why nothing churns on a no-op rebuild
+
+This repo commits its build artifacts, so a rebuild that changes nothing
+must produce no diff. Neither output format gives you that for free:
+
+- **Blender's FBX exporter derives object UIDs from Python string
+  hashes**, which are salted per process — so the same mesh exported twice
+  differed by 127 bytes. `PYTHONHASHSEED=0` (set by `run_pipeline.sh`)
+  takes that to 3 bytes: the minute/second/millisecond that the exporter
+  always stamps into the header, which no option disables.
+- **bmesh emits faces in a different order from run to run** for props
+  built from spheres or the lathe. Verified to be a pure permutation —
+  identical faces, windings and normals, just stored in a different
+  order.
+- **Cycles' sampling is not byte-reproducible**, so re-rendering an
+  unchanged prop rewrote ~450KB of PNG for no visual difference.
+
+Rather than fight the formats, the pipeline fingerprints the *mesh*
+(`manifest.py`) and simply doesn't rewrite a file whose content is
+unchanged. `asset_manifest.json` records each prop's content hash,
+triangle count and budget, and the fingerprint its preview was rendered
+from. The preview key also includes a hash of `render_previews.py`, so
+changing the camera or lights invalidates every preview automatically.
+
+The fingerprint is order-independent but winding-, UV- and
+material-sensitive: a flipped normal or a moved vertex still shows up as
+a change. Net effect: running the pipeline twice leaves `git status`
+clean.
 
 `build_assets.py` builds each prop with `bmesh`, runs the full validation
 gate (transforms, manifold/isolated-vertex/quad-dominant geometry, UV
@@ -76,9 +114,12 @@ FBX files — what you see is exactly what Unity will import, embedded
 texture included:
 
 ```bash
-blender -b -P Tools/AssetPipeline/render_previews.py   # -> previews/<Key>.png
+PYTHONHASHSEED=0 blender -b -P Tools/AssetPipeline/render_previews.py
 python3 Tools/AssetPipeline/make_contact_sheet.py      # -> previews/_contact_sheet.png
 ```
+
+Previews whose prop and rig are both unchanged are skipped (see the
+reproducibility section); pass `-- --force` to re-render regardless.
 
 `previews/` is committed so reviewers can see the props without a Unity
 Editor or Blender install. Re-run the two commands above and commit the
