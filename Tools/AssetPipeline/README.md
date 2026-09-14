@@ -68,6 +68,21 @@ vertex sits at local `Z=0`, and the shape rises along `+Z` from there. The
 validator checks this as a real invariant (lowest vertex within 3cm of
 Z=0), not just `object.location == origin`.
 
+## Rendering preview screenshots
+
+There's no Unity Editor (or GPU/EGL) in this environment, so previews are
+rendered with Blender's Cycles CPU backend against the already-exported
+FBX files — what you see is exactly what Unity will import, embedded
+texture included:
+
+```bash
+blender -b -P Tools/AssetPipeline/render_previews.py   # -> previews/<Key>.png
+python3 Tools/AssetPipeline/make_contact_sheet.py      # -> previews/_contact_sheet.png
+```
+
+`previews/` is gitignored — it's a regenerable visualization aid, not a
+shipped asset.
+
 ## Adding a new prop
 
 1. Add an entry to `WEAPON_SPECS` or `LOOT_SPECS` in `asset_specs.py`
