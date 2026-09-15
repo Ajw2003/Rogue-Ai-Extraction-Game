@@ -1,10 +1,17 @@
 # Plunderspell asset pipeline
 
-Procedural, script-driven prop generation for the vertical slice. Every prop
-listed in `asset_specs.py` corresponds 1:1 to a `ScriptableObject` already in
-`Assets/_Project/Data/{Inventory,Loot}` that had no mesh behind it — see the
-art direction in `docs/plunderspell-moodboard.html` (pigment palette,
-per-era kit lists) for where the shapes and colours come from.
+Procedural, script-driven prop and level-module generation for the vertical
+slice. Every entry in `asset_specs.py` corresponds 1:1 to either a
+`ScriptableObject` in `Assets/_Project/Data/{Inventory,Loot}` (weapons/loot,
+built in `builders.py`) or a `RoomId` in
+`Assets/_Project/Data/Castle/CastleRoomRegistry.asset` (castle modules, built
+in `castle_builders.py` on top of the architectural primitives in
+`room_kit.py` — floor/wall/door shells, crenellations, towers, spiral
+stairs) that had no mesh behind it — see the art direction in
+`docs/plunderspell-moodboard.html` (pigment palette, per-era kit lists) for
+where the shapes and colours come from, and the pigment-to-zone mapping at
+the top of `castle_builders.py` for how that palette was extended to
+architecture without adding new pigments (the 4x4 atlas was already full).
 
 ## Requirements
 
@@ -137,6 +144,30 @@ will drift out of date if regenerated and not recommitted.
 3. Re-run `build_assets.py` — the report at the bottom names every check
    that failed, per asset. Fix and re-run until `N/N assets passed`.
 
+## Adding a new castle module
+
+1. Add an entry to `CASTLE_SPECS` in `asset_specs.py` with `subdir="Castle"`
+   — its `key` must match a `RoomId` already in `CastleRoomRegistry.asset`.
+2. Write the builder in `castle_builders.py`. For an enclosed room, start
+   from `room_kit.room_shell(...)` (floor + four walls, an archway on every
+   side named in `door_sides`) and add 1-3 set-piece primitives so it reads
+   as its own place; for a CurtainWall segment, compose `room_kit.wall_run`
+   / `tower_drum` / `crenellations` directly (it's the wall itself, not an
+   enclosed room). `ZONE_HEIGHT`/`ZONE_ACCENT` at the top of the file give
+   every zone a consistent height and accent colour — pull from those
+   rather than hardcoding new ones.
+3. Use `room_kit.paint_box(...)` (not `mesh_kit.add_box` directly) for
+   anything that sits flush against another part (floor, walls, another
+   furniture piece) — two independently-built boxes that just touch
+   produce exact duplicate-position vertices, which the validator flags;
+   `paint_box` grows the box a couple of centimetres so it overlaps instead.
+   That doesn't cover two *fully overlapping* boxes (e.g. both walls at a
+   corner running the whole footprint) — see the comments in
+   `room_kit.room_shell` and `build_wall_corner` for how those are avoided
+   instead (one side claims the corner, the other stops short of it).
+4. Re-run `build_assets.py` the same way — fix and re-run until
+   `N/N assets passed`, same as a prop.
+
 ## Known gap: Unity `.meta` files / prefabs
 
 This pass stops at validated meshes on disk. There is no Unity Editor in
@@ -146,3 +177,13 @@ GUIDs, which is safe here since nothing yet references these brand-new
 assets) the next time the project is opened in the Editor. Wiring each mesh
 onto its `InventoryItem/LootItem` ScriptableObject via a prefab is the next
 step, done in-Editor.
+
+Same gap for the castle modules, plus one more step: `CastleRoomRegistry.asset`
+already has an entry per `RoomId` (so the generator resolves every zone's
+weighted pool correctly), but every entry's `Prefab` field is still
+`{fileID: 0}` — `ProceduralCastleGenerator.InstantiateModule` explicitly
+no-ops on a null prefab (data-only layout), so the generator itself needs no
+changes, but nothing will render in a real playthrough until each `Prefab`
+field is pointed at a prefab wrapping the matching FBX with a
+`CastleRoomModule` (+ `SocketPoint` children matching that mesh's door
+gaps) added in-Editor.
