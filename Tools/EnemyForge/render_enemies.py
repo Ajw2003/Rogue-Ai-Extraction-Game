@@ -5,10 +5,14 @@ Loads each exported .blend, lights it on a studio set, and renders Isometric,
 Front, Side, Three-quarter and Wireframe passes plus a contact sheet per enemy
 and one roster line-up.
 
-    python3 Tools/EnemyForge/render_enemies.py
+Runs either against the Blender Python module or a real Blender install:
 
-This machine has no GPU and no EGL, so Cycles on CPU is the only working engine
-(see the Environment section of docs/systems/enemy-asset-pipeline.md).
+    python3 Tools/EnemyForge/render_enemies.py --device CPU
+    blender --background --python Tools/EnemyForge/render_enemies.py -- --device OPTIX
+
+Pass --device to pick the Cycles backend. It never falls back silently: asking for
+a GPU backend that is not present is an error, because a silent drop to CPU looks
+exactly like a slow render.
 """
 
 from __future__ import annotations
@@ -143,10 +147,15 @@ def _camera(subject_height: float, subject_width: float,
     return camera
 
 
+# Set from --device in main(); every _clear_scene() resets the scene, so the backend
+# has to be re-applied for each render rather than configured once at startup.
+RENDER_DEVICE = "CPU"
+
+
 def _configure_cycles(resolution: int, samples: int) -> None:
     scene = bpy.context.scene
     scene.render.engine = "CYCLES"
-    scene.cycles.device = "CPU"
+    configure_device(RENDER_DEVICE)
     scene.cycles.samples = samples
     scene.cycles.use_adaptive_sampling = True
     scene.cycles.adaptive_threshold = 0.01
@@ -350,6 +359,60 @@ def contact_sheet(arch, tiles: list[str], out_root: str) -> str:
     return path
 
 
+def script_argv() -> list[str]:
+    """Arguments meant for this script under either launch mode.
+
+    `blender --background --python x.py -- --samples 64` puts Blender's own flags in
+    sys.argv, so everything after a lone `--` belongs to us; run as plain Python
+    there is no separator and the usual argv tail applies.
+    """
+    if "--" in sys.argv:
+        return sys.argv[sys.argv.index("--") + 1:]
+    # Launched as `python3 render_enemies.py ...`: argv[0] is this script.
+    if os.path.basename(sys.argv[0]) == os.path.basename(__file__):
+        return sys.argv[1:]
+    # Launched by the Blender CLI with no `--`: argv holds Blender's flags, not ours.
+    return []
+
+
+def configure_device(requested: str) -> str:
+    """Point Cycles at a compute backend and report exactly what it will use."""
+    scene = bpy.context.scene
+    if requested == "CPU":
+        scene.cycles.device = "CPU"
+        return "CPU"
+
+    prefs = bpy.context.preferences.addons["cycles"].preferences
+    candidates = [requested] if requested != "AUTO" else ["OPTIX", "CUDA", "HIP",
+                                                          "METAL", "ONEAPI"]
+    for backend in candidates:
+        try:
+            prefs.compute_device_type = backend
+        except TypeError:
+            continue  # this build has no kernels for that backend at all
+
+        refresh = getattr(prefs, "refresh_devices", None) or prefs.get_devices
+        refresh()
+        usable = [d for d in prefs.devices if d.type == backend]
+        if not usable:
+            continue
+
+        for device in prefs.devices:
+            device.use = device.type == backend
+        scene.cycles.device = "GPU"
+        names = ", ".join(sorted({d.name for d in usable}))
+        return f"{backend} ({names})"
+
+    available = sorted({d.type for d in getattr(prefs, "devices", [])} - {"CPU"})
+    if requested == "AUTO":
+        scene.cycles.device = "CPU"
+        return "CPU (no GPU backend available)"
+    raise SystemExit(
+        f"--device {requested} requested but no {requested} device is available. "
+        f"Backends this Blender can see: {available or 'none'}. "
+        f"Use --device CPU to render without a GPU.")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--models", default=DEFAULT_MODELS)
@@ -360,10 +423,19 @@ def main() -> int:
     parser.add_argument("--skip-lineup", action="store_true")
     parser.add_argument("--lineup-only", action="store_true",
                         help="render just the roster line-up, skipping per-enemy passes")
-    args = parser.parse_args()
+    parser.add_argument("--device", default="AUTO",
+                        choices=["AUTO", "OPTIX", "CUDA", "HIP", "METAL", "ONEAPI", "CPU"],
+                        help="Cycles compute backend (default: AUTO, GPU if one exists)")
+    args = parser.parse_args(script_argv())
+
+    global RENDER_DEVICE
+    RENDER_DEVICE = args.device
 
     selected = ROSTER if not args.only else [BY_NAME[n] for n in args.only]
     os.makedirs(args.out, exist_ok=True)
+
+    bpy.context.scene.render.engine = "CYCLES"
+    print(f"Cycles device: {configure_device(args.device)}")
 
     started = time.time()
     for arch in [] if args.lineup_only else selected:
