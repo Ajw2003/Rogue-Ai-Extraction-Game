@@ -1,0 +1,20 @@
+{
+    "name": "RogueAi.Player",
+    "rootNamespace": "",
+    "references": [
+        "RogueAi.Core",
+        "RogueAi.Items",
+        "RogueAi.Voice",
+        "RogueAi.Spells",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

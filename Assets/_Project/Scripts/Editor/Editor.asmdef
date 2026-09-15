@@ -1,0 +1,23 @@
+{
+    "name": "RogueAi.Editor",
+    "rootNamespace": "",
+    "references": [
+        "RogueAi.Core",
+        "RogueAi.Items",
+        "RogueAi.Player",
+        "RogueAi.Voice",
+        "RogueAi.Spells",
+        "RogueAi.Castle"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

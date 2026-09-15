@@ -1,0 +1,16 @@
+{
+    "name": "RogueAi.Voice",
+    "rootNamespace": "RogueAi.Voice",
+    "references": [
+        "PurrNet.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

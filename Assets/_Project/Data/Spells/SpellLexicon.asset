@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3b02826c2fafc7c085aaa366a0babf2, type: 3}
+  m_Name: SpellLexicon
+  m_EditorClassIdentifier: 
+  Spells:
+  - {fileID: 11400000, guid: 11f699baa8d81582351b7990e1467403, type: 2}
+  - {fileID: 11400000, guid: c5ec666a597b526c99bde1d153bd400e, type: 2}
+  - {fileID: 11400000, guid: 45c0c59367da75d1590fd0e9922a2ac5, type: 2}
+  - {fileID: 11400000, guid: 05caa28776ff7a9669fec2172b559fb0, type: 2}
+  - {fileID: 11400000, guid: 108e68d3bb17f3e6675d1ded2c790d8b, type: 2}
+  - {fileID: 11400000, guid: 5ba69b2f25488ee48a15865a61063856, type: 2}
+  - {fileID: 11400000, guid: 3bef074a7d5c61c5d3da79533c64a7a0, type: 2}
+  - {fileID: 11400000, guid: 0abf01e8c2f337e85282e5221891e0f3, type: 2}
+  MaxNearMatchDistance: 2
