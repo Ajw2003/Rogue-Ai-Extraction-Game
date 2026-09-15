@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace RogueAi.Spells
 {
@@ -11,7 +12,8 @@ namespace RogueAi.Spells
     public class SpellWord : ScriptableObject
     {
         [Tooltip("The exact trigger word/phrase, normalised (UPPERCASE, no punctuation), e.g. \"IGNIS\".")]
-        public string SpellWord;
+        [FormerlySerializedAs("SpellWord")]
+        public string spellWord;
 
         [Tooltip("Spell that fires on an exact match.")]
         public SpellId spellId = SpellId.None;
@@ -29,8 +31,8 @@ namespace RogueAi.Spells
         private void OnValidate()
         {
             // Keep the authored trigger word normalised so runtime matching is exact.
-            if (!string.IsNullOrEmpty(SpellWord))
-                SpellWord = SpellWord.Trim().ToUpperInvariant();
+            if (!string.IsNullOrEmpty(spellWord))
+                spellWord = spellWord.Trim().ToUpperInvariant();
         }
     }
 }
