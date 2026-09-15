@@ -137,6 +137,36 @@ will drift out of date if regenerated and not recommitted.
 3. Re-run `build_assets.py` — the report at the bottom names every check
    that failed, per asset. Fix and re-run until `N/N assets passed`.
 
+## Verifying the Unity side
+
+The pipeline validates geometry in Blender, which says nothing about whether
+Unity's importer is happy with the result. `ArtAssetImportValidator`
+(`Assets/_Project/Scripts/Editor/`) closes that gap: it checks every FBX is
+indexed by the AssetDatabase, produces a non-empty mesh whose triangle count
+matches `asset_manifest.json`, has materials with the embedded palette
+texture bound, and has a generated `.meta`.
+
+Run it headless from the repo root (adjust the Unity path for your install):
+
+```bash
+# macOS
+/Applications/Unity/Hub/Editor/6000.3.15f1/Unity.app/Contents/MacOS/Unity \
+  -batchmode -nographics -projectPath . \
+  -executeMethod ArtAssetImportValidator.ValidateFromCommandLine \
+  -logFile Logs/unity-art-import.log
+
+# Windows
+"C:\Program Files\Unity\Hub\Editor\6000.3.15f1\Editor\Unity.exe" ^
+  -batchmode -nographics -projectPath . ^
+  -executeMethod ArtAssetImportValidator.ValidateFromCommandLine ^
+  -logFile Logs\unity-art-import.log
+```
+
+It exits non-zero on failure and writes `Logs/art-import-report.txt` (both
+gitignored). The same checks also run as an EditMode test
+(`ArtAssetImportTests`), so they show up in the Test Runner window and in CI
+— see `.github/workflows/`.
+
 ## Known gap: Unity `.meta` files / prefabs
 
 This pass stops at validated meshes on disk. There is no Unity Editor in
