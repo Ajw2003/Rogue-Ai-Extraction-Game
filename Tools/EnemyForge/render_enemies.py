@@ -8,7 +8,7 @@ and one roster line-up.
     python3 Tools/EnemyForge/render_enemies.py
 
 This machine has no GPU and no EGL, so Cycles on CPU is the only working engine
-(see the note in Tools/EnemyForge/README.md).
+(see the Environment section of docs/systems/enemy-asset-pipeline.md).
 """
 
 from __future__ import annotations
@@ -38,6 +38,7 @@ VIEWS = [
     ("Front", 0.0, 0.0),
     ("Side", 90.0, 0.0),
     ("ThreeQuarter", -35.0, 12.0),
+    ("Back", 180.0, 12.0),
 ]
 
 
@@ -109,8 +110,8 @@ def _ground(radius: float) -> bpy.types.Object:
     mat = bpy.data.materials.new("ReviewGround")
     mat.use_nodes = True
     principled = mat.node_tree.nodes["Principled BSDF"]
-    principled.inputs["Base Color"].default_value = (0.010, 0.013, 0.020, 1.0)
-    principled.inputs["Roughness"].default_value = 0.40
+    principled.inputs["Base Color"].default_value = (0.005, 0.007, 0.012, 1.0)
+    principled.inputs["Roughness"].default_value = 0.58
     principled.inputs["Metallic"].default_value = 0.0
     plane.data.materials.append(mat)
     return plane
@@ -163,13 +164,9 @@ def _configure_cycles(resolution: int, samples: int) -> None:
 def _enable_wireframe() -> bpy.types.Material:
     """Clay override with its own edge overlay: the technical topology pass.
 
-    Freestyle was the obvious tool here and is not used: driven headlessly it drew
-    almost no lines, and the auto-created empty LineSet crashes the renderer. A
-    Wireframe node draws the edges Cycles actually renders, which is the geometry
-    the engine will see anyway.
-
-    The override applies to every object in the scene, so the wireframe pass is
-    rendered without a ground plane rather than turning the floor into clay too.
+    Deliberately not Freestyle, and rendered without a ground plane because the
+    override hits every object — see "Freestyle is not usable headlessly here" in
+    docs/systems/enemy-asset-pipeline.md.
     """
     clay = bpy.data.materials.new("ReviewClay")
     clay.use_nodes = True
@@ -301,7 +298,10 @@ def render_lineup(roster, models_root: str, out_root: str,
 
     total_width = cursor + 1.0
     camera = _camera(tallest, total_width, 8.0, 6.0)
-    camera.data.ortho_scale = total_width * 1.08
+    # ortho_scale sizes the wide axis, so the vertical extent it covers is only
+    # scale / aspect. Fit whichever of width or height is the binding constraint.
+    aspect = bpy.context.scene.render.resolution_x / bpy.context.scene.render.resolution_y
+    camera.data.ortho_scale = max(total_width * 1.08, tallest * 1.18 * aspect)
 
     path = os.path.join(out_root, "00_Roster_Lineup.png")
     _render_to(path)
@@ -358,13 +358,15 @@ def main() -> int:
     parser.add_argument("--samples", type=int, default=64)
     parser.add_argument("--only", nargs="*", default=None)
     parser.add_argument("--skip-lineup", action="store_true")
+    parser.add_argument("--lineup-only", action="store_true",
+                        help="render just the roster line-up, skipping per-enemy passes")
     args = parser.parse_args()
 
     selected = ROSTER if not args.only else [BY_NAME[n] for n in args.only]
     os.makedirs(args.out, exist_ok=True)
 
     started = time.time()
-    for arch in selected:
+    for arch in [] if args.lineup_only else selected:
         print(f"\n=== {arch.name} ===")
         step = time.time()
         tiles = render_enemy(arch, args.models, args.out,

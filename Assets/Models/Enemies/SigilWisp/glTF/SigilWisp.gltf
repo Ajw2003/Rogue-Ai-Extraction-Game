@@ -203,7 +203,7 @@
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":2502,
+			"count":2528,
 			"max":[
 				0.36755287647247314,
 				1.0290030241012573,
@@ -219,25 +219,25 @@
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":2502,
+			"count":2528,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":2502,
+			"count":2528,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":3,
 			"componentType":5121,
-			"count":2502,
+			"count":2528,
 			"type":"VEC4"
 		},
 		{
 			"bufferView":4,
 			"componentType":5126,
-			"count":2502,
+			"count":2528,
 			"type":"VEC4"
 		},
 		{
@@ -256,44 +256,44 @@
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":30024,
+			"byteLength":30336,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":30024,
-			"byteOffset":30024,
+			"byteLength":30336,
+			"byteOffset":30336,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":20016,
-			"byteOffset":60048,
+			"byteLength":20224,
+			"byteOffset":60672,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":10008,
-			"byteOffset":80064,
+			"byteLength":10112,
+			"byteOffset":80896,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":40032,
-			"byteOffset":90072,
+			"byteLength":40448,
+			"byteOffset":91008,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":16008,
-			"byteOffset":130104,
+			"byteOffset":131456,
 			"target":34963
 		},
 		{
 			"buffer":0,
 			"byteLength":384,
-			"byteOffset":146112
+			"byteOffset":147464
 		}
 	],
 	"samplers":[
@@ -304,7 +304,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":146496,
+			"byteLength":147848,
 			"uri":"SigilWisp.bin"
 		}
 	]

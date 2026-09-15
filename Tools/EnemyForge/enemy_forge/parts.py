@@ -164,13 +164,10 @@ def _bone_name(part: Part, mirrored: bool) -> str:
 def build_bmesh(parts: list[Part]) -> tuple[bmesh.types.BMesh, list[str]]:
     """Assemble every part into one bmesh and return it with its bone-name table.
 
-    Surface family and owning bone are stamped onto each element the moment it is
-    created, while the returned references are still live: a later bmesh op can
-    reallocate the element arrays, and index order does not follow creation order,
-    so neither references nor index ranges survive to the end of the build.
-
-    Faces carry their family as `material_index`; verts carry an index into the
-    returned bone-name table in the `bone_id` int layer.
+    Faces carry their surface family as `material_index`; verts carry an index into
+    the returned bone-name table in the `bone_id` int layer. Both are stamped inline,
+    while the primitive op's references are still live — see "bmesh references and
+    index order both go stale" in docs/systems/enemy-asset-pipeline.md.
     """
     bm = bmesh.new()
     bone_layer = bm.verts.layers.int.new(BONE_LAYER)

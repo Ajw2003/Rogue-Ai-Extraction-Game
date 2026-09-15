@@ -29,7 +29,7 @@ PALETTE = {
                    emit=(0.10, 0.85, 1.0), grain=0.10),
     "iron": dict(base=(0.028, 0.032, 0.043), rough=0.44, metal=0.95,
                  emit=(0.0, 0.0, 0.0), grain=0.22),
-    "cloth": dict(base=(0.050, 0.026, 0.084), rough=0.93, metal=0.0,
+    "cloth": dict(base=(0.028, 0.014, 0.052), rough=0.93, metal=0.0,
                   emit=(0.0, 0.0, 0.0), grain=0.34),
 }
 

@@ -44,9 +44,9 @@ def build_mesh_object(arch: Archetype,
                       authoring: list[bpy.types.Material]) -> bpy.types.Object:
     """Create the joined mesh with its material slots and rigid vertex groups.
 
-    The authoring materials have to be attached before the face indices are written:
-    Blender clamps material_index to the number of slots, so writing them to a
-    slotless mesh silently collapses every surface family onto slot 0.
+    The authoring materials must be attached before face indices are written, or
+    Blender clamps every family onto slot 0 — see "Material indices are clamped to
+    the number of slots" in docs/systems/enemy-asset-pipeline.md.
     """
     bm, bone_names = build_bmesh(arch.parts)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)

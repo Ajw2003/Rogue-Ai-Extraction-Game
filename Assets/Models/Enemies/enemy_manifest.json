@@ -56,7 +56,7 @@
         "islands": 28,
         "bones": 4,
         "lowest_z": 0.0,
-        "height": 1.467,
+        "height": 1.457,
         "width": 1.313
       },
       "failures": [],
@@ -72,14 +72,14 @@
       "role": "Elite caster \u2014 hovers, shields allies, casts at range",
       "passed": true,
       "stats": {
-        "vertices": 2654,
-        "faces": 2720,
-        "triangles": 5168,
-        "islands": 39,
+        "vertices": 3058,
+        "faces": 3185,
+        "triangles": 5940,
+        "islands": 49,
         "bones": 11,
-        "lowest_z": 0.1409,
-        "height": 2.349,
-        "width": 1.622
+        "lowest_z": 0.1696,
+        "height": 2.48,
+        "width": 1.382
       },
       "failures": [],
       "warnings": [],

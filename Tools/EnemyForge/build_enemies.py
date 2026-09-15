@@ -55,6 +55,32 @@ def build_one(arch, out_root: str, resolution: int) -> dict:
     }
 
 
+def write_manifest(path: str, results: list[dict]) -> None:
+    """Merge this run's results into the manifest, keeping enemies we did not build.
+
+    A `--only` run must not drop the rest of the roster from the manifest, which is
+    what downstream tooling reads to know what exists.
+    """
+    existing: dict[str, dict] = {}
+    if os.path.exists(path):
+        try:
+            with open(path, encoding="utf-8") as handle:
+                for entry in json.load(handle).get("enemies", []):
+                    existing[entry["name"]] = entry
+        except (json.JSONDecodeError, KeyError, OSError) as error:
+            print(f"        ignoring unreadable manifest at {path}: {error}")
+
+    for entry in results:
+        existing[entry["name"]] = entry
+
+    order = [a.name for a in ROSTER]
+    ordered = sorted(existing.values(),
+                     key=lambda e: order.index(e["name"]) if e["name"] in order else 999)
+    with open(path, "w", encoding="utf-8") as handle:
+        json.dump({"generated_by": "Tools/EnemyForge/build_enemies.py",
+                   "enemies": ordered}, handle, indent=2)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", default=DEFAULT_OUT, help="output root directory")
@@ -75,9 +101,7 @@ def main() -> int:
         print(f"        built in {time.time() - step:.1f}s")
 
     manifest_path = os.path.join(args.out, "enemy_manifest.json")
-    with open(manifest_path, "w", encoding="utf-8") as handle:
-        json.dump({"generated_by": "Tools/EnemyForge/build_enemies.py",
-                   "enemies": results}, handle, indent=2)
+    write_manifest(manifest_path, results)
 
     failed = [r["name"] for r in results if not r["passed"]]
     print(f"\n{len(results)} models in {time.time() - started:.1f}s "

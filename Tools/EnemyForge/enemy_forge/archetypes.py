@@ -58,8 +58,10 @@ def ring(count: int, radius: float, z: float, start_deg: float = 0.0, **part_kwa
 
 def _sigil_wisp() -> Archetype:
     parts = [
-        Part("ico", (0, 0, 0.62), (0.22, 0.22, 0.22), "arcane", "Core", subdivisions=3),
-        Part("ico", (0, 0, 0.62), (0.34, 0.34, 0.34), "iron", "Core", subdivisions=1),
+        # The glowing core is the outer surface: an iron shell around it would seal
+        # in the one thing that identifies this enemy at a distance.
+        Part("ico", (0, 0, 0.62), (0.34, 0.34, 0.34), "arcane", "Core", subdivisions=3),
+        Part("ico", (0, 0, 0.62), (0.21, 0.21, 0.21), "iron", "Core", subdivisions=1),
     ]
     # Six gold shards caged around the core, points outward.
     parts += ring(6, 0.20, 0.62, kind="shard", size=(0.10, 0.10, 0.30),
@@ -171,7 +173,9 @@ def _vault_warden() -> Archetype:
 
 def _hex_turret() -> Archetype:
     parts = [
-        Part("cyl", (0, 0, 0.055), (1.02, 1.02, 0.11), "iron", "Base", segments=18),
+        # Stone, not iron: a flat metallic disc reflects only the dark sky and
+        # disappears from every raised camera angle.
+        Part("cyl", (0, 0, 0.055), (1.02, 1.02, 0.11), "stone", "Base", segments=18),
         Part("torus", (0, 0, 0.11), (1.08, 1.08, 1.08), "gold", "Base",
              segments=30, rings=8, minor=0.055),
     ]
@@ -199,8 +203,10 @@ def _hex_turret() -> Archetype:
              rot=(90, 0, 0), segments=22, rings=7, minor=0.14),
         Part("cyl", (0, -0.42, 1.06), (0.27, 0.27, 0.04), "arcane", "Barrel", rot=(90, 0, 0)),
     ]
-    parts += ring(3, 0.0, 1.38, kind="shard", size=(0.08, 0.08, 0.26),
-                  mat="gold", bone="Head", loc=(0, 0.02, 0), rot=(14, 0, 0), segments=4)
+    # Radius must stay non-zero: at 0 the three shards land on the same point and
+    # intersect into one mangled spike.
+    parts += ring(3, 0.11, 1.36, start_deg=90, kind="shard", size=(0.09, 0.09, 0.28),
+                  mat="gold", bone="Head", loc=(0, 0.02, 0), rot=(0, 16, 0), segments=4)
     parts += ring(4, 0.30, 1.30, kind="shard", size=(0.06, 0.06, 0.18),
                   mat="arcane", bone="Head", loc=(0, 0.02, 0), segments=4)
     bones = [
@@ -219,75 +225,98 @@ def _hex_turret() -> Archetype:
 # --------------------------------------------------------------------------------
 
 def _arc_revenant() -> Archetype:
+    # Eight-sided cones, not smooth ones: the faceted silhouette is what separates a
+    # robed construct from a lampshade at gameplay distance.
     parts = [
-        Part("cone", (0, 0, 0.86), (1.08, 1.02, 1.16), "cloth", "Hips",
-             segments=16, taper=0.30),
+        Part("cone", (0, 0, 0.88), (0.94, 0.88, 1.14), "cloth", "Hips",
+             segments=8, taper=0.40),
+        Part("cone", (0, 0, 1.62), (0.46, 0.40, 0.42), "cloth", "Chest",
+             segments=8, taper=1.20),
     ]
-    # Ragged hem: deliberate per-shard variation so the silhouette is not a clean cone.
-    hem = [(0.00, 0.31, 0.36), (0.14, 0.27, 0.30), (0.28, 0.35, 0.40),
-           (0.43, 0.25, 0.26), (0.57, 0.33, 0.34), (0.71, 0.29, 0.31),
-           (0.86, 0.36, 0.42)]
-    for frac, base_z, length in hem:
+    # Ragged hem, leaning outward so the tatters break the cone's outline.
+    hem = [(0.00, 0.40, 0.50, 20.0), (0.14, 0.35, 0.42, 16.0),
+           (0.28, 0.44, 0.56, 24.0), (0.43, 0.33, 0.38, 14.0),
+           (0.57, 0.42, 0.50, 20.0), (0.71, 0.36, 0.44, 17.0),
+           (0.86, 0.46, 0.58, 26.0)]
+    for frac, centre_z, length, lean in hem:
         yaw = 360.0 * frac
         theta = math.radians(yaw)
         parts.append(Part("shard",
-                          (math.cos(theta) * 0.44, math.sin(theta) * 0.42, base_z),
-                          (0.13, 0.13, length), "cloth", "Hips",
-                          rot=(0, 0, yaw), segments=4))
+                          (math.cos(theta) * 0.42, math.sin(theta) * 0.40, centre_z),
+                          (0.15, 0.15, length), "cloth", "Hips",
+                          rot=(0.0, lean, yaw), segments=4))
     parts += [
-        Part("torus", (0, 0, 1.30), (0.48, 0.44, 0.48), "gold", "Spine",
+        Part("torus", (0, 0, 1.44), (0.50, 0.46, 0.50), "gold", "Spine",
              segments=24, rings=8, minor=0.15),
-        Part("cone", (0, 0, 1.58), (0.44, 0.38, 0.42), "cloth", "Chest",
-             segments=14, taper=1.28),
-        Part("cone", (0, 0, 1.74), (0.88, 0.72, 0.26), "cloth", "Chest",
-             segments=16, taper=0.45),
-        Part("torus", (0, 0, 1.62), (0.90, 0.74, 0.90), "gold", "Chest",
-             segments=26, rings=7, minor=0.055),
-        Part("ico", (0, -0.20, 1.52), (0.16, 0.12, 0.16), "arcane", "Chest", subdivisions=2),
+        Part("ico", (0, -0.21, 1.60), (0.18, 0.14, 0.18), "arcane", "Chest",
+             subdivisions=2),
 
-        Part("cone", (0, 0.01, 2.00), (0.42, 0.46, 0.36), "cloth", "Head",
-             segments=14, taper=0.32),
-        Part("shard", (0, 0.09, 2.24), (0.10, 0.16, 0.26), "cloth", "Head", segments=4),
-        Part("box", (0, -0.16, 1.97), (0.23, 0.08, 0.27), "gold", "Head"),
-        Part("box", (0.058, -0.205, 2.02), (0.05, 0.03, 0.10), "arcane", "Head", mirror=True),
-        Part("box", (0, -0.20, 1.88), (0.14, 0.02, 0.03), "arcane", "Head"),
+        # Shoulders read as angled pauldrons rather than a brim around the neck.
+        Part("cone", (0, 0, 1.80), (0.70, 0.60, 0.28), "cloth", "Chest",
+             segments=8, taper=0.55),
+        Part("sphere", (0.36, 0, 1.79), (0.36, 0.40, 0.32), "cloth", "Chest",
+             mirror=True, segments=14, rings=9),
+        Part("torus", (0.36, 0, 1.79), (0.36, 0.44, 0.46), "gold", "Chest",
+             mirror=True, rot=(0, 90, 0), segments=20, rings=7, minor=0.10),
+        # Collar flaring up behind the head, to frame the mask.
+        Part("cone", (0, 0.12, 2.14), (0.40, 0.36, 0.30), "cloth", "Head",
+             segments=8, taper=1.70),
 
-        Part("cyl", (0.31, 0, 1.54), (0.12, 0.12, 0.34), "iron", "UpperArm.L",
-             mirror=True, rot=(0, 12, 0)),
-        Part("sphere", (0.35, 0, 1.36), (0.14, 0.14, 0.14), "gold", "UpperArm.L",
+        Part("cone", (0, 0, 2.14), (0.40, 0.44, 0.36), "cloth", "Head",
+             segments=8, taper=0.30),
+        Part("shard", (0, 0.07, 2.38), (0.10, 0.15, 0.24), "cloth", "Head", segments=4),
+        Part("box", (0, -0.15, 2.06), (0.22, 0.09, 0.24), "gold", "Head"),
+        Part("box", (0.055, -0.20, 2.11), (0.05, 0.03, 0.10), "arcane", "Head",
+             mirror=True),
+        Part("box", (0, -0.195, 1.98), (0.13, 0.02, 0.03), "arcane", "Head"),
+
+        # Arms angle forward into a casting pose and carry gold joints so they read
+        # against the robe instead of vanishing into it.
+        Part("sphere", (0.34, 0, 1.78), (0.23, 0.25, 0.21), "gold", "UpperArm.L",
              mirror=True, segments=12, rings=8),
-        Part("cyl", (0.37, -0.04, 1.18), (0.11, 0.11, 0.34), "iron", "Forearm.L", mirror=True),
-        Part("box", (0.38, -0.06, 0.98), (0.12, 0.14, 0.15), "iron", "Hand.L", mirror=True),
-        Part("shard", (0.33, -0.10, 0.86), (0.045, 0.045, 0.18), "iron", "Hand.L",
-             mirror=True, rot=(12, 0, -8), segments=4),
-        Part("shard", (0.38, -0.12, 0.85), (0.045, 0.045, 0.20), "iron", "Hand.L",
-             mirror=True, rot=(14, 0, 0), segments=4),
-        Part("shard", (0.43, -0.10, 0.86), (0.045, 0.045, 0.18), "iron", "Hand.L",
-             mirror=True, rot=(12, 0, 8), segments=4),
-
-        Part("torus", (0, 0, 1.34), (1.52, 1.52, 1.52), "arcane", "Sigil",
-             rot=(72, 0, 20), segments=40, rings=6, minor=0.026),
-        Part("torus", (0, 0, 1.34), (1.30, 1.30, 1.30), "gold", "Sigil",
-             rot=(70, 0, -56), segments=36, rings=6, minor=0.024),
+        Part("cyl", (0.37, 0.02, 1.62), (0.16, 0.16, 0.34), "iron", "UpperArm.L",
+             mirror=True, rot=(0, 16, 0)),
+        Part("sphere", (0.40, 0.02, 1.45), (0.18, 0.18, 0.18), "gold", "UpperArm.L",
+             mirror=True, segments=12, rings=8),
+        Part("cyl", (0.43, -0.09, 1.27), (0.15, 0.15, 0.36), "iron", "Forearm.L",
+             mirror=True, rot=(-22, 0, 0)),
+        Part("box", (0.43, -0.09, 1.30), (0.19, 0.16, 0.22), "cloth", "Forearm.L",
+             mirror=True, rot=(-22, 0, 0)),
+        Part("box", (0.44, -0.23, 1.11), (0.14, 0.16, 0.16), "iron", "Hand.L",
+             mirror=True),
+        Part("box", (0.44, -0.31, 1.11), (0.10, 0.02, 0.10), "arcane", "Hand.L",
+             mirror=True),
     ]
-    parts += ring(4, 0.74, 1.34, kind="shard", size=(0.07, 0.07, 0.20),
+    for dx, yaw in ((-0.05, -14.0), (0.0, 0.0), (0.05, 14.0)):
+        parts.append(Part("shard", (0.44 + dx, -0.33, 1.02), (0.05, 0.05, 0.20),
+                          "iron", "Hand.L", mirror=True, rot=(28.0, 0.0, yaw),
+                          segments=4))
+
+    parts += [
+        Part("torus", (0, 0, 1.32), (1.26, 1.26, 1.26), "arcane", "Sigil",
+             rot=(74, 0, 22), segments=36, rings=6, minor=0.026),
+        Part("torus", (0, 0, 1.32), (1.08, 1.08, 1.08), "gold", "Sigil",
+             rot=(68, 0, -58), segments=32, rings=6, minor=0.026),
+    ]
+    parts += ring(4, 0.62, 1.32, kind="shard", size=(0.07, 0.07, 0.20),
                   mat="arcane", bone="Sigil", rot=(0, 90, 0), segments=4)
+
     bones = [
         dict(name="Root", head=(0, 0, 0), tail=(0, 0, 0.26)),
-        dict(name="Hips", head=(0, 0, 0.30), tail=(0, 0, 1.30), parent="Root"),
-        dict(name="Spine", head=(0, 0, 1.30), tail=(0, 0, 1.50), parent="Hips"),
-        dict(name="Chest", head=(0, 0, 1.50), tail=(0, 0, 1.82), parent="Spine"),
-        dict(name="Head", head=(0, 0, 1.82), tail=(0, 0, 2.22), parent="Chest"),
-        dict(name="UpperArm.L", head=(0.28, 0, 1.70), tail=(0.35, 0, 1.36),
+        dict(name="Hips", head=(0, 0, 0.32), tail=(0, 0, 1.30), parent="Root"),
+        dict(name="Spine", head=(0, 0, 1.30), tail=(0, 0, 1.52), parent="Hips"),
+        dict(name="Chest", head=(0, 0, 1.52), tail=(0, 0, 1.90), parent="Spine"),
+        dict(name="Head", head=(0, 0, 1.94), tail=(0, 0, 2.36), parent="Chest"),
+        dict(name="UpperArm.L", head=(0.33, 0, 1.78), tail=(0.40, 0.02, 1.45),
              parent="Chest", mirror=True),
-        dict(name="Forearm.L", head=(0.35, 0, 1.36), tail=(0.38, -0.06, 1.04),
+        dict(name="Forearm.L", head=(0.40, 0.02, 1.45), tail=(0.44, -0.20, 1.15),
              parent="UpperArm.L", mirror=True),
-        dict(name="Hand.L", head=(0.38, -0.06, 1.04), tail=(0.38, -0.12, 0.82),
+        dict(name="Hand.L", head=(0.44, -0.20, 1.15), tail=(0.45, -0.34, 1.00),
              parent="Forearm.L", mirror=True),
-        dict(name="Sigil", head=(0, 0, 1.34), tail=(0, 0, 1.70), parent="Root"),
+        dict(name="Sigil", head=(0, 0, 1.32), tail=(0, 0, 1.68), parent="Root"),
     ]
     return Archetype("ArcRevenant", "Elite caster — hovers, shields allies, casts at range",
-                     2.37, parts, bones, tri_budget=8500, bevel=0.007,
+                     2.50, parts, bones, tri_budget=8500, bevel=0.007,
                      wear=0.7, grounded=False)
 
 
