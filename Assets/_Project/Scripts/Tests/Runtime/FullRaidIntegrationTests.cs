@@ -211,6 +211,7 @@ namespace RogueAi.Tests
 
             var zoneGo = Track(new GameObject("Zone"));
             zoneGo.transform.position = new Vector3(100f, 0f, 0f);
+            zoneGo.AddComponent<BoxCollider>().isTrigger = true;
             ExtractionZone zone = zoneGo.AddComponent<ExtractionZone>();
 
             var directorGo = Track(new GameObject("Director"));

@@ -291,12 +291,13 @@ namespace RogueAi.Tests
         {
             var go = Track(new GameObject("TaggedPlayer"));
             go.AddComponent<IntruderTag>();
+            Transform playerTransform = go.transform;
 
-            Assert.Contains(go.transform, (System.Collections.ICollection)CastleGuard.Intruders,
+            Assert.Contains(playerTransform, (System.Collections.ICollection)CastleGuard.Intruders,
                 "A tagged player must be visible to guards at runtime.");
 
             Object.DestroyImmediate(go);
-            Assert.IsFalse(CastleGuard.Intruders.Contains(go.transform),
+            Assert.IsFalse(CastleGuard.Intruders.Contains(playerTransform),
                 "…and must stop being watched for once it is gone.");
         }
 

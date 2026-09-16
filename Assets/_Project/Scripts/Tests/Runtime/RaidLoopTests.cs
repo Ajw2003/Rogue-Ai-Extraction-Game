@@ -92,6 +92,7 @@ namespace RogueAi.Tests
             lair = lairGo.AddComponent<LairHubManager>();
 
             var zoneGo = Track(new GameObject("ExtractionZone"));
+            zoneGo.AddComponent<BoxCollider>().isTrigger = true;
             zone = zoneGo.AddComponent<ExtractionZone>();
 
             var spawnerGo = Track(new GameObject("LootSpawner"));

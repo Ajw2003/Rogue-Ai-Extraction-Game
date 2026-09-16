@@ -2,6 +2,7 @@
     "name": "RogueAi.Editor",
     "rootNamespace": "",
     "references": [
+        "PurrNet.Runtime",
         "RogueAi.Core",
         "RogueAi.Items",
         "RogueAi.Player",

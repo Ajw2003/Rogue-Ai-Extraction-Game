@@ -178,6 +178,7 @@ namespace RogueAi.Tests
             var zoneGo = Track(new GameObject("Zone"));
             // Well away from the player, so the zone's own collider cannot sit on the interaction ray.
             zoneGo.transform.position = new Vector3(50f, 0f, 0f);
+            zoneGo.AddComponent<BoxCollider>().isTrigger = true;
             zone = zoneGo.AddComponent<ExtractionZone>();
 
             var alarmGo = Track(new GameObject("Alarm"));

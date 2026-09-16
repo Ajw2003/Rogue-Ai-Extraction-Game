@@ -2,6 +2,7 @@
     "name": "RogueAi.UI",
     "rootNamespace": "RogueAi.UI",
     "references": [
+        "PurrNet.Runtime",
         "RogueAi.Core",
         "RogueAi.Alarm",
         "RogueAi.Extraction",

@@ -2,6 +2,7 @@
     "name": "RogueAi.Tests",
     "rootNamespace": "RogueAi.Tests",
     "references": [
+        "RogueAi.Core",
         "RogueAi.Voice",
         "RogueAi.Spells",
         "RogueAi.Castle",

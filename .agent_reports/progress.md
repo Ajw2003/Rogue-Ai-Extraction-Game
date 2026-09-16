@@ -60,3 +60,46 @@
 - Compile: 0 error CS.
 - EditMode: 12/12 passed.
 - PlayMode: 34/34 passed.
+
+## 7. claude/plunderspell-core-gameplay-o2av06 (merged) — final branch
+
+Largest and most substantial branch (9 commits: spells, guards, the full raid loop, HUD, README).
+
+**Merge conflicts (4 files, all a single real rename):** SpellWord.cs/SpellLexicon.cs and two
+test files all had the same conflict: HEAD had renamed the illegal `SpellWord` field (CS0542,
+same name as its class) to `spellWord`; the incoming branch had independently renamed it to
+`Word`. Verified which name is actually load-bearing before choosing: the incoming branch's own
+new file `FullRaidIntegrationTests.cs` (arrives with this merge, not itself conflicted) already
+uses `.Word` - so `Word` was kept everywhere, not pattern-matched blindly.
+
+**Compile fixes needed after the merge (three separate real defects, each verified against the
+actual codebase before fixing, none shimmed):**
+1. Same class of bug as branch 3: two `.asmdef` files landed in `Assets/_Project/Scripts/Runtime/UI/`
+   (existing `Plunderspell.UI.asmdef` + incoming `RogueAi.UI.asmdef`, brought in by 3 new
+   `RaidHud*.cs` files). Moved the new files + asmdef into `UI/RaidHud/`.
+2. `RogueAi.UI.asmdef` (now in RaidHud/) was missing a `PurrNet.Runtime` reference needed by
+   `RaidHudPresenter.cs`'s use of NetworkBehaviour-derived types (RaidDirector, ExtractionZone,
+   etc.) - added it, matching the same reference already used by every sibling `RogueAi.*.asmdef`.
+3. Two more pre-existing project asmdefs were missing references their branch's own new files
+   needed: `RogueAi.Tests.asmdef` was missing `RogueAi.Core` (for `IHealth`/`Interfaces`, used by
+   the new `SpellEffectTests.cs`), and `Editor.asmdef` was missing `PurrNet.Runtime` (for the new
+   `RaidSceneBuilder.cs`, which instantiates NetworkBehaviour-derived components).
+
+**Real test bugs found and fixed (surfaced for the first time once the above compile errors were
+fixed - these tests had never successfully run before):**
+- `ExtractionZone` requires the abstract `Collider` type ([RequireComponent(typeof(Collider))]),
+  which Unity cannot auto-add. Three new test files (`FullRaidIntegrationTests.cs`,
+  `HudAndInteractionTests.cs`, `RaidLoopTests.cs`) called `AddComponent<ExtractionZone>()`
+  directly without adding a concrete collider first, unlike the one already-working sibling test
+  and the real production scene builder (`RaidSceneBuilder.BuildExtractionZone`, verified
+  correct) which both add a `BoxCollider` first. Added the missing `AddComponent<BoxCollider>().isTrigger = true;`
+  to all three, matching the established pattern.
+- `GuardTests.Test_IntruderTagRegistersAndUnregisters` accessed `go.transform` *after*
+  `Object.DestroyImmediate(go)`, which throws `MissingReferenceException` in this Unity version.
+  Fixed by capturing the `Transform` reference before destroying the GameObject.
+
+**Final verification:**
+- Compile: 0 error CS.
+- EditMode: 12/12 passed.
+- PlayMode: 105/105 passed (up from 34 - this branch's new suites: FullRaidIntegrationTests,
+  GuardTests, HudAndInteractionTests, RaidLoopTests, SpellEffectTests, CastleGeneratorTests).
