@@ -1,45 +1,55 @@
 # Known issues found during the 2026-09-15 branch integration
 
-## PlayMode screenshot tests hang forever under `-nographics` batchmode
+## PlayMode screenshot test hung/threw under `-batchmode` — `WaitForEndOfFrame` is not supported in batchmode at all
 
-**Symptom:** `Unity.exe -batchmode -nographics -projectPath . -runTests -testPlatform PlayMode ...`
-never returns and produces no further log output after Unity finishes loading the test scene.
-From the outside this looks identical to a stuck/frozen process — no error, no timeout, no exit.
+**Symptom:** `Unity.exe -batchmode -projectPath . -runTests -testPlatform PlayMode ...` either
+hung indefinitely (observed: 29 minutes with zero further log output before being killed) or,
+on a later attempt, exited fast with the test marked failed. Both are the same underlying cause
+surfacing two different ways.
 
-**Root cause:** [`UIScreenshotPlayModeTests.CapturesAllUIScreens`](../Assets/_Project/Scripts/Tests/PlayMode/UIScreenshotPlayModeTests.cs)
-(added by the `plunderspell-ui-system` branch) does, per captured UI state:
+**Original (wrong) theory:** the first pass at this diagnosis blamed `-nographics` specifically,
+reasoning that `WaitForEndOfFrame` needs a real rendering surface. That was disproven directly:
+dropping `-nographics` (keeping the real GPU) reproduced the *exact same* indefinite hang at the
+identical point in the log. The real constraint is `-batchmode` itself, independent of graphics.
 
-```csharp
-yield return new WaitForEndOfFrame();
-ScreenCapture.CaptureScreenshot(...);
+**Actual root cause, confirmed from Unity's own error text** (found by writing a minimal
+step-by-step diagnostic `[UnityTest]` and bisecting): Unity Test Framework raises this directly
+as a test failure once it detects a `WaitForEndOfFrame` yield during a batchmode run:
+
+```
+Unhandled log message: '[Exception] Exception: UnityTest yielded WaitForEndOfFrame,
+which is not evoked in batchmode.'
 ```
 
-`WaitForEndOfFrame` waits for a real rendered frame to finish. `-nographics` disables the
-rendering surface entirely, so that frame never completes and the coroutine — and the whole
-test run — hangs indefinitely. There is no timeout on the Unity side; it will wait forever.
+`-batchmode` never presents a frame — there's no window to finish presenting — so anything that
+yields on frame-presentation (`WaitForEndOfFrame`, and by extension
+`ScreenCapture.CaptureScreenshot`, which schedules its capture for end-of-frame) either blocks
+forever waiting for a callback that will never fire, or gets caught by the test framework's log
+check and fails the test, depending on scheduling timing. This is a fundamental incompatibility,
+not a flag to tune.
 
-**Evidence:** `test_ui-system-playmode.log` shows normal forward progress (import, backup-scene
-load, `[VoiceServiceLocator] Auto-registered MockVoiceInputService (editor/headless/no-mic)`,
-mode service init, licensing resolved) for about a minute, then stops dead at
-`TrimDiskCacheJob: Current cache size 0mb` — exactly the point where the first `CaptureState`
-call would hit `WaitForEndOfFrame`. The process kept running with zero further log output until
-it was killed ~8 minutes later.
+**Second, independent issue found in the same test:** the UI's root `Canvas` is created in
+`RenderMode.ScreenSpaceOverlay` (see [UIFactory.CreateRootCanvas](../Assets/_Project/Scripts/Runtime/UI/UIFactory.cs)).
+Overlay-mode canvases composite directly to the display and are not captured by rendering any
+particular `Camera` to a `RenderTexture` — so even a from-scratch headless-safe capture using
+`Camera.Render()` would produce a blank image for this UI unless the canvas is temporarily
+switched to `ScreenSpaceCamera` mode against the capture camera.
 
-**How this surfaced as a process problem, not just a test problem:** the agent running the
-integration ran this Unity invocation as a *synchronous, foreground* command with a 10-minute
+**Fix applied** (in [UIScreenshotPlayModeTests.cs](../Assets/_Project/Scripts/Tests/PlayMode/UIScreenshotPlayModeTests.cs)):
+replaced `WaitForEndOfFrame` + `ScreenCapture.CaptureScreenshot` with a dedicated capture
+`Camera` rendering synchronously to a `RenderTexture` (`Camera.Render()` + `ReadPixels` +
+`EncodeToPNG`), with the target `Canvas` temporarily switched to `ScreenSpaceCamera` mode
+pointed at that camera for the duration of the test. No waiting on frame presentation at all,
+so it's compatible with batchmode. Verified: all 34 PlayMode tests pass
+(`results_ui-system-playmode.xml`, `total="34" passed="34" failed="0"`), and the 7 produced
+screenshots (`UI_Verification_Screenshots/`) were visually inspected — real rendered UI (title,
+menu buttons, etc.), not blank frames.
+
+**Process lesson, independent of the Unity-side cause:** the agent running this integration
+initially ran the long Unity invocation as a *synchronous, foreground* command with a 10-minute
 timeout and no streamed output. A blocking foreground call gives no visibility while it runs and
 cannot be interrupted or checked on mid-flight — the user had to kill the task manually to regain
-the agent's attention. Structural fix: any Unity batchmode invocation that can run long (PlayMode
-tests especially) should run in the background with periodic status checks, never as a blind
-synchronous wait.
-
-**Fix for the test itself (not yet applied — needs a decision):**
-- Simplest: run PlayMode screenshot tests without `-nographics` (drop the flag; `-batchmode`
-  alone still produces no visible window on this machine, but keeps a real rendering surface
-  so `WaitForEndOfFrame` actually completes).
-- Alternative: guard the screenshot capture so it degrades gracefully headless (e.g. skip the
-  `WaitForEndOfFrame`/`CaptureScreenshot` calls under `Application.isBatchMode && SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null`),
-  so the test still exercises the state-cycling logic in fully headless CI without hanging.
-
-**Process fix already applied going forward:** all further Unity batchmode calls in this
-integration run in the background with polling instead of blocking synchronously.
+the agent's attention, and had no way to tell a real hang apart from normal long-running work.
+Fix applied going forward: every Unity batchmode invocation in this integration runs in the
+background with active log-tailing (via a Monitor watching for progress/error markers) instead
+of a blind synchronous wait, so a stall is visible and actionable within seconds, not minutes.
