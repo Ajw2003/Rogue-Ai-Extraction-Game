@@ -21,3 +21,27 @@
   and visually inspected all 7 produced screenshots as real rendered UI.
 - Also committed ~100 Unity-generated .meta files this and the prior enemy-assets branch never
   committed themselves (needed for stable GUIDs).
+
+## 4. claude/inspiring-davinci-83909p (merged)
+- 8 files conflicted. All resolved and verified against the actual current codebase, not just
+  pattern-matched:
+  - PlayerStateMachine.cs, Item.cs, PlayerDodgeState.cs: comment-only differences (both sides
+    made the identical gravity-removal code change, just worded the explanatory comments
+    differently) - kept HEAD's wording.
+  - PlayerJumpState.cs, PlayerWalkState.cs: a REAL API mismatch. HEAD's side called
+    CameraRelativeInputOnGravityPlane(up), a method that no longer exists anywhere in the
+    codebase (grep confirmed) - the current PlayerState.cs base class only defines the
+    parameterless CameraRelativeInput(). Took the incoming branch's side for both; HEAD's side
+    would not have compiled.
+  - TestSceneBuilder.cs: real merge of both sides' test-scene tuning - combined branch's
+    GroundSize/GroundThickness constants and comment reasoning, adopted branch's "drop item from
+    height" behavior (a better test of gravity restoration, which is what this branch is about),
+    dropped an unused `groundTransform` parameter that HEAD's BuildTestItem accepted but never
+    used.
+  - Gravity.asmdef vs Voice/RogueAi.Voice.asmdef "rename": a git similarity-detection false
+    positive (both are small boilerplate-heavy JSON files) - not a real rename. Verified content
+    of both; kept HEAD's Voice.asmdef untouched (unrelated system, already in use) and left
+    Gravity.asmdef deleted (agreed on both sides - the gravity module is gone).
+- Compile: 0 error CS.
+- EditMode: 12/12 passed.
+- PlayMode: 34/34 passed.
