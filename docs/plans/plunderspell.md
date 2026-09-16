@@ -202,5 +202,8 @@ balance it away.
 
 ## Status
 
-Planning complete; no implementation yet. Milestone 0 (fork clean, cut gravity) is the next step —
-see [`docs/plunderspell.md`](../plunderspell.md) §10 for the full milestone breakdown.
+This plan has been executed: milestones M0 through M3 are all merged (see
+[`docs/ProjectState.md`](../ProjectState.md) for what "merged" does and doesn't mean per
+milestone — M1 and M2's acceptance criteria haven't actually been checked yet, and M3 is scaffold
+only). This section previously read "Planning complete; no implementation yet," which stopped
+being true once M0 merged; `docs/ProjectState.md` is now the live source for where things stand.

@@ -96,8 +96,10 @@ rather than faked.
 
 ## Paper trail
 
-Every step's compile log, test XML, and this narrative live under `.agent_reports/` on
-`integration/staging-2026-09-15`, committed and pushed after each branch per this repo's
-commit-everything policy. `KNOWN_ISSUES.md` documents the `WaitForEndOfFrame`/batchmode finding
-in full (including the corrected root cause) as a standalone reference for anyone hitting the
-same symptom in the future.
+Every step's compile log, test XML, and this narrative were committed and pushed after each
+branch per this repo's commit-everything policy, originally under `.agent_reports/` on
+`integration/staging-2026-09-15` and now archived here as `docs/archive/2026-09-15-integration/`
+(the referenced `compile_final.log` was never actually committed — the `error CS` counts below
+came from the batchmode console output, not a saved log file). `KNOWN_ISSUES.md` documents the
+`WaitForEndOfFrame`/batchmode finding in full (including the corrected root cause) as a standalone
+reference for anyone hitting the same symptom in the future.
