@@ -51,3 +51,12 @@
 - Pure documentation add (docs/prompts/plunderspell-fable.md), no code changes, no conflicts.
 - Skipped Unity compile/test for this one specifically: zero .cs/.asmdef/asset changes means
   zero compile risk. Not a shortcut on code changes - there are none to verify.
+
+## 6. claude/level-generation-visual-pqdsr8 (merged)
+- 1 real conflict: Tools/AssetPipeline/README.md - both sides independently appended a different
+  new doc section (HEAD: "Verifying the Unity side"; branch: "Adding a new castle module").
+  Non-overlapping, both valuable - kept both, branch's section first (fits right after the
+  existing "Adding a new prop" section), HEAD's after.
+- Compile: 0 error CS.
+- EditMode: 12/12 passed.
+- PlayMode: 34/34 passed.
