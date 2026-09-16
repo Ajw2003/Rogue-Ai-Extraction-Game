@@ -1,0 +1,17 @@
+{
+    "name": "RogueAi.Extraction",
+    "rootNamespace": "RogueAi.Extraction",
+    "references": [
+        "PurrNet.Runtime",
+        "RogueAi.Loot"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
