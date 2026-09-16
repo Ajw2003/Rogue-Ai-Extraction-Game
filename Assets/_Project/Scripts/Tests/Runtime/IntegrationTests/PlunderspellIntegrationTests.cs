@@ -45,7 +45,7 @@ namespace RogueAi.Tests.Integration
         private SpellLexicon BuildLexicon()
         {
             var ignis = ScriptableObject.CreateInstance<SpellWord>();
-            ignis.spellWord = "IGNIS";
+            ignis.Word = "IGNIS";
             ignis.spellId = SpellId.Ignis;
             ignis.misfireId = SpellId.MisfireIgnis;
             ignis.AltPronunciations = new[] { "AGNIS", "IGNISH" };

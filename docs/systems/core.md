@@ -25,7 +25,26 @@ paid for everywhere — keep it small.
   GameObject.
 - **A subclass overriding `OnDestroy` must call `base.OnDestroy()`.** See Traps.
 
+## Spell-target interfaces
+
+`Core/Interfaces/ISpellTargets.cs` declares `IBreakable`, `ILevitatable`, `ISleepable`,
+`IStunnable`, `IIgnitable`, `IOpenable` and `IHandOpenable`. They live in Core for a structural
+reason: `RogueAi.Spells` must be able to affect loot, doors and players, all of which sit downstream
+of it, so a direct reference would cycle. A spell only ever sees the interface, found by an overlap
+query. Anything that should be affectable implements one — or adds `StatusEffectReceiver`, which
+implements four of them.
+
 ## Dev tooling
+
+- **`Tools/Plunderspell/Build Playable Raid Scene`**
+  (`Assets/_Project/Scripts/Editor/RaidSceneBuilder.cs`) builds a complete playable raid from code:
+  rooms with doorways, a placeholder haul, a garrison, the extraction zone, the HUD and a player who
+  can walk, grab and cast. Everything it generates is placeholder — it is a harness for playing the
+  game, not the art pass. Re-running always starts from an empty scene, so it never leaves a second
+  castle behind. See `docs/systems/raid.md`.
+
+- **`Tools/Headless/verify.sh`** compiles every gameplay and editor assembly and runs the whole test
+  suite without Unity. See `Tools/Headless/README.md`.
 
 - **`Tools/RogueAi/Build Test Scene`** (`Assets/_Project/Scripts/Editor/TestSceneBuilder.cs`) builds a
   throwaway player prefab, flat ground and grabbable item from code and saves them as

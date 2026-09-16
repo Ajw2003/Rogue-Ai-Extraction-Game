@@ -26,9 +26,9 @@ namespace RogueAi.Spells
             for (int i = 0; i < Spells.Count; i++)
             {
                 var sw = Spells[i];
-                if (sw == null || string.IsNullOrEmpty(sw.spellWord))
+                if (sw == null || string.IsNullOrEmpty(sw.Word))
                     continue;
-                if (string.Equals(sw.spellWord, normalized, System.StringComparison.Ordinal))
+                if (string.Equals(sw.Word, normalized, System.StringComparison.Ordinal))
                     return sw;
             }
             return null;
@@ -56,8 +56,8 @@ namespace RogueAi.Spells
 
                 int distance = int.MaxValue;
 
-                if (!string.IsNullOrEmpty(sw.spellWord))
-                    distance = MisfireEngine.LevenshteinDistance(normalized, sw.spellWord);
+                if (!string.IsNullOrEmpty(sw.Word))
+                    distance = MisfireEngine.LevenshteinDistance(normalized, sw.Word);
 
                 if (sw.AltPronunciations != null)
                 {

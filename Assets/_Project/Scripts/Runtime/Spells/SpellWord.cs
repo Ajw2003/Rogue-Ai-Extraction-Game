@@ -11,9 +11,12 @@ namespace RogueAi.Spells
     [CreateAssetMenu(fileName = "SpellWord", menuName = "Plunderspell/Spell Word")]
     public class SpellWord : ScriptableObject
     {
-        [Tooltip("The exact trigger word/phrase, normalised (UPPERCASE, no punctuation), e.g. \"IGNIS\".")]
+        // NOTE: this field cannot be called "SpellWord" — C# forbids a member sharing its enclosing
+        // type's name (CS0542), which broke the whole Spells assembly. FormerlySerializedAs keeps
+        // any asset still authored with the old key deserialising into this one.
         [FormerlySerializedAs("SpellWord")]
-        public string spellWord;
+        [Tooltip("The exact trigger word/phrase, normalised (UPPERCASE, no punctuation), e.g. \"IGNIS\".")]
+        public string Word;
 
         [Tooltip("Spell that fires on an exact match.")]
         public SpellId spellId = SpellId.None;
@@ -31,8 +34,8 @@ namespace RogueAi.Spells
         private void OnValidate()
         {
             // Keep the authored trigger word normalised so runtime matching is exact.
-            if (!string.IsNullOrEmpty(spellWord))
-                spellWord = spellWord.Trim().ToUpperInvariant();
+            if (!string.IsNullOrEmpty(Word))
+                Word = Word.Trim().ToUpperInvariant();
         }
     }
 }
