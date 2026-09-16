@@ -45,3 +45,9 @@
 - Compile: 0 error CS.
 - EditMode: 12/12 passed.
 - PlayMode: 34/34 passed.
+
+## 5. origin/claude/plunderspell-fable-prompt-iutej1 (merged)
+- Down to 1 commit after branch 4 merged (it shared 3 commits with inspiring-davinci).
+- Pure documentation add (docs/prompts/plunderspell-fable.md), no code changes, no conflicts.
+- Skipped Unity compile/test for this one specifically: zero .cs/.asmdef/asset changes means
+  zero compile risk. Not a shortcut on code changes - there are none to verify.
