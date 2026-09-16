@@ -113,6 +113,32 @@ vertex sits at local `Z=0`, and the shape rises along `+Z` from there. The
 validator checks this as a real invariant (lowest vertex within 3cm of
 Z=0), not just `object.location == origin`.
 
+## Blender → Unity axis conversion
+
+Castle module builders (`castle_builders.py`, `room_kit.py`) place doors and
+props in Blender's native Z-up space — `door_sides` names a wall by compass
+direction in *that* space. Confirmed empirically against the actual
+imported FBX bounds (a room's Y-height in Unity matches its Blender
+`ZONE_HEIGHT`; the Drawbridge module's deck, built at a large negative
+Blender Y, lands at large *positive* Unity Z):
+
+```
+Unity(X, Y, Z) = Blender(X, Z, -Y)
+```
+
+Height carries straight across (Blender Z → Unity Y). North/south swap
+under the Y negation; east/west pass straight through. Concretely, for
+`SocketPoint.Direction` (which is Unity's own compass, independent of the
+Blender authoring labels): a Blender `"north"` door → Unity `Direction.South`;
+`"south"` → `Direction.North`; `"east"`/`"west"` → the same-named Unity
+direction. Every door in `room_shell` sits centred on its wall (local
+offset 0 along the wall), at Unity world position `±(HALF - WALL_T/2)` on
+the relevant horizontal axis and Unity Y = `FLOOR_T + doorHeight/2` where
+`doorHeight = min(zoneHeight * 0.72, zoneHeight - 0.3)` (see `door()` in
+`room_kit.py`). This is what
+`Assets/_Project/Prefabs/Castle/*.prefab`'s `SocketPoint` children are
+placed from.
+
 ## Rendering preview screenshots
 
 There's no Unity Editor (or GPU/EGL) in this environment, so previews are
@@ -198,22 +224,31 @@ gitignored). The same checks also run as an EditMode test
 (`ArtAssetImportTests`), so they show up in the Test Runner window and in CI
 — see `.github/workflows/`.
 
-## Known gap: Unity `.meta` files / prefabs
+## In-Editor wiring (done)
 
-This pass stops at validated meshes on disk. There is no Unity Editor in
-this environment, so no `.meta` files or prefabs were hand-authored for the
-new FBX/PNG assets — Unity will generate `.meta` files itself (with fresh
-GUIDs, which is safe here since nothing yet references these brand-new
-assets) the next time the project is opened in the Editor. Wiring each mesh
-onto its `InventoryItem/LootItem` ScriptableObject via a prefab is the next
-step, done in-Editor.
+This pass used to stop at validated meshes on disk, with prefab/registry
+wiring left as a manual in-Editor step. That step is now done, driven live
+through the Unity CLI's Pipeline connection rather than hand-edited YAML:
 
-Same gap for the castle modules, plus one more step: `CastleRoomRegistry.asset`
-already has an entry per `RoomId` (so the generator resolves every zone's
-weighted pool correctly), but every entry's `Prefab` field is still
-`{fileID: 0}` — `ProceduralCastleGenerator.InstantiateModule` explicitly
-no-ops on a null prefab (data-only layout), so the generator itself needs no
-changes, but nothing will render in a real playthrough until each `Prefab`
-field is pointed at a prefab wrapping the matching FBX with a
-`CastleRoomModule` (+ `SocketPoint` children matching that mesh's door
-gaps) added in-Editor.
+- `Assets/_Project/Prefabs/Loot/*.prefab` and `Assets/_Project/Prefabs/Weapons/*.prefab`
+  wrap each Loot/Weapons FBX with a fitted `BoxCollider` plus `LootPickup`
+  (loot, wired to its matching `Data/Loot/*.asset`) or `Item` (weapons —
+  no world-pickup system exists for `InventoryItem` yet, so these are a
+  plain grabbable object rather than raid-economy loot). The 5 real loot
+  pieces are wired into `GeneratedLootTable.asset`'s `Entries`.
+- `Assets/_Project/Prefabs/Castle/*.prefab` wrap each Castle FBX with a
+  `MeshCollider` per mesh piece and a `CastleRoomModule` whose `SocketPoint`
+  children are placed from the exact door geometry each room was built with
+  (see "Blender → Unity axis conversion" above) — every entry in
+  `CastleRoomRegistry.asset` now points at its real prefab instead of
+  `{fileID: 0}`. Verified by actually running `RaidScene` and inspecting
+  the generated castle: 35 rooms placed, doors between adjacent rooms line
+  up, 0 console errors.
+- `CastleGuard.prefab`'s placeholder capsule was replaced with the
+  `VaultWarden` rig (static pose — no animation clips exist yet), keeping
+  its existing `CapsuleCollider`/AI tuning untouched.
+
+The other 4 enemy models (`SigilWisp`, `ArcRevenant`, `GildedColossus`,
+`HexTurret`) have no corresponding gameplay slot yet — `GuardSpawner` only
+supports one guard archetype — so they remain unwired pending a multi-enemy-type
+feature.
