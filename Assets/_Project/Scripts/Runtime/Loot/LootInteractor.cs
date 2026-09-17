@@ -17,7 +17,7 @@ namespace RogueAi.Loot
     {
         [Header("Reach")]
         [Tooltip("How far the player can reach to grab something, in metres.")]
-        [SerializeField] private float _reach = 3f;
+        [SerializeField] private float _reach = 6f;
 
         [Tooltip("Layers that can be interacted with.")]
         [SerializeField] private LayerMask _interactableLayers = ~0;
@@ -58,10 +58,14 @@ namespace RogueAi.Loot
             if (isSpawned && !isOwner)
                 return;
 
-            UpdateFocus();
+
 
             if (Input.GetKeyDown(_interactKey))
+            {
+                UpdateFocus();
                 Interact();
+            }
+
             else if (Input.GetKeyDown(_dropKey))
                 Drop();
         }
@@ -79,11 +83,11 @@ namespace RogueAi.Loot
             Vector3 origin = _eye != null ? _eye.position : transform.position;
             Vector3 direction = _eye != null ? _eye.forward : transform.forward;
 
-            if (Physics.Raycast(origin, direction, out RaycastHit hit, _reach, _interactableLayers,
-                    QueryTriggerInteraction.Collide))
+            if (Physics.SphereCast(origin, _reach, direction, out RaycastHit hit))
             {
                 Focus = hit.collider.GetComponentInParent<LootPickup>();
                 FocusDoor = hit.collider.GetComponentInParent<CastleDoorHandle>();
+                Debug.Log(Focus);
             }
 
             if (Focus != previous)
