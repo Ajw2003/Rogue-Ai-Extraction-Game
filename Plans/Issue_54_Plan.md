@@ -25,3 +25,7 @@ Currently, the game loads many visual elements like rooms, loot, and guards duri
 *   [ ] A performance target is defined for a typical raid.
 *   [ ] A performance test is run and recorded during a typical raid.
 *   [ ] The recorded test clearly shows whether the game passes or fails the performance targets.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

@@ -27,3 +27,7 @@ Currently, when a player throws or swings an object, the action happens instantl
 *   [ ] A throw action includes a follow-through phase after the object is released.
 *   [ ] The throwing velocity is applied at the correct moment, not instantly.
 *   [ ] The same wind-up and follow-through logic is prepared or applied for melee swings.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

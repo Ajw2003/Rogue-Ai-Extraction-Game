@@ -29,3 +29,7 @@ Currently, there is no crosshair on the screen while playing the game. This make
 *   [ ] The crosshair changes its visual state when aiming at an interactable object.
 *   [ ] The crosshair is hidden during menus, pauses, and while in the Lair.
 *   [ ] Aiming and interacting with objects feels accurate to where the crosshair points.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

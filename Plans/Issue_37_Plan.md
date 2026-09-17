@@ -30,3 +30,7 @@ Right now, weapons in the game can only be thrown at enemies. Even though weapon
 *   [ ] Swing speed and damage are affected by the weapon's weight stat.
 *   [ ] Swinging a weapon creates a noise alert for the enemy hearing system.
 *   [ ] The Arming Sword is completely set up and working as a test example.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

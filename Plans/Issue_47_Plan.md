@@ -25,3 +25,7 @@ Currently, the game changes spell strength and noise based on how loudly the pla
 *   [ ] A visual indicator appears on screen while holding the cast key.
 *   [ ] The indicator tracks and displays voice volume instantly as it changes.
 *   [ ] It is easy to tell from the indicator if the volume is at a whisper, normal, or shout level.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

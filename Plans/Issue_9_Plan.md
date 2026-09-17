@@ -29,3 +29,7 @@ Currently, the player character can still walk around and look around even when 
 *   [ ] Spell casting and interaction are disabled when a menu is open.
 *   [ ] All controls immediately restore and function correctly when returning to active gameplay.
 *   [ ] Input blocking relies on the `GameState` variable rather than enabling/disabling script components.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

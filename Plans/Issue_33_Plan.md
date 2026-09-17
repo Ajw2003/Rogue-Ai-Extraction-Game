@@ -23,3 +23,7 @@ The player's debt and collected treasure currently only show up as numbers on th
 *   [ ] The debt is represented as a physical object in the lair space.
 *   [ ] Collected loot is visually present in the lair space.
 *   [ ] Both physical representations accurately reflect the player's current totals.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

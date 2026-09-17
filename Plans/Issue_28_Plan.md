@@ -31,3 +31,7 @@ This task involves defining the specific items sold at the four market stalls (S
 *   [ ] Item files are created for all wares across the four stalls
 *   [ ] Smith stall upgrades can be successfully applied to weapons
 *   [ ] All market items are priced strictly higher than their dungeon equivalents
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

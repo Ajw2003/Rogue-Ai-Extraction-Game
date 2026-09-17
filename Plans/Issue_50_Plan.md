@@ -26,3 +26,7 @@ The first milestone requires the game to understand spoken words accurately and 
 *   [ ] The top-1 recognition rate was measured and recorded.
 *   [ ] The word-end-to-effect latency was measured and recorded.
 *   [ ] The results are written up against the M1 acceptance criterion in docs/ProjectState.md.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

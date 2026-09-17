@@ -30,3 +30,7 @@ Currently, players escape a raid and return to the lair by walking into an invis
 *   [ ] The flat green placeholder square is completely removed.
 *   [ ] The portal clearly shows whether extraction is currently active or inactive.
 *   [ ] Walking into the portal successfully ends the raid and returns the player to the lair.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

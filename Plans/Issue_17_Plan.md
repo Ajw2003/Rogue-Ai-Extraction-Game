@@ -29,3 +29,7 @@ The game allows the player to select from four different historical eras (Bronze
 *   [ ] The procedural generator correctly filters rooms, enemies, and loot by the selected era.
 *   [ ] The existing era-specific weapons (BronzeSword, Matchlock, etc.) are correctly assigned to their respective time periods.
 *   [ ] The game never spawns mixed-era content in a single raid.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

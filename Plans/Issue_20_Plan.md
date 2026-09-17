@@ -30,3 +30,7 @@ Currently, when the game generates a castle and spawns loot, many items are plac
 *   [ ] Loot rests visibly on surfaces inside the correct rooms.
 *   [ ] The mathematical `LootPlacementPlanner` remains unchanged and deterministic.
 *   [ ] The automated determinism tests still pass successfully.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

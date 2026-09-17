@@ -28,3 +28,7 @@ Currently, the player character is too tall compared to the castle rooms. The ro
 *   [ ] The player character has comfortable headroom inside all rooms and when passing through all doorways.
 *   [ ] The largest enemy can spawn and move freely inside the smallest room it is allowed to enter.
 *   [ ] All character and environment models visually agree on a consistent scale.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

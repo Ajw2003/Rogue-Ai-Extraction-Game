@@ -30,3 +30,7 @@ Currently, the player character is just an invisible shape with no hands or arms
 *   [ ] The hands play an animation while the player is casting a spell.
 *   [ ] Doors open and close with a smooth visual motion, not an instant snap.
 *   [ ] Doors use the same smooth motion regardless of whether they are opened by hand or by magic.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

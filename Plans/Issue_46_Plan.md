@@ -24,3 +24,7 @@ The escape portal currently lacks any visual or audio cues to let players know i
 *   [ ] The portal has an audible countdown effect like a ticking sound.
 *   [ ] The countdown effects are clear from a long distance.
 *   [ ] The effects sync correctly with the actual game timer.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

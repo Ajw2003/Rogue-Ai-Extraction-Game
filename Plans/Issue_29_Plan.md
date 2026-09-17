@@ -20,3 +20,7 @@ The goal of this task is to implement two economic rules in the game market. Fir
 ## Completion Checks
 *   [ ] Debt is paid first, automatically, before anything is spendable at the market.
 *   [ ] Market prices for an item that also exists as raid loot are provably higher than that loot's raid worth.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

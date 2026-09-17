@@ -30,3 +30,7 @@ Currently, players and enemies have health numbers hidden in the code, but there
 *   [ ] The player's current health is clearly visible on their screen.
 *   [ ] The player can be defeated when their health reaches zero, triggering a failure state.
 *   [ ] Enemy health is clearly visible in the game world, such as through a health bar above them.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

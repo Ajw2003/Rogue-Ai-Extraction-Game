@@ -32,3 +32,7 @@ Currently, enemies in the game do not have any animations. When they move toward
 *   [ ] Enemies play an attack animation when striking.
 *   [ ] Enemies play a death animation when defeated.
 *   [ ] The prefab forge tool automatically sets up these animation components without manual intervention.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

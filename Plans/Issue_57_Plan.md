@@ -28,3 +28,7 @@ The game needs a way for players to cast spells using their keyboard instead of 
 *   [ ] A settings toggle lets a player choose keyboard casting even when a working microphone is available.
 *   [ ] Each of the 40 magical words has a clear, documented default key.
 *   [ ] The player can rebind the key for every single magical word.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

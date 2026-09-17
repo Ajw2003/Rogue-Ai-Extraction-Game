@@ -18,3 +18,7 @@ Currently, the game calculates how sound travels so guards can react to noises, 
 ## Completion Checks
 *   [ ] Guards make a distinct sound for each level of awareness.
 *   [ ] All guard sounds play through the standard sound broadcasting system.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

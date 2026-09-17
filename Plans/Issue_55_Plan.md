@@ -22,3 +22,7 @@ The goal is to conduct a complete play session of a raid with four real players 
 ## Completion Checks
 *   [ ] Four real people play a raid together, start to finish, on the actual built game.
 *   [ ] The outcome (completed / failed, and why) is recorded against the M2 acceptance criterion in `docs/ProjectState.md`.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

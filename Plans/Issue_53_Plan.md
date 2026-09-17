@@ -29,3 +29,7 @@ The game currently only runs inside the game engine editor. There is no way to c
 *   [ ] A standalone version of the game has been created successfully.
 *   [ ] The standalone game opens and reaches the main menu.
 *   [ ] A full game session can be started and completed in the standalone game.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

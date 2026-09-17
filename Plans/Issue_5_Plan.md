@@ -28,3 +28,7 @@ The current procedural generation system places castle rooms on a grid, but the 
 *   [ ] Doorways always connect to other doorways. A doorway never opens into a solid wall or empty space.
 *   [ ] A player character can walk from the starting room to the exit room entirely through interior space.
 *   [ ] The automated tests for castle generation determinism and reachability still pass successfully.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

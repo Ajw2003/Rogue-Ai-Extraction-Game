@@ -29,3 +29,7 @@ Currently, the main menu and the Lair screen are extremely basic. They use solid
 *   [ ] The UI fonts, text, and buttons use custom styling instead of default boxes.
 *   [ ] The Lair screen has been updated to use the exact same visual style.
 *   [ ] The overall look establishes a mood that fits the game's theme.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

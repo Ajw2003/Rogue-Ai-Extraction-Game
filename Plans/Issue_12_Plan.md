@@ -29,3 +29,7 @@ Currently, there are no visual signs when the player attacks an enemy or when th
 *   [ ] Enemies flash or the player sees a hit marker when successfully dealing damage.
 *   [ ] Defeating an enemy produces a different visual effect than a regular damage hit.
 *   [ ] Visual feedback works reliably through the existing health system.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

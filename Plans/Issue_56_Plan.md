@@ -30,3 +30,7 @@ The settings menu needs to be fully built out to support the needs of our voice-
 *   [ ] All gameplay actions and spell word backups can be reassigned to new keys.
 *   [ ] The player can choose a specific microphone from a list of connected devices.
 *   [ ] A visual indicator correctly shows that the chosen microphone is active and working.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

@@ -24,3 +24,7 @@ The castle environment currently looks very flat and dull because it uses the sa
 *   [ ] The castle uses varied materials instead of a single gray color.
 *   [ ] Lighting and visual effects provide depth to the interiors.
 *   [ ] The player character's lantern functions as a light source.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

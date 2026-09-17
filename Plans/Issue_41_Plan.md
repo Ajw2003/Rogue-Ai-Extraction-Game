@@ -23,3 +23,7 @@ The problem is that half of the enemies currently planned for the game do not ma
 *   [ ] A final decision has been made regarding the enemy theme.
 *   [ ] The decision is explicitly recorded in the decisions file.
 *   [ ] The relevant enemy list or vision documents have been updated to reflect the choice.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

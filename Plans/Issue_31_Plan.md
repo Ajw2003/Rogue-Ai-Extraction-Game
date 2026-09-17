@@ -29,3 +29,7 @@ The game currently uses a flat menu screen for the player's home base. To match 
 *   [ ] The old flat lair menu is completely removed.
 *   [ ] Debt and banked gold can be checked by interacting with the environment.
 *   [ ] Era selection and starting a journey can be done by interacting with the environment.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

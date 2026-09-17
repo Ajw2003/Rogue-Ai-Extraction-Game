@@ -23,3 +23,7 @@ The game currently has working features for players to invite friends and join l
 *   [ ] Colors on the lobby menus match the project palette
 *   [ ] The visual styling matches the vellum and candlelight theme
 *   [ ] The lobby and invite screens look consistent with the main menu
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

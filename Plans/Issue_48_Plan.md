@@ -23,3 +23,7 @@ Currently, players have no way of knowing when a teammate is in the process of c
 ## Completion Checks
 *   [ ] Nearby teammates get a visible and/or audible cue that a player is mid-cast before the spell resolves.
 *   [ ] No raw audio crosses the network (the existing on-device-only voice decision stays intact).
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

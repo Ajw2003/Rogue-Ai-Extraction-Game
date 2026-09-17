@@ -27,3 +27,7 @@ The game currently lacks visual feedback like camera shaking or brief game pause
 *   [ ] Taking damage causes a camera shake or brief game pause.
 *   [ ] A melee hit causes a camera shake or brief game pause.
 *   [ ] The intensity of the feedback changes based on the strength of the action.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

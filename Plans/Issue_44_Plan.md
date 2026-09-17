@@ -20,3 +20,7 @@ Currently, structural features like murder-holes and arrow-loops are only used t
 ## Completion Checks
 *   [ ] At least one socket type (such as the murder-hole) has a functional gameplay effect as a hazard.
 *   [ ] The new hazard effect is documented in `docs/systems/castle.md`.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

@@ -23,3 +23,7 @@ The player currently spawns at a fixed position, which can cause them to start i
 *   [ ] The player spawns in open, walkable space for any seed.
 *   [ ] The spawn is derived from the generated layout rather than hardcoded.
 *   [ ] Spawning never places the player inside a solid object.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

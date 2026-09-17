@@ -23,3 +23,7 @@ The game's design document outlines a Mystical Market where players can buy item
 *   [ ] Stalls have their specific items and higher prices assigned.
 *   [ ] Shops remember what the player has previously purchased.
 *   [ ] Leftover money is correctly forced to be spent in the market.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

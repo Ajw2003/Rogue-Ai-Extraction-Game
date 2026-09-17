@@ -29,3 +29,7 @@ Currently, the game uses five basic, generic loot items for every time period. T
 *   [ ] The five generic placeholder items are no longer the only loot used.
 *   [ ] The Altarpiece exists as a large item that requires two people to carry.
 *   [ ] Loot reward values increase correctly as players get closer to the crypt or chapel zones.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

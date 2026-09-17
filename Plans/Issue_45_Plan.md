@@ -29,3 +29,7 @@ The drawbridge currently exists as a static 3D model in the castle environment b
 *   [ ] The state is driven by the alarm system (e.g., barring it at Roused).
 *   [ ] The state change is visibly animated.
 *   [ ] The state change produces sound effects.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

@@ -29,3 +29,7 @@ During gameplay, the mouse cursor remains visible and can move off the game scre
 *   [ ] The mouse cursor is unlocked and visible in all menus.
 *   [ ] Alt-tabbing or losing window focus correctly frees the cursor.
 *   [ ] Returning to the game restores the correct cursor behavior without getting stuck hidden or visible.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

@@ -35,3 +35,7 @@ The game currently lacks visual icons for essential features like spells, weapon
 *   [ ] 4 time period icons are completed and imported into the project.
 *   [ ] Condition icons for burning, stunned, and sleeping are completed and imported into the project.
 *   [ ] All icons strictly follow the required color rules regarding magic and gold.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

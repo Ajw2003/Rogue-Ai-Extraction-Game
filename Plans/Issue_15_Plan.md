@@ -31,3 +31,7 @@ Currently, loot items spawn in the world, but they are too small to easily see a
 *   [ ] Loot items highlight or glow when the player looks at them.
 *   [ ] An on-screen prompt tells the player what the item is and what button to press.
 *   [ ] Heavy items explicitly state in their prompt that two players are required to carry them.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

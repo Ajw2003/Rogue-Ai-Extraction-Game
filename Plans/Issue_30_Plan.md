@@ -27,3 +27,7 @@ The game currently uses a basic menu screen to represent the player's home area.
 *   [ ] The lighting and mood match the dark and safe feeling described in the original design.
 *   [ ] Gold and debt are represented physically in the space.
 *   [ ] Entering the Lair places the player in the physical room.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

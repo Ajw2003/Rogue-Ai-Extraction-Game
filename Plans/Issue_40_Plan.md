@@ -26,3 +26,7 @@ Currently, there are no graphical icons for weapons or loot items in the game. T
 *   [ ] One icon created for every weapon in the final roster
 *   [ ] One icon created for every loot piece or category
 *   [ ] All icons strictly follow the required color palette
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

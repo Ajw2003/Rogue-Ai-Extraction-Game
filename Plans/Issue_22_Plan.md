@@ -29,3 +29,7 @@ Currently, the game is completely silent and visually flat. Spells, enemy attack
 *   [ ] Misfiring a spell produces a clear, unique sound and visual failure.
 *   [ ] UI elements produce sound effects when clicked or activated.
 *   [ ] All audio in the game is routed through an `AudioMixer` instead of playing raw.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

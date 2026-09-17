@@ -30,3 +30,7 @@ The game currently lacks a way to use ranged weapons. The goal of this task is t
 *   [ ] Firing the weapon triggers a long reload period where the player cannot fire again immediately.
 *   [ ] Firing the weapon creates a noise that can be heard in the game world.
 *   [ ] The current ammunition count or reload progress is clearly visible on the screen.
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.

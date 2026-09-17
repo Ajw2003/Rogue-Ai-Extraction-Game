@@ -30,3 +30,7 @@ The core systems for the game exist but they are not connected into a playable g
 *   [ ] Each stage has a fail state as well as a success state.
 *   [ ] The reason to go again is legible in the fiction (the debt).
 </Plan: Issue 24 - EPIC: build the game loop end to end so there is something to actually play>
+
+
+## Technical Constraints
+When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.
