@@ -34,4 +34,13 @@ Currently, the pieces that make up the castle do not fit together cleanly. The g
 
 
 ## Technical Constraints
-When executing this plan, you MUST strictly adhere to the project's C# and Unity conventions detailed in `docs/UnityConvention.md`. This includes using `m_camelCase` for private fields, Allman braces, `[SerializeField]` for inspector exposure, BEM naming for UI, and the Single Responsibility Principle.
+When executing this plan, you MUST read and strictly adhere to ALL principles and conventions detailed in `docs/UnityConvention.md`. 
+You cannot pick and choose which rules to enforce; every single rule applies.
+Specifically, you must follow:
+- Core Architectural Principles: KISS, YAGNI, Solve the Root Cause, DRY, and SRP.
+- All Naming Conventions (e.g., `m_camelCase` for privates, `s_camelCase` for statics, `PascalCase` for methods/properties).
+- All Formatting & Syntax rules (e.g., Allman braces, mandatory braces, 4-space indentation).
+- Class & Method Organization (Newspaper metaphor, correct layout order).
+- Unity-Specific Implementations (e.g., `[SerializeField]` instead of public, `[Tooltip]` instead of comments).
+- UI Toolkit (UXML/USS) Naming (BEM convention, kebab-case).
+- Commenting rules (Explain 'Why', not 'What').
