@@ -71,6 +71,26 @@ bake lands off-mesh and stands still for the entire raid.
 `NavMeshSurface` has to read those meshes to bake them. It is an `AssetPostprocessor` rather than a
 one-off pass so that re-exporting a `.blend` cannot quietly undo it.
 
+### Orientation
+
+The models come from Blender (Z-up) into Unity (Y-up), and the three prefab families do **not** agree
+on where that correction lives. This was measured by instantiating each prefab at candidate rotations
+and reading world bounds, not reasoned about:
+
+| Family | Root rotation | Upright when instantiated with |
+|---|---|---|
+| Castle rooms | `(90,0,0)` (repaired) | the prefab's own root rotation |
+| Loot | `(270,0,0)` | the prefab's own root rotation |
+| Enemies | identity (correction on mesh child) | the prefab's own root rotation |
+
+The castle prefabs were originally saved with a root of `(270,0,0)` *on top of* their mesh child's
+own `(270,0,0)`, which composes to a 180-degree flip about X — the room hangs below the floor.
+`Tools/Plunderspell/Fix Castle Prefab Orientation` sets those roots to `(90,0,0)`.
+
+Because every family is now upright at its own root rotation, the rule at every spawn site is the
+same: **compose with `prefab.transform.rotation`, never replace it.** `Instantiate(prefab, pos, rot,
+parent)` overwrites the root rotation, which is what laid every room on its edge.
+
 ## Invariants
 
 - **The scene is assembled from authored assets or not at all.** `RaidSceneBuilder` aborts when a
@@ -81,6 +101,8 @@ one-off pass so that re-exporting a `.blend` cannot quietly undo it.
   spawns nothing there, silently.
 - **The NavMesh is baked between castle generation and guard spawning.** Not in `Start()`, not
   in the Editor.
+- **Spawn sites compose with the prefab's rotation, never replace it.** Passing a bare rotation to
+  `Instantiate` discards the Blender axis correction the prefab root carries.
 - **Castle models are Read/Write enabled.** An unreadable mesh still bakes in the Editor and
   silently produces no surface in a player build.
 

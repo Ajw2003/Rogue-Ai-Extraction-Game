@@ -62,7 +62,9 @@ namespace RogueAi.Raid
 
             EnsureContainer();
             GameObject go = prefab != null
-                ? Instantiate(prefab, position, Quaternion.identity, _container)
+                // Keep the prefab's own rotation: it carries the Blender axis correction, and
+                // passing identity here lays the loot on its side.
+                ? Instantiate(prefab, position, prefab.transform.rotation, _container)
                 : new GameObject($"Loot_{item.DisplayName}");
 
             if (prefab == null)

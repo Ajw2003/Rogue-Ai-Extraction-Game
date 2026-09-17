@@ -78,7 +78,11 @@ namespace RogueAi.Raid
             if (prefab == null)
                 return;
 
-            GameObject go = Instantiate(prefab, placement.Position, Quaternion.identity, _container);
+            // The enemy prefabs keep the axis correction on their mesh child, so their root rotation
+            // is already identity — but compose rather than replace, so a prefab that corrects on the
+            // root (as the castle and loot prefabs do) also stands up correctly here.
+            GameObject go = Instantiate(prefab, placement.Position, prefab.transform.rotation,
+                _container);
             _spawned.Add(go);
 
             var guard = go.GetComponent<CastleGuard>();
