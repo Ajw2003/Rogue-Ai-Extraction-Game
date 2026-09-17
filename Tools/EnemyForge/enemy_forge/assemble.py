@@ -160,6 +160,60 @@ def build_armature(arch: Archetype, mesh_obj: bpy.types.Object) -> bpy.types.Obj
     return rig
 
 
+def apply_smooth_weights(mesh_obj: bpy.types.Object, rig: bpy.types.Object,
+                         iterations: int = 3, max_influences: int = 4) -> dict:
+    """Replace the rigid per-part weights with blended ones, keeping rigid as a net.
+
+    Rigid weights are right for a construct and wrong for a man in wool: at every
+    joint the parts would swing as separate blocks. Blender's heat weighting blends
+    them, but it can fail on a mesh of disjoint islands and leave vertices with no
+    influence at all, which would drop them on the floor when the rig moves. So the
+    per-part assignment is kept and restored for exactly those vertices.
+    """
+    rigid = [[g.group for g in v.groups] for v in mesh_obj.data.vertices]
+    group_names = [g.name for g in mesh_obj.vertex_groups]
+
+    bpy.ops.object.select_all(action="DESELECT")
+    mesh_obj.select_set(True)
+    rig.select_set(True)
+    bpy.context.view_layer.objects.active = rig
+    try:
+        bpy.ops.object.parent_set(type="ARMATURE_AUTO")
+    except RuntimeError as error:
+        # Heat weighting refused outright; the rigid weights already on the mesh
+        # are a correct, if stiff, binding, so the build continues.
+        return {"auto_weights": False, "reason": str(error), "restored": 0}
+
+    lookup = {name: mesh_obj.vertex_groups.get(name) for name in group_names}
+    restored = 0
+    for vert in mesh_obj.data.vertices:
+        if vert.groups and sum(g.weight for g in vert.groups) > 1e-4:
+            continue
+        for group_index in rigid[vert.index]:
+            group = lookup.get(group_names[group_index])
+            if group is not None:
+                group.add([vert.index], 1.0, "REPLACE")
+                restored += 1
+
+    bpy.context.view_layer.objects.active = mesh_obj
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    if iterations:
+        bpy.ops.object.vertex_group_smooth(group_select_mode="ALL",
+                                           factor=0.5, repeat=iterations)
+    # Unity blends at most four bones per vertex; trimming here rather than letting
+    # the importer silently drop the smallest influences keeps the two in agreement.
+    bpy.ops.object.vertex_group_limit_total(group_select_mode="ALL", limit=max_influences)
+    bpy.ops.object.vertex_group_normalize_all(group_select_mode="ALL", lock_active=False)
+    bpy.ops.object.mode_set(mode="OBJECT")
+
+    influences = [len([g for g in v.groups if g.weight > 1e-4])
+                  for v in mesh_obj.data.vertices]
+    return {"auto_weights": True, "restored": restored,
+            "max_influences": max(influences) if influences else 0,
+            "mean_influences": round(sum(influences) / max(1, len(influences)), 2)}
+
+
 def texture_and_bake(obj: bpy.types.Object, arch: Archetype,
                      authoring: list[bpy.types.Material],
                      texture_dir: str, resolution: int) -> bpy.types.Material:

@@ -1,0 +1,19 @@
+{
+    "name": "RogueAi.Castle",
+    "rootNamespace": "RogueAi.Castle",
+    "references": [
+        "PurrNet.Runtime",
+        "RogueAi.Core",
+        "RogueAi.Acoustics",
+        "RogueAi.Alarm"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
