@@ -492,8 +492,8 @@ for title, labels, body in ISSUES:
     created.append({"number": num, "title": title, "url": url})
     print("#%-3s %s" % (num, title))
 
-out = os.path.join(".agent_reports", "github-issues.json")
-os.makedirs(".agent_reports", exist_ok=True)
+out = os.path.join("docs", "generated", "github-issues.json")
+os.makedirs(os.path.join("docs", "generated"), exist_ok=True)
 with open(out, "w", encoding="utf-8") as f:
     json.dump(created, f, indent=2)
 print("\ncreated %d issues -> %s" % (len(created), out))

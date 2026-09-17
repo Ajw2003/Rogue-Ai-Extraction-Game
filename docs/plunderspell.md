@@ -4,7 +4,7 @@
 > and who must carry every stolen thing home in their own two arms.*
 
 Status: pitch / design bible v0.2 — no implementation yet.
-Illustrated mood board: `docs/plunderspell-moodboard.html` (open it in a browser).
+Illustrated mood board: `docs/generated/plunderspell-moodboard.html` (open it in a browser).
 Engineering plan: [`docs/plans/plunderspell.md`](plans/plunderspell.md).
 
 *A note on the voice: the pitch is written to be read aloud, and it is written by a herald who is

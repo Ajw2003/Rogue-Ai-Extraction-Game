@@ -9,7 +9,7 @@ into different historical Ages, plunder castles/villages/kingdoms, extract back 
 
 The vision, palette, weapon set, spell lexicon and Age structure live in
 [`docs/plunderspell.md`](../plunderspell.md), with an illustrated mood board at
-[`docs/plunderspell-moodboard.html`](../plunderspell-moodboard.html). This document is the
+[`docs/generated/plunderspell-moodboard.html`](../generated/plunderspell-moodboard.html). This document is the
 engineering plan for getting there.
 
 ### What the branch survey actually found (this changed the plan)
@@ -202,5 +202,6 @@ balance it away.
 
 ## Status
 
-Planning complete; no implementation yet. Milestone 0 (fork clean, cut gravity) is the next step —
-see [`docs/plunderspell.md`](../plunderspell.md) §10 for the full milestone breakdown.
+M0 through M3 are all merged into `main`. See [`docs/ProjectState.md`](../ProjectState.md) for
+where things actually stand against each milestone's acceptance criterion — most of them are code
+complete but unchecked, not done in the sense this plan means it.

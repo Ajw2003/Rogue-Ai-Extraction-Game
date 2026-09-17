@@ -8,7 +8,7 @@ built in `builders.py`) or a `RoomId` in
 in `castle_builders.py` on top of the architectural primitives in
 `room_kit.py` — floor/wall/door shells, crenellations, towers, spiral
 stairs) that had no mesh behind it — see the art direction in
-`docs/plunderspell-moodboard.html` (pigment palette, per-era kit lists) for
+`docs/generated/plunderspell-moodboard.html` (pigment palette, per-era kit lists) for
 where the shapes and colours come from, and the pigment-to-zone mapping at
 the top of `castle_builders.py` for how that palette was extended to
 architecture without adding new pigments (the 4x4 atlas was already full).
