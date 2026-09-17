@@ -66,3 +66,54 @@ playtesting backlog since anyone last touched `docs/`, and `docs/` itself had ti
    relying on the automated PlayMode suite as a stand-in for "is this fun" — same for M1's
    real-microphone, multi-accent recognition measurement.
 3. Only after 1–2: decide the `CastleRoomRegistry`/loot/guard schema change M3 actually needs.
+
+---
+
+## Later, same day — moodboard gap-closure pass
+
+A second pass, requested directly: audit the built game against `docs/plunderspell.md` and the
+mood board pillar by pillar (not against the raid loop, which the morning's 21-item backlog
+already covers), write up the findings, and file GitHub issues for everything needed to close the
+gap — "exhaustive," including content that has no art or systems work behind it yet at all.
+
+### Done
+
+- Read the pitch bible, the mood board, every tier-3/4/5/6 doc, and walked `Assets/`,
+  `Assets/_Project/{Art,Data,Prefabs,Scripts}` and `Tools/` on disk (folder-listing depth, not a
+  line-by-line code read — see the plan doc's "What this pass did not check").
+- Wrote up the full findings, pillar by pillar, as
+  [`docs/plans/moodboard-gap-closure.md`](plans/moodboard-gap-closure.md).
+- Filed 34 new GitHub issues via `Tools/mkissues_moodboard_gap.py`, following the same
+  `gh issue create` mechanism as `Tools/mkissues.py`; manifest at
+  `docs/generated/github-issues-moodboard-gap.json` once run.
+- Pointed `docs/README.md` and `docs/ProjectState.md` at the new plan doc and backlog.
+
+### Deliberately not done
+
+- Did not open individual `.cs` scripts or `.asset` YAML to verify implementation details beyond
+  what the existing tier-4 docs already cite — flagged explicitly in the plan doc rather than
+  presented as more thoroughly checked than it was.
+- Did not resolve the one open creative-direction question the audit surfaced (the bestiary's
+  thematic split between household guards and arcane/fantasy enemies) — that needs a human
+  decision, not more analysis; filed as its own issue with a `decision-needed` label rather than
+  guessed at.
+- Did not run `Tools/mkissues_moodboard_gap.py` against the real repo — this cloud session has no
+  `gh` authentication or GitHub write path. The script was dry-run twice against a mocked `gh` to
+  validate its logic (34 issues, no duplicate titles, every label it uses gets created first, valid
+  JSON manifest written) but the actual `gh issue create` calls are untested until run locally.
+
+### Surfaced, not today's job
+
+- The Mystical Market (the pitch's fourth named pillar) doesn't exist in the codebase at all — not
+  a raid-loop gap, a whole unbuilt system. See the plan doc §2.4.
+- The Lair is built as a UI screen, not the 3D "damp, yours, and permanent" place the pitch
+  describes. See the plan doc §2.5.
+
+### Next, in order
+
+1. Run `Tools/mkissues_moodboard_gap.py` locally (where `gh` is already authenticated) to actually
+   file the 34 issues.
+2. Decide the bestiary question (its own filed issue) before any more art/animation/audio work
+   lands on the five divergent enemies — reworking them later is more expensive than deciding once.
+3. Interleave the new backlog with the existing 21-item one per
+   `docs/plans/moodboard-gap-closure.md` §4's suggested triage order.
