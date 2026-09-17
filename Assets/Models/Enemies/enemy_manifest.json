@@ -2,6 +2,138 @@
   "generated_by": "Tools/EnemyForge/build_enemies.py",
   "enemies": [
     {
+      "name": "Watchman",
+      "role": "Calm \u2014 walks the patrol routes, carries the lantern",
+      "passed": true,
+      "stats": {
+        "vertices": 1821,
+        "faces": 1870,
+        "triangles": 3502,
+        "islands": 35,
+        "bones": 19,
+        "lowest_z": 0.0,
+        "height": 1.703,
+        "width": 0.517,
+        "auto_weights": true,
+        "restored": 204,
+        "max_influences": 4,
+        "mean_influences": 1.71
+      },
+      "failures": [],
+      "warnings": [],
+      "files": {
+        "fbx": "Assets/Models/Enemies/Watchman/Watchman.fbx",
+        "gltf": "Assets/Models/Enemies/Watchman/glTF/Watchman.gltf",
+        "blend": "Assets/Models/Enemies/Watchman/Watchman.blend"
+      }
+    },
+    {
+      "name": "ManAtArms",
+      "role": "Stirred \u2014 the one guard who comes to check",
+      "passed": true,
+      "stats": {
+        "vertices": 1822,
+        "faces": 1835,
+        "triangles": 3516,
+        "islands": 32,
+        "bones": 19,
+        "lowest_z": 0.0,
+        "height": 1.785,
+        "width": 0.643,
+        "auto_weights": true,
+        "restored": 278,
+        "max_influences": 4,
+        "mean_influences": 1.78
+      },
+      "failures": [],
+      "warnings": [],
+      "files": {
+        "fbx": "Assets/Models/Enemies/ManAtArms/ManAtArms.fbx",
+        "gltf": "Assets/Models/Enemies/ManAtArms/glTF/ManAtArms.gltf",
+        "blend": "Assets/Models/Enemies/ManAtArms/ManAtArms.blend"
+      }
+    },
+    {
+      "name": "Sergeant",
+      "role": "Roused \u2014 leads the sweep, carries the horn",
+      "passed": true,
+      "stats": {
+        "vertices": 2089,
+        "faces": 2131,
+        "triangles": 4022,
+        "islands": 39,
+        "bones": 19,
+        "lowest_z": 0.0,
+        "height": 1.813,
+        "width": 0.681,
+        "auto_weights": true,
+        "restored": 456,
+        "max_influences": 4,
+        "mean_influences": 1.78
+      },
+      "failures": [],
+      "warnings": [],
+      "files": {
+        "fbx": "Assets/Models/Enemies/Sergeant/Sergeant.fbx",
+        "gltf": "Assets/Models/Enemies/Sergeant/glTF/Sergeant.gltf",
+        "blend": "Assets/Models/Enemies/Sergeant/Sergeant.blend"
+      }
+    },
+    {
+      "name": "WarHound",
+      "role": "The chase \u2014 reacts to noise, runs you down",
+      "passed": true,
+      "stats": {
+        "vertices": 1318,
+        "faces": 1368,
+        "triangles": 2520,
+        "islands": 29,
+        "bones": 15,
+        "lowest_z": 0.0,
+        "height": 0.769,
+        "width": 0.465,
+        "auto_weights": true,
+        "restored": 96,
+        "max_influences": 4,
+        "mean_influences": 1.88
+      },
+      "failures": [],
+      "warnings": [
+        "height 0.77 m differs from the declared 0.90 m"
+      ],
+      "files": {
+        "fbx": "Assets/Models/Enemies/WarHound/WarHound.fbx",
+        "gltf": "Assets/Models/Enemies/WarHound/glTF/WarHound.gltf",
+        "blend": "Assets/Models/Enemies/WarHound/WarHound.blend"
+      }
+    },
+    {
+      "name": "CryptRisen",
+      "role": "The crypt \u2014 raised by a word, obedient to nobody",
+      "passed": true,
+      "stats": {
+        "vertices": 1900,
+        "faces": 1974,
+        "triangles": 3636,
+        "islands": 41,
+        "bones": 19,
+        "lowest_z": 0.0,
+        "height": 1.647,
+        "width": 0.506,
+        "auto_weights": true,
+        "restored": 0,
+        "max_influences": 1,
+        "mean_influences": 1.0
+      },
+      "failures": [],
+      "warnings": [],
+      "files": {
+        "fbx": "Assets/Models/Enemies/CryptRisen/CryptRisen.fbx",
+        "gltf": "Assets/Models/Enemies/CryptRisen/glTF/CryptRisen.gltf",
+        "blend": "Assets/Models/Enemies/CryptRisen/CryptRisen.blend"
+      }
+    },
+    {
       "name": "SigilWisp",
       "role": "Scout flier \u2014 fast, fragile, swarms",
       "passed": true,

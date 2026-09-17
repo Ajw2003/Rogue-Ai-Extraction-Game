@@ -31,10 +31,14 @@ DEFAULT_OUT = os.path.join(REPO_ROOT, "Assets", "Models", "Enemies")
 
 def build_one(arch, out_root: str, resolution: int) -> dict:
     assemble.reset_scene()
+    violations = materials.discipline_violations(arch.name, arch.families, arch.arcane)
+    if violations:
+        raise RuntimeError("; ".join(violations))
     authoring = materials.build_authoring_set(arch.name, wear=arch.wear)
     obj = assemble.build_mesh_object(arch, authoring)
     assemble.finish_geometry(obj, arch)
     rig = assemble.build_armature(arch, obj)
+    skin = assemble.apply_smooth_weights(obj, rig)
 
     model_dir = os.path.join(out_root, arch.name)
     texture_dir = os.path.join(model_dir, "Textures")
@@ -48,7 +52,7 @@ def build_one(arch, out_root: str, resolution: int) -> dict:
         "name": arch.name,
         "role": arch.role,
         "passed": report.passed,
-        "stats": report.stats,
+        "stats": {**report.stats, **skin},
         "failures": report.failures,
         "warnings": report.warnings,
         "files": {k: os.path.relpath(v, REPO_ROOT) for k, v in exported.items()},

@@ -18,23 +18,57 @@ import bpy
 
 from .parts import MATERIALS
 
-# Cold arcane cyan against warm gold on dark blue-grey masonry. Base colours are
-# linear, so they read darker here than they will on screen.
+def _srgb(hex_colour: str) -> tuple[float, float, float]:
+    """Convert a moodboard hex to linear RGB, which is what the shader wants.
+
+    Colours are stored as the hex the moodboard states so the two can be diffed
+    by eye; the sRGB-to-linear transfer happens here rather than in the table.
+    """
+    hex_colour = hex_colour.lstrip("#")
+    out = []
+    for i in (0, 2, 4):
+        c = int(hex_colour[i:i + 2], 16) / 255.0
+        out.append(c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4)
+    return tuple(out)
+
+
+# Pigments, straight from docs/plunderspell-moodboard.html. The three reserved ones
+# are named here so the discipline check below can refer to them by meaning.
+BONE_BLACK, ASH = "#14120E", "#1E1A14"
+VELLUM, VELLUM_DIM, VELLUM_FAINT = "#DCD2BA", "#9A9078", "#635C4C"
+VERDIGRIS = "#5FA288"   # arcane and interactive only
+ORPIMENT = "#C9A227"    # money only — never worn by an enemy
+MADDER = "#C4542E"      # fire, alarm, blood
+LAPIS = "#7A6AA0"       # the voice, and whatever answers it
+
+# Surface families for the castle household. Deliberately drab: the moodboard
+# reserves orpiment for money, so nothing an enemy wears may be gold. Colour on a
+# guard therefore means state, not decoration.
 PALETTE = {
-    "stone": dict(base=(0.036, 0.047, 0.082), rough=0.82, metal=0.0,
-                  emit=(0.0, 0.0, 0.0), grain=0.30),
-    "gold": dict(base=(0.72, 0.45, 0.08), rough=0.28, metal=1.0,
-                 emit=(0.0, 0.0, 0.0), grain=0.14),
-    "arcane": dict(base=(0.015, 0.075, 0.095), rough=0.35, metal=0.0,
-                   emit=(0.10, 0.85, 1.0), grain=0.10),
-    "iron": dict(base=(0.028, 0.032, 0.043), rough=0.44, metal=0.95,
-                 emit=(0.0, 0.0, 0.0), grain=0.22),
-    "cloth": dict(base=(0.028, 0.014, 0.052), rough=0.93, metal=0.0,
-                  emit=(0.0, 0.0, 0.0), grain=0.34),
+    "wool":    dict(base="#3C3124", rough=0.94, metal=0.0, emit=None,  grain=0.34),
+    "leather": dict(base="#2C2118", rough=0.70, metal=0.0, emit=None,  grain=0.26),
+    "oak":     dict(base="#5A4630", rough=0.80, metal=0.0, emit=None,  grain=0.30),
+    "mail":    dict(base="#2F3337", rough=0.74, metal=0.86, emit=None, grain=0.30),
+    "steel":   dict(base="#8C939A", rough=0.46, metal=0.86, emit=None, grain=0.18),
+    "linen":   dict(base=VELLUM_DIM, rough=0.90, metal=0.0, emit=None, grain=0.22),
+    "flesh":   dict(base="#8A6A4E", rough=0.68, metal=0.0, emit=None,  grain=0.12),
+    "bone":    dict(base="#B9B2A0", rough=0.74, metal=0.0, emit=None,  grain=0.20),
+    "madder":  dict(base="#5E2617", rough=0.90, metal=0.0, emit=None,  grain=0.30),
+    # The lantern flame: the one warm note on a calm household, and the colour that
+    # changes when it wakes.
+    "tallow":  dict(base="#2A2012", rough=0.50, metal=0.0, emit="#FFC46A", grain=0.08),
+    # Reserved for the crypt. A word raised it, so it carries the voice's colour.
+    "lapis":   dict(base="#181428", rough=0.55, metal=0.0, emit="#9C8AD6", grain=0.10),
 }
 
-# How far the baked emission map is scaled up in the shipping material.
-EMISSION_STRENGTH = 4.0
+# Families no living member of the household may use, and why. Checked per archetype
+# in discipline_violations(); see "Colour on an enemy means state" in
+# docs/systems/enemy-asset-pipeline.md.
+ARCANE_ONLY = {"lapis"}
+
+# The baked emission map is 8-bit and clamps at 1.0, so the glow is scaled back up
+# in the shipping material. Unity needs the same multiplier as an HDR value.
+EMISSION_STRENGTH = 9.0
 
 CHANNELS = ("BaseMap", "Roughness", "Metallic", "Emission")
 # Roughness and metallic hold raw numbers, not colour; sRGB encoding would skew them.
@@ -42,6 +76,12 @@ DATA_CHANNELS = {"Roughness", "Metallic"}
 
 # Baking needs the raw channel sockets, which cannot be stored on an ID datablock.
 _CHANNEL_SOCKETS: dict[str, dict] = {}
+
+
+if set(PALETTE) != set(MATERIALS):
+    raise RuntimeError(
+        "materials.PALETTE and parts.MATERIALS disagree: "
+        f"{sorted(set(PALETTE) ^ set(MATERIALS))}")
 
 
 def _noise(nodes, links, coords, scale: float, detail: float, location):
@@ -67,7 +107,7 @@ def build_authoring_material(family: str, name: str, wear: float) -> bpy.types.M
     grain = _noise(nodes, links, coords, 46.0, 3.0, (-900, -360))
 
     base_rgb = nodes.new("ShaderNodeRGB")
-    base_rgb.outputs[0].default_value = (*spec["base"], 1.0)
+    base_rgb.outputs[0].default_value = (*_srgb(spec["base"]), 1.0)
     base_rgb.location = (-900, 250)
 
     # Weathering darkens the surface unevenly rather than tinting it.
@@ -100,11 +140,12 @@ def build_authoring_material(family: str, name: str, wear: float) -> bpy.types.M
     metal_value.outputs[0].default_value = spec["metal"]
     metal_value.location = (-900, -60)
 
+    glow = _srgb(spec["emit"]) if spec["emit"] else (0.0, 0.0, 0.0)
     emit_rgb = nodes.new("ShaderNodeRGB")
-    emit_rgb.outputs[0].default_value = (*spec["emit"], 1.0)
+    emit_rgb.outputs[0].default_value = (*glow, 1.0)
     emit_rgb.location = (-900, -560)
 
-    if any(spec["emit"]):
+    if spec["emit"]:
         # Let the glow vary spatially so a large emissive panel is not a flat slab.
         pulse = nodes.new("ShaderNodeMix")
         pulse.data_type = "RGBA"
@@ -136,6 +177,24 @@ def build_authoring_material(family: str, name: str, wear: float) -> bpy.types.M
         "Emission": emit_socket,
     }
     return mat
+
+
+def discipline_violations(name: str, families: set[str], arcane: bool) -> list[str]:
+    """Check an archetype against the moodboard's colour rules.
+
+    Orpiment is structurally impossible — there is no gold family to select — so the
+    live rule is that only an arcane archetype may carry the voice's colour.
+    """
+    problems = []
+    if not arcane:
+        for family in sorted(families & ARCANE_ONLY):
+            problems.append(
+                f"{name} is not arcane but uses the {family!r} family; the moodboard "
+                f"reserves lapis for the voice and whatever answers it")
+    unknown = sorted(families - set(PALETTE))
+    if unknown:
+        problems.append(f"{name} uses families that are not in the palette: {unknown}")
+    return problems
 
 
 def build_authoring_set(name: str, wear: float) -> list[bpy.types.Material]:

@@ -50,7 +50,7 @@ def _clear_scene() -> None:
     bpy.ops.wm.read_factory_settings(use_empty=True)
 
 
-def _world(strength: float = 0.28) -> None:
+def _world(strength: float = 0.38) -> None:
     world = bpy.data.worlds.new("ReviewWorld")
     bpy.context.scene.world = world
     world.use_nodes = True
@@ -63,8 +63,9 @@ def _world(strength: float = 0.28) -> None:
     mapping.inputs["Rotation"].default_value = (0.0, math.radians(-90.0), 0.0)
     coords = nodes.new("ShaderNodeTexCoord")
     ramp = nodes.new("ShaderNodeValToRGB")
-    ramp.color_ramp.elements[0].color = (0.006, 0.010, 0.020, 1.0)
-    ramp.color_ramp.elements[1].color = (0.030, 0.045, 0.070, 1.0)
+    # The Lair frame: "one candle, one fire, falling away into black."
+    ramp.color_ramp.elements[0].color = (0.0045, 0.0035, 0.0022, 1.0)
+    ramp.color_ramp.elements[1].color = (0.052, 0.033, 0.014, 1.0)
 
     background = nodes.new("ShaderNodeBackground")
     background.inputs["Strength"].default_value = strength
@@ -90,20 +91,29 @@ def _area_light(name, location, rotation, energy, size, color=(1.0, 1.0, 1.0)):
 
 
 def _studio(height: float) -> None:
-    """Three-point rig scaled to the subject: warm key, cool fill, cold rim."""
-    reach = max(2.0, height * 1.6)
-    _area_light("Key", (reach * 0.9, -reach * 1.0, height * 1.25),
-                (math.radians(62), 0.0, math.radians(42)),
-                energy=reach * reach * 62.0, size=reach * 0.9,
-                color=(1.0, 0.94, 0.86))
-    _area_light("Fill", (-reach * 1.1, -reach * 0.7, height * 0.75),
-                (math.radians(76), 0.0, math.radians(-56)),
-                energy=reach * reach * 34.0, size=reach * 1.2,
-                color=(0.72, 0.82, 1.0))
-    _area_light("Rim", (-reach * 0.35, reach * 1.2, height * 1.5),
-                (math.radians(115), 0.0, math.radians(-160)),
-                energy=reach * reach * 70.0, size=reach * 0.7,
-                color=(0.55, 0.85, 1.0))
+    """Candlelight, not a photo studio.
+
+    The moodboard commits to one lighting idea — a candle guttering in a dark stone
+    room — so the key is warm, low and close, the fill is barely there, and the only
+    cool light is a thin moon rim that keeps the silhouette off the background.
+    """
+    reach = max(1.6, height * 1.35)
+    # Key: a candle at chest height, close and to the front-right. Warm enough to
+    # read as flame rather than daylight.
+    _area_light("Candle", (reach * 0.62, -reach * 0.78, height * 0.62),
+                (math.radians(84), 0.0, math.radians(38)),
+                energy=reach * reach * 95.0, size=reach * 0.34,
+                color=(1.0, 0.63, 0.28))
+    # Fill: the room's own firelight bouncing back, dim and browner.
+    _area_light("Hearth", (-reach * 1.05, -reach * 0.45, height * 0.38),
+                (math.radians(96), 0.0, math.radians(-62)),
+                energy=reach * reach * 18.0, size=reach * 1.1,
+                color=(1.0, 0.52, 0.24))
+    # Rim: moon through an arrow-loop. Cold, weak, and the only non-fire light.
+    _area_light("Moon", (-reach * 0.30, reach * 1.15, height * 1.35),
+                (math.radians(118), 0.0, math.radians(-166)),
+                energy=reach * reach * 40.0, size=reach * 0.55,
+                color=(0.55, 0.62, 0.78))
 
 
 def _ground(radius: float) -> bpy.types.Object:
@@ -114,8 +124,8 @@ def _ground(radius: float) -> bpy.types.Object:
     mat = bpy.data.materials.new("ReviewGround")
     mat.use_nodes = True
     principled = mat.node_tree.nodes["Principled BSDF"]
-    principled.inputs["Base Color"].default_value = (0.005, 0.007, 0.012, 1.0)
-    principled.inputs["Roughness"].default_value = 0.58
+    principled.inputs["Base Color"].default_value = (0.012, 0.010, 0.008, 1.0)
+    principled.inputs["Roughness"].default_value = 0.62
     principled.inputs["Metallic"].default_value = 0.0
     plane.data.materials.append(mat)
     return plane
@@ -167,7 +177,7 @@ def _configure_cycles(resolution: int, samples: int) -> None:
     scene.render.resolution_percentage = 100
     scene.render.film_transparent = False
     scene.view_settings.view_transform = "AgX"
-    scene.view_settings.look = "AgX - Punchy"
+    scene.view_settings.look = "AgX - Medium High Contrast"
 
 
 def _enable_wireframe() -> bpy.types.Material:
