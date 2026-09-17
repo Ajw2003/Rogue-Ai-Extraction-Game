@@ -43,6 +43,11 @@ namespace RogueAi.Raid
             List<LootPlacement> plan = LootPlacementPlanner.Plan(castle, _table, seed);
             _lastPlan.AddRange(plan);
 
+            // The castle rooms were instantiated earlier in this same frame, and PhysX does not see a
+            // new collider's transform until it is synced. Spawning loot rigidbodies against an
+            // unsynced physics scene is what makes them resolve against stale room positions.
+            Physics.SyncTransforms();
+
             for (int i = 0; i < plan.Count; i++)
                 Spawn(plan[i]);
 

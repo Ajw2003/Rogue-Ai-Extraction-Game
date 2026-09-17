@@ -1,0 +1,171 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &4436528182348588213
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: be7c2c71d921e1242b57f262c2db1d96, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: be7c2c71d921e1242b57f262c2db1d96, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: be7c2c71d921e1242b57f262c2db1d96, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: be7c2c71d921e1242b57f262c2db1d96, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: be7c2c71d921e1242b57f262c2db1d96, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: be7c2c71d921e1242b57f262c2db1d96, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: be7c2c71d921e1242b57f262c2db1d96, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: be7c2c71d921e1242b57f262c2db1d96, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: be7c2c71d921e1242b57f262c2db1d96, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: be7c2c71d921e1242b57f262c2db1d96, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: be7c2c71d921e1242b57f262c2db1d96, type: 3}
+      propertyPath: m_Name
+      value: ArcRevenant
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: be7c2c71d921e1242b57f262c2db1d96, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3177909402763064231}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: be7c2c71d921e1242b57f262c2db1d96, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6838651928492965365}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: be7c2c71d921e1242b57f262c2db1d96, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4694252293608377310}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: be7c2c71d921e1242b57f262c2db1d96, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2179051637313994380}
+  m_SourcePrefab: {fileID: 100100000, guid: be7c2c71d921e1242b57f262c2db1d96, type: 3}
+--- !u!1 &3553585510442637796 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: be7c2c71d921e1242b57f262c2db1d96, type: 3}
+  m_PrefabInstance: {fileID: 4436528182348588213}
+  m_PrefabAsset: {fileID: 0}
+--- !u!136 &3177909402763064231
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3553585510442637796}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.69096917
+  m_Height: 2.310565
+  m_Direction: 1
+  m_Center: {x: 0, y: 1.1552825, z: 0}
+--- !u!195 &6838651928492965365
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3553585510442637796}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.69096917
+  m_Speed: 1.8
+  m_Acceleration: 12
+  avoidancePriority: 50
+  m_AngularSpeed: 240
+  m_StoppingDistance: 0.8
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2.310565
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 1
+--- !u!114 &4694252293608377310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3553585510442637796}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb201dad623c262478779bf36ad01883, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RogueAi.Status::RogueAi.Status.StatusEffectReceiver
+  _healthSource: {fileID: 0}
+  _body: {fileID: 0}
+--- !u!114 &2179051637313994380
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3553585510442637796}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7316eefc8d4f86c43b94afb39386487a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RogueAi.Guards::RogueAi.Guards.CastleGuard
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _sightRange: 18
+  _fieldOfView: 110
+  _eyeHeight: 2.0795085
+  _geometryLayers:
+    serializedVersion: 2
+    m_Bits: 1
+  _patrolSpeed: 1.8
+  _chaseSpeed: 3.8
+  _arrivalDistance: 1
+  _turnSpeed: 240
+  _patrolRoute: []
+  _maxHealth: 150
+  _alarm: {fileID: 0}
+  _shoutStrength: 0.8
+  _shoutRadius: 20

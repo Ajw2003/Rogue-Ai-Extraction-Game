@@ -46,6 +46,9 @@ namespace RogueAi.Raid
         [Tooltip("The castle's alert level. Reset at the start of every raid.")]
         [SerializeField] private AlarmFSMManager _alarm;
 
+        [Tooltip("Bakes the walkable surface over the generated castle. Without it guards cannot move.")]
+        [SerializeField] private CastleNavMeshBaker _navigation;
+
         [Header("Raid setup")]
         [Tooltip("Seed for the next raid. Left at 0, a fresh one is rolled per raid.")]
         [SerializeField] private int _fixedSeed;
@@ -158,6 +161,11 @@ namespace RogueAi.Raid
 
             if (_castleNetwork != null && (!isSpawned || isServer))
                 _castleNetwork.SetSeed(seed);
+
+            // The rooms only exist now, so the walkable surface has to be built between generating
+            // them and posting the garrison — a guard spawned before the bake lands off-mesh and
+            // stands still for the whole raid.
+            _navigation?.Rebuild();
 
             // Only the server populates the world; clients receive the loot objects as spawned network
             // objects rather than instantiating their own copies.
@@ -321,7 +329,8 @@ namespace RogueAi.Raid
         /// <summary>Wires the director up from code, for tests and for scenes built by tooling.</summary>
         public void Configure(ProceduralCastleGenerator generator, LootSpawner spawner,
             ExtractionZone zone, LairHubManager lair, AlarmFSMManager alarm = null,
-            CastleNetworkManager castleNetwork = null, GuardSpawner guardSpawner = null)
+            CastleNetworkManager castleNetwork = null, GuardSpawner guardSpawner = null,
+            CastleNavMeshBaker navigation = null)
         {
             UnsubscribeFromZone();
 
@@ -332,6 +341,7 @@ namespace RogueAi.Raid
             _alarm = alarm;
             _castleNetwork = castleNetwork;
             _guardSpawner = guardSpawner;
+            _navigation = navigation;
 
             SubscribeToZone();
         }

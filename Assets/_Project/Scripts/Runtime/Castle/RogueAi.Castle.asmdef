@@ -5,7 +5,8 @@
         "PurrNet.Runtime",
         "RogueAi.Core",
         "RogueAi.Acoustics",
-        "RogueAi.Alarm"
+        "RogueAi.Alarm",
+        "Unity.AI.Navigation"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
