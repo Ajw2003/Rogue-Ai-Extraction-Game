@@ -38,10 +38,21 @@ namespace RogueAi.EditorTools
     {
         // Tune here rather than hunting through the assembled scene.
         private const float CellSize = 12f;
-        private const float PlayerHeight = 2f;
+        private const float PlayerHeight = 1.8f;
         private const float PlayerRadius = 0.4f;
-        private const float EyeHeight = 1.6f;
+        private const float EyeHeight = 1.65f;
         private const float RaidSeconds = 300f;
+
+        /// <summary>Thickness of a room module's floor slab, i.e. the Y a room is walked on.</summary>
+        private const float FloorHeight = 0.3f;
+
+        /// <summary>
+        /// Clearance above the floor for the spawn probe. The slab's top face is a couple of
+        /// millimetres proud of FloorHeight (room_kit grows every stacked box slightly so flush
+        /// joints do not z-fight), so a capsule resting at exactly FloorHeight intersects it and
+        /// every candidate spawn reads as blocked.
+        /// </summary>
+        private const float FloorClearance = 0.05f;
 
         private const string SceneDirectory = "Assets/_Project/Scenes";
         private const string DataDirectory = "Assets/_Project/Data/Generated";
@@ -61,11 +72,15 @@ namespace RogueAi.EditorTools
             EnsureFolder(SceneDirectory);
             EnsureFolder(DataDirectory);
 
+            // The catalogues are loaded AFTER the new scene, not before: opening a scene unloads
+            // assets nothing in it references yet, which quietly turned every reference loaded
+            // above it into a null one — the generator, loot spawner and guard spawner were all
+            // being wired to nothing.
+            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+
             if (!TryLoadAuthoredAssets(out CastleRoomRegistry registry, out RaidLootTable lootTable,
                     out EnemyRoster roster))
                 return;
-
-            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
             BuildLight();
             BuildGround();
@@ -82,7 +97,7 @@ namespace RogueAi.EditorTools
             RaidDirector director = BuildDirector(generator, lootSpawner, guardSpawner, extraction,
                 lair, alarm, navigation);
 
-            GameObject player = BuildPlayer();
+            GameObject player = BuildPlayer(ResolveSpawn(generator));
             BuildHud(director, extraction, alarm, lair, player.GetComponentInChildren<LootInteractor>());
 
             EditorSceneManager.MarkSceneDirty(scene);
@@ -256,10 +271,83 @@ namespace RogueAi.EditorTools
 
         // --- Player -------------------------------------------------------------------------
 
-        private static GameObject BuildPlayer()
+        /// <summary>
+        /// Where the raid starts: standing on the floor of the extraction-exit room, which is the
+        /// room the raid both enters and leaves through. Derived from a real generated layout
+        /// rather than a fixed coordinate, and probed against the placed colliders so the player
+        /// never starts inside a wall or a set-piece.
+        ///
+        /// See docs/systems/scale.md ("Spawning") for the seed caveat.
+        /// </summary>
+        private static Vector3 ResolveSpawn(ProceduralCastleGenerator generator)
+        {
+            ProceduralCastleData layout = generator.Generate(generator.defaultSeed);
+            Vector3 room = ResolveSpawnRoom(layout);
+
+            // The rooms were instantiated a moment ago; without this their colliders are still at
+            // their old transforms and every overlap probe below reports clear.
+            Physics.SyncTransforms();
+
+            Vector3 spawn = FirstClearStandingPoint(room);
+            generator.ClearGenerated();
+            return spawn;
+        }
+
+        /// <summary>The world centre of the extraction-exit room, falling back outward as needed.</summary>
+        private static Vector3 ResolveSpawnRoom(ProceduralCastleData layout)
+        {
+            if (layout == null || layout.PlacedModules.Count == 0)
+            {
+                Debug.LogWarning("Plunderspell: empty castle layout; spawning the player at the origin.");
+                return Vector3.zero;
+            }
+
+            int index = layout.ExtractionExitIndex >= 0 ? layout.ExtractionExitIndex : layout.CryptStartIndex;
+            if (index < 0)
+                index = 0;
+            return layout.PlacedModules[index].Position;
+        }
+
+        /// <summary>
+        /// The first offset from <paramref name="room"/> where a player-sized capsule standing on
+        /// the floor touches nothing. Offsets fan outward from the room centre, because a room's
+        /// set-piece (a well, a stair core, a sarcophagus) is usually exactly there.
+        /// </summary>
+        private static Vector3 FirstClearStandingPoint(Vector3 room)
+        {
+            foreach (Vector2 offset in StandingOffsets())
+            {
+                Vector3 feet = room + new Vector3(offset.x, FloorHeight + FloorClearance, offset.y);
+                Vector3 bottom = feet + Vector3.up * PlayerRadius;
+                Vector3 top = feet + Vector3.up * (PlayerHeight - PlayerRadius);
+                // Triggers are ignored deliberately: the alarm's listening volume spans the whole
+                // castle, so counting it as an obstruction would reject every candidate.
+                if (!Physics.CheckCapsule(bottom, top, PlayerRadius, ~0, QueryTriggerInteraction.Ignore))
+                    return feet + Vector3.up * (PlayerHeight * 0.5f);
+            }
+
+            Debug.LogWarning("Plunderspell: no clear standing point in the spawn room; using its centre.");
+            return room + Vector3.up * (FloorHeight + FloorClearance + PlayerHeight * 0.5f);
+        }
+
+        /// <summary>Room-centre, then two rings of eight, out to just inside the walls.</summary>
+        private static IEnumerable<Vector2> StandingOffsets()
+        {
+            yield return Vector2.zero;
+            foreach (float radius in new[] { 2.5f, 4.25f })
+            {
+                for (int step = 0; step < 8; step++)
+                {
+                    float angle = step * Mathf.PI * 0.25f;
+                    yield return new Vector2(Mathf.Cos(angle) * radius, Mathf.Sin(angle) * radius);
+                }
+            }
+        }
+
+        private static GameObject BuildPlayer(Vector3 spawn)
         {
             var root = new GameObject("Player");
-            root.transform.position = new Vector3(CellSize * 5f, PlayerHeight * 0.5f, 0f);
+            root.transform.position = spawn;
 
             var body = root.AddComponent<Rigidbody>();
             body.freezeRotation = true;

@@ -35,6 +35,10 @@ namespace RogueAi.Castle
         [Tooltip("All room modules known to the generator.")]
         public List<CastleRoomModuleData> Modules = new List<CastleRoomModuleData>();
 
+        [Tooltip("One door-plug prefab per enclosed zone, used to seal an archway that faces an " +
+                 "empty cell. Zone is the only field that matters; RoomId is for readability.")]
+        public List<CastleRoomModuleData> DoorPlugs = new List<CastleRoomModuleData>();
+
         /// <summary>Returns all modules that belong to the requested zone.</summary>
         public List<CastleRoomModuleData> GetModulesForZone(CastleZone zone)
         {
@@ -45,6 +49,21 @@ namespace RogueAi.Castle
                     result.Add(Modules[i]);
             }
             return result;
+        }
+
+        /// <summary>
+        /// The door-plug prefab that fills an archway in <paramref name="zone"/>, or null when
+        /// none is registered. Plugs are per-zone because the archway is sized from the zone's
+        /// wall height, so one plug cannot fill a Crypt door and a Keep door both.
+        /// </summary>
+        public GameObject GetDoorPlugForZone(CastleZone zone)
+        {
+            for (int i = 0; i < DoorPlugs.Count; i++)
+            {
+                if (DoorPlugs[i] != null && DoorPlugs[i].Zone == zone)
+                    return DoorPlugs[i].Prefab;
+            }
+            return null;
         }
 
         /// <summary>Finds a module entry by its RoomId, or null if not present.</summary>

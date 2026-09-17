@@ -3,7 +3,7 @@ using UnityEditor;
 namespace RogueAi.EditorTools
 {
     /// <summary>
-    /// Forces Read/Write on the castle room models.
+    /// Forces Read/Write and baked axis conversion on the castle room models.
     ///
     /// The castle is instantiated from a seed at runtime, so its NavMesh is built at runtime too, and
     /// <c>NavMeshSurface</c> has to read the room meshes to do it. An unreadable mesh still bakes in
@@ -24,6 +24,11 @@ namespace RogueAi.EditorTools
 
             var importer = (ModelImporter)assetImporter;
             importer.isReadable = true;
+            // Without this a castle model imports with a 270-degree root rotation instead of 90,
+            // so the upright root the prefabs carry (see CastlePrefabOrientationFix) turns it
+            // upside down. Every model committed before this line had it ticked by hand; the one
+            // added after did not, and came into the scene inverted.
+            importer.bakeAxisConversion = true;
         }
     }
 }

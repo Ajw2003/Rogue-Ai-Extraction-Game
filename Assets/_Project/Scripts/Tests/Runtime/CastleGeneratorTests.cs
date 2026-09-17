@@ -119,6 +119,70 @@ namespace RogueAi.Tests
         }
 
         [Test]
+        public void Test_AdjacentRoomsAreDoorConnected()
+        {
+            var gen = MakeGenerator();
+
+            foreach (int seed in new[] { 42, 777, 12345, -9 })
+            {
+                ProceduralCastleData data = gen.Generate(seed);
+
+                var byCell = new Dictionary<Vector2Int, CastleZone>();
+                foreach (var pm in data.PlacedModules)
+                    byCell[pm.GridPosition] = pm.Zone;
+
+                var directions = new[]
+                {
+                    Vector2Int.right, Vector2Int.left, Vector2Int.up, Vector2Int.down
+                };
+
+                int connections = 0;
+                foreach (var pm in data.PlacedModules)
+                {
+                    if (!ProceduralCastleGenerator.IsEnclosedRoom(pm.Zone))
+                        continue;
+
+                    foreach (Vector2Int dir in directions)
+                    {
+                        if (!byCell.TryGetValue(pm.GridPosition + dir, out CastleZone neighbourZone))
+                            continue;
+                        if (!ProceduralCastleGenerator.IsEnclosedRoom(neighbourZone))
+                            continue;
+
+                        Assert.IsTrue(ProceduralCastleGenerator.HasArchwayFacing(pm.Zone, dir),
+                            $"seed {seed}: {pm.RoomId} at {pm.GridPosition} has no archway facing {dir}.");
+                        Assert.IsTrue(ProceduralCastleGenerator.HasArchwayFacing(neighbourZone, -dir),
+                            $"seed {seed}: the module at {pm.GridPosition + dir} has no archway facing {-dir}.");
+                        connections++;
+                    }
+                }
+
+                Assert.Greater(connections, 0,
+                    $"seed {seed}: expected at least one enclosed-room adjacency to check.");
+            }
+        }
+
+        [Test]
+        public void Test_CurtainWallIsNotAnEnclosedRoom()
+        {
+            Assert.IsFalse(ProceduralCastleGenerator.IsEnclosedRoom(CastleZone.CurtainWall));
+            Assert.IsFalse(ProceduralCastleGenerator.HasArchwayFacing(CastleZone.CurtainWall, Vector2Int.up));
+
+            foreach (CastleZone zone in new[]
+                     {
+                         CastleZone.OuterBailey, CastleZone.InnerWard, CastleZone.Keep, CastleZone.Crypt
+                     })
+            {
+                Assert.IsTrue(ProceduralCastleGenerator.IsEnclosedRoom(zone));
+                Assert.IsTrue(ProceduralCastleGenerator.HasArchwayFacing(zone, Vector2Int.up));
+                Assert.IsTrue(ProceduralCastleGenerator.HasArchwayFacing(zone, Vector2Int.down));
+                Assert.IsTrue(ProceduralCastleGenerator.HasArchwayFacing(zone, Vector2Int.left));
+                Assert.IsTrue(ProceduralCastleGenerator.HasArchwayFacing(zone, Vector2Int.right));
+                Assert.IsFalse(ProceduralCastleGenerator.HasArchwayFacing(zone, new Vector2Int(1, 1)));
+            }
+        }
+
+        [Test]
         public void Test_LevenshteinFromM1_StillPasses()
         {
             Assert.AreEqual(1, MisfireEngine.LevenshteinDistance("IGNIS", "AGNIS"));

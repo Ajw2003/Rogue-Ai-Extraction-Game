@@ -9,6 +9,18 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 06022da31627ac94592b529ed4e3bcd2, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.219438
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 06022da31627ac94592b529ed4e3bcd2, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.219438
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 06022da31627ac94592b529ed4e3bcd2, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.219438
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 06022da31627ac94592b529ed4e3bcd2, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -106,7 +118,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 5933718209957545553}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 0.36755314
+  m_Radius: 0.44820824
   m_Speed: 3
   m_Acceleration: 12
   avoidancePriority: 50
@@ -115,7 +127,7 @@ NavMeshAgent:
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
-  m_Height: 0.98405993
+  m_Height: 1.2
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 1
@@ -156,7 +168,7 @@ MonoBehaviour:
   _directChildren: []
   _sightRange: 16
   _fieldOfView: 110
-  _eyeHeight: 0.8856539
+  _eyeHeight: 1.08
   _geometryLayers:
     serializedVersion: 2
     m_Bits: 1

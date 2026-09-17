@@ -113,3 +113,20 @@ MonoBehaviour:
     Zone: 4
     Prefab: {fileID: 5334702773492980883, guid: c90c27a28041ca8469e12b5ff2af5ec2, type: 3}
     Weight: 2
+  DoorPlugs:
+  - RoomId: DoorPlugOuterBailey
+    Zone: 1
+    Prefab: {fileID: 9217928979009630254, guid: 16cef356c0332534899bef5de3254e62, type: 3}
+    Weight: 1
+  - RoomId: DoorPlugInnerWard
+    Zone: 2
+    Prefab: {fileID: 1464301172838922161, guid: f7a5f19579b760149b88e0dd23d2bbc0, type: 3}
+    Weight: 1
+  - RoomId: DoorPlugKeep
+    Zone: 3
+    Prefab: {fileID: 5565432028150986523, guid: 90c3f50a49246ba46b4c7053c5378092, type: 3}
+    Weight: 1
+  - RoomId: DoorPlugCrypt
+    Zone: 4
+    Prefab: {fileID: 8500490668443810507, guid: f407d50ff16123b4791ecc3c5820740f, type: 3}
+    Weight: 1

@@ -28,6 +28,16 @@ namespace RogueAi.Castle
         [Tooltip("Parent for instantiated rooms. Auto-created if left null.")]
         [SerializeField] private Transform roomContainer;
 
+        // Module geometry the door-plug placement has to agree with, authored in
+        // Tools/AssetPipeline/room_kit.py. Duplicated here rather than measured off the mesh
+        // because the layout is computed for data-only (prefab-free) castles too.
+        private const float k_ModuleFootprint = 12f;
+        private const float k_WallThickness = 0.5f;
+        private const float k_FloorThickness = 0.3f;
+
+        /// <summary>Distance from a module's centre to the middle of one of its four walls.</summary>
+        private const float k_ArchwayInset = k_ModuleFootprint / 2f - k_WallThickness / 2f;
+
         /// <summary>The most recent layout produced by <see cref="Generate"/>.</summary>
         public ProceduralCastleData LastGenerated { get; private set; }
 
@@ -96,6 +106,10 @@ namespace RogueAi.Castle
 
             // 7. Mark one OuterBailey module as the extraction exit.
             AssignExtractionExit(data);
+
+            // 8. Every enclosed room is authored with an archway on all four sides, so any side
+            //    with no neighbour is currently a hole in the outer face. Fill those.
+            SealOpenArchways(data, occupied);
 
             LastGenerated = data;
             return data;
@@ -240,6 +254,82 @@ namespace RogueAi.Castle
             }
 
             Debug.LogWarning("[CastleGen] No OuterBailey module placed — extraction exit unassigned.");
+        }
+
+        /// <summary>
+        /// Fills every archway that faces an empty cell with its zone's door plug, so an opening
+        /// either leads into the neighbouring room or is walled off — never out into nothing.
+        /// See docs/systems/scale.md ("Archways") for the sizes this relies on.
+        /// </summary>
+        private void SealOpenArchways(ProceduralCastleData data, Dictionary<Vector2Int, int> occupied)
+        {
+            if (registry == null)
+                return;
+
+            for (int i = 0; i < data.PlacedModules.Count; i++)
+            {
+                ProceduralCastleData.PlacedModule module = data.PlacedModules[i];
+                if (!IsEnclosedRoom(module.Zone))
+                    continue;
+
+                GameObject plug = registry.GetDoorPlugForZone(module.Zone);
+                if (plug == null)
+                    continue;
+
+                foreach (Vector2Int dir in FourDirs)
+                {
+                    if (occupied.ContainsKey(module.GridPosition + dir))
+                        continue;
+                    InstantiateDoorPlug(plug, module, dir);
+                }
+            }
+        }
+
+        /// <summary>Places one door plug in the archway of <paramref name="module"/> facing <paramref name="dir"/>.</summary>
+        private void InstantiateDoorPlug(GameObject plug, ProceduralCastleData.PlacedModule module,
+            Vector2Int dir)
+        {
+            EnsureContainer();
+
+            Vector3 position = module.Position
+                               + new Vector3(dir.x, 0f, dir.y) * k_ArchwayInset
+                               + Vector3.up * k_FloorThickness;
+
+            // The plug slab is authored spanning its own local X, which lands on world X once the
+            // prefab's Blender-to-Unity root rotation is composed in. A north/south archway needs
+            // that span across Z instead, hence the quarter turn on the east/west pair.
+            float yaw = dir.x != 0 ? 90f : 0f;
+            Quaternion rotation = Quaternion.Euler(0f, yaw, 0f) * plug.transform.rotation;
+
+            GameObject go = Instantiate(plug, position, rotation, roomContainer);
+            go.name = $"DoorPlug_{module.Zone}_{module.GridPosition.x}_{module.GridPosition.y}_{dir.x}_{dir.y}";
+            _instantiated.Add(go);
+        }
+
+        /// <summary>
+        /// Whether modules of <paramref name="zone"/> are enclosed chambers (floor plus four
+        /// walls) rather than stretches of the curtain wall itself.
+        /// </summary>
+        public static bool IsEnclosedRoom(CastleZone zone) => zone != CastleZone.CurtainWall;
+
+        /// <summary>
+        /// Whether a module of <paramref name="zone"/> is authored with an archway facing
+        /// <paramref name="direction"/>. Enclosed rooms open on all four sides
+        /// (see <c>_shell</c> in Tools/AssetPipeline/castle_builders.py), which is what makes
+        /// every 4-adjacency in the layout a real, walkable connection regardless of how the
+        /// generator happened to rotate either module.
+        /// </summary>
+        public static bool HasArchwayFacing(CastleZone zone, Vector2Int direction)
+        {
+            if (!IsEnclosedRoom(zone))
+                return false;
+
+            for (int i = 0; i < FourDirs.Length; i++)
+            {
+                if (FourDirs[i] == direction)
+                    return true;
+            }
+            return false;
         }
 
         /// <summary>Destroys every room GameObject instantiated by the last generation pass.</summary>
