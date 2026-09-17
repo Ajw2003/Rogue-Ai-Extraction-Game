@@ -14,14 +14,21 @@ from dataclasses import dataclass, field
 import bmesh
 from mathutils import Euler, Matrix, Vector
 
-# Surface families. The index is the face's material slot index, so the order here
-# is the order the authoring materials must be appended to the object.
+# Surface families of the castle household. The index is the face's material slot,
+# so this order is the order materials.build_authoring_set() must append them in.
+# Deliberately contains no gold: the moodboard spends orpiment on money alone.
 MATERIALS = {
-    "stone": 0,   # dark blue-grey vault masonry, the bulk of every construct
-    "gold": 1,    # warm arcane trim and filigree
-    "arcane": 2,  # emissive cyan energy: cores, eyes, sigils
-    "iron": 3,    # darker machined metal: joints, barrels, plating
-    "cloth": 4,   # deep violet robe and banner fabric
+    "wool": 0,     # undyed tunic, hose, surcoat, hound's coat
+    "leather": 1,  # boots, belts, straps, collar
+    "oak": 2,      # hafts, staves, the lantern's frame
+    "mail": 3,     # riveted iron mail, dark and rough
+    "steel": 4,    # helm, plate, blade — the only bright metal
+    "linen": 5,    # undershirts, coifs, grave wrappings
+    "flesh": 6,    # hands and faces
+    "bone": 7,     # skulls, teeth, the sergeant's horn
+    "madder": 8,   # the alarm's colour, worn by the man who raises it
+    "tallow": 9,   # lantern flame (emissive)
+    "lapis": 10,   # the voice, and whatever answers it (emissive, crypt only)
 }
 
 MIRROR = Matrix.Diagonal((-1.0, 1.0, 1.0, 1.0))
