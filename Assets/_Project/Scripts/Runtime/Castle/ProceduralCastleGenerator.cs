@@ -194,7 +194,11 @@ namespace RogueAi.Castle
                 return; // data-only layout; designer prefab not yet assigned.
 
             EnsureContainer();
-            GameObject go = Instantiate(entry.Prefab, worldPos, rot, roomContainer);
+            // Compose the facing with the prefab's own rotation rather than replacing it. The room
+            // prefabs carry the Blender Z-up -> Unity Y-up correction on their root, and passing a
+            // rotation to Instantiate overwrites it, which lays every room on its edge.
+            GameObject go = Instantiate(entry.Prefab, worldPos, rot * entry.Prefab.transform.rotation,
+                roomContainer);
             _instantiated.Add(go);
 
             var module = go.GetComponent<CastleRoomModule>();

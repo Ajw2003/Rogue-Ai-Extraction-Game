@@ -1,0 +1,107 @@
+[
+  {
+    "number": "5",
+    "title": "PCG: rooms do not connect and the floor plan does not read as a castle",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/5"
+  },
+  {
+    "number": "6",
+    "title": "Player is too tall for the rooms (scale mismatch between character and architecture)",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/6"
+  },
+  {
+    "number": "7",
+    "title": "No crosshair - cannot tell where you are aiming",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/7"
+  },
+  {
+    "number": "8",
+    "title": "Mouse is not locked or hidden during play",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/8"
+  },
+  {
+    "number": "9",
+    "title": "Player can still move and look around while the main menu is open",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/9"
+  },
+  {
+    "number": "10",
+    "title": "Enemies have no animations",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/10"
+  },
+  {
+    "number": "11",
+    "title": "No animations for the player or for doors",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/11"
+  },
+  {
+    "number": "12",
+    "title": "No visual feedback for taking or dealing damage",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/12"
+  },
+  {
+    "number": "13",
+    "title": "No visual feedback for spells",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/13"
+  },
+  {
+    "number": "14",
+    "title": "No usable health or damage model - nothing is distinguishable in play",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/14"
+  },
+  {
+    "number": "15",
+    "title": "No carryable objects placed in the level - picking anything up is not discoverable",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/15"
+  },
+  {
+    "number": "16",
+    "title": "Main menu has no art",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/16"
+  },
+  {
+    "number": "17",
+    "title": "Only one era (High Medieval) has art and models",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/17"
+  },
+  {
+    "number": "18",
+    "title": "No way to test combat",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/18"
+  },
+  {
+    "number": "19",
+    "title": "Modules float and snap inconsistently - grid spacing must be exact",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/19"
+  },
+  {
+    "number": "20",
+    "title": "Loot is flung across the map by physics at spawn",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/20"
+  },
+  {
+    "number": "21",
+    "title": "No portal - no asset and no way to travel to or from the lair",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/21"
+  },
+  {
+    "number": "22",
+    "title": "No VFX or SFX anywhere - spells, attacks, UI and casting failures are all silent",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/22"
+  },
+  {
+    "number": "23",
+    "title": "Castles look bland",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/23"
+  },
+  {
+    "number": "24",
+    "title": "EPIC: build the game loop end to end so there is something to actually play",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/24"
+  },
+  {
+    "number": "25",
+    "title": "Player spawn can be inside or flush against castle geometry",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/25"
+  }
+]

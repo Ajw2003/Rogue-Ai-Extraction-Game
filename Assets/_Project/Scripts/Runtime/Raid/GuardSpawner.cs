@@ -11,7 +11,11 @@ namespace RogueAi.Raid
     /// </summary>
     public class GuardSpawner : MonoBehaviour
     {
-        [Tooltip("Guard prefab. Without one the placements are data-only (planned, not spawned).")]
+        [Tooltip("Which enemy garrisons which zone. Takes precedence over the single guard prefab.")]
+        [SerializeField] private EnemyRoster _roster;
+
+        [Tooltip("Fallback guard prefab, used for any zone the roster does not cover. Without a " +
+                 "roster and without this, the placements are data-only (planned, not spawned).")]
         [SerializeField] private GameObject _guardPrefab;
 
         [Tooltip("Scales every zone's guard density. 0 disables the garrison entirely.")]
@@ -32,6 +36,7 @@ namespace RogueAi.Raid
 
         public float DensityScale { get => _densityScale; set => _densityScale = value; }
         public GameObject GuardPrefab { get => _guardPrefab; set => _guardPrefab = value; }
+        public EnemyRoster Roster { get => _roster; set => _roster = value; }
 
         /// <summary>Plans and spawns the garrison for a castle. Returns the plan.</summary>
         public IReadOnlyList<GuardPlacement> SpawnFor(ProceduralCastleData castle, int seed)
@@ -41,19 +46,43 @@ namespace RogueAi.Raid
             List<GuardPlacement> plan = GuardPlacementPlanner.Plan(castle, seed, _densityScale);
             _lastPlan.AddRange(plan);
 
-            if (_guardPrefab == null)
+            if (_roster == null && _guardPrefab == null)
                 return _lastPlan;
+
+            // A fourth independent stream, matching the planner's convention: picking *which* enemy
+            // must not shift the castle, the loot, or where the garrison stands.
+            var rng = new System.Random(unchecked(seed * 31 + 24593));
 
             EnsureContainer();
             for (int i = 0; i < plan.Count; i++)
-                Spawn(plan[i]);
+                Spawn(plan[i], rng);
 
             return _lastPlan;
         }
 
-        private void Spawn(GuardPlacement placement)
+        /// <summary>The enemy prefab for a placement: the roster's pick, else the fallback prefab.</summary>
+        private GameObject PrefabFor(GuardPlacement placement, System.Random rng)
         {
-            GameObject go = Instantiate(_guardPrefab, placement.Position, Quaternion.identity, _container);
+            if (_roster != null)
+            {
+                GameObject fromRoster = _roster.PickForZone(placement.Zone, rng);
+                if (fromRoster != null)
+                    return fromRoster;
+            }
+            return _guardPrefab;
+        }
+
+        private void Spawn(GuardPlacement placement, System.Random rng)
+        {
+            GameObject prefab = PrefabFor(placement, rng);
+            if (prefab == null)
+                return;
+
+            // The enemy prefabs keep the axis correction on their mesh child, so their root rotation
+            // is already identity — but compose rather than replace, so a prefab that corrects on the
+            // root (as the castle and loot prefabs do) also stands up correctly here.
+            GameObject go = Instantiate(prefab, placement.Position, prefab.transform.rotation,
+                _container);
             _spawned.Add(go);
 
             var guard = go.GetComponent<CastleGuard>();

@@ -18,17 +18,43 @@ namespace RogueAi.UI
         [Tooltip("Hide the HUD (e.g. for screenshots).")]
         [SerializeField] private bool _visible = true;
 
+        [Tooltip("Show the push-to-cast key and the spell list.")]
+        [SerializeField] private bool _showSpellbook = true;
+
+        // Mirrors MockVoiceInputService.keybindMap; the HUD only needs the words, not the service.
+        private static readonly string[] Spellbook =
+        {
+            "IGNIS", "FRANGO", "LEVO", "AURUM VOCO",
+            "TONITRUS", "SOMNUS", "CADAVER SURGE", "PORTA",
+        };
+
+        private RogueAi.Voice.PushToCastController _pushToCast;
         private RaidHudPresenter _presenter;
         private GUIStyle _label;
         private GUIStyle _big;
         private Texture2D _barBackground;
         private Texture2D _barFill;
 
-        private void Awake() => _presenter = GetComponent<RaidHudPresenter>();
+        private void Awake()
+        {
+            _presenter = GetComponent<RaidHudPresenter>();
+            _pushToCast = FindFirstObjectByType<RogueAi.Voice.PushToCastController>();
+        }
 
         private void OnGUI()
         {
             if (!_visible || _presenter == null)
+                return;
+
+            // IMGUI draws over the uGUI canvas, so an always-on HUD hides the main menu and the
+            // lair behind it. Only draw once the player is actually in the world.
+            if (Plunderspell.Core.GameServices.GameState == null)
+                return;
+
+            Plunderspell.Core.GameState state = Plunderspell.Core.GameServices.GameState.CurrentState;
+            if (state != Plunderspell.Core.GameState.Playing &&
+                state != Plunderspell.Core.GameState.Paused &&
+                state != Plunderspell.Core.GameState.Inventory)
                 return;
 
             EnsureStyles();
@@ -69,6 +95,8 @@ namespace RogueAi.UI
                     carrying, Centered(_label));
             }
 
+            DrawSpellbook();
+
             // Bottom-centre: the last cast, so a misfire is unmissable.
             if (!string.IsNullOrEmpty(model.LastCastLine))
             {
@@ -78,6 +106,41 @@ namespace RogueAi.UI
                     : Color.white;
                 GUI.Label(new Rect(Screen.width * 0.5f - 200f, Screen.height - 32f, 400f, 24f),
                     model.LastCastLine, style);
+            }
+        }
+
+        /// <summary>
+        /// The casting controls. Push-to-cast is not guessable: you hold a key to open the mic and
+        /// then say (here, press) the word, so without this the spells are invisible.
+        /// </summary>
+        private void DrawSpellbook()
+        {
+            if (!_showSpellbook)
+                return;
+
+            const float width = 210f;
+            const float lineHeight = 18f;
+            float height = lineHeight * (Spellbook.Length + 2) + 12f;
+            float x = Screen.width - width - 12f;
+            float y = Screen.height - height - 12f;
+
+            GUI.DrawTexture(new Rect(x, y, width, height), _barBackground);
+
+            var style = new GUIStyle(_label) { alignment = TextAnchor.MiddleLeft };
+            bool casting = _pushToCast != null && _pushToCast.IsCasting;
+
+            style.normal.textColor = casting ? new Color(0.45f, 0.95f, 0.55f) : Color.white;
+            GUI.Label(new Rect(x + 8f, y + 6f, width - 16f, lineHeight),
+                casting ? "CASTING - press a number" : "Hold V to cast", style);
+
+            style.normal.textColor = new Color(0.75f, 0.75f, 0.75f);
+            GUI.Label(new Rect(x + 8f, y + 6f + lineHeight, width - 16f, lineHeight),
+                "Shift = shout   Ctrl = whisper", style);
+
+            for (int i = 0; i < Spellbook.Length; i++)
+            {
+                GUI.Label(new Rect(x + 8f, y + 6f + lineHeight * (i + 2), width - 16f, lineHeight),
+                    $"{i + 1}   {Spellbook[i]}", style);
             }
         }
 

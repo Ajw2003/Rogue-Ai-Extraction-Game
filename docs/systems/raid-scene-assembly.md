@@ -1,0 +1,192 @@
+# Raid scene assembly
+
+How `Assets/_Project/Scenes/RaidScene.unity` comes to hold the castle, the haul and the garrison —
+and which authored assets it is assembled from.
+
+This document exists because the scene used to be assembled from *nothing*: `RaidSceneBuilder`
+generated its own box room, its own gold cube and its own capsule guard, so none of the modelled art
+in the project ever appeared in a raid. See "The placeholder era" below.
+
+Owns: `Assets/_Project/Scripts/Editor/RaidSceneBuilder.cs`,
+`Assets/_Project/Scripts/Editor/EnemyPrefabForge.cs`,
+`Assets/_Project/Scripts/Editor/RaidLootTableForge.cs`,
+`Assets/_Project/Scripts/Editor/CastleMeshImportSettings.cs`,
+`Assets/_Project/Scripts/Runtime/Raid/EnemyRoster.cs`,
+`Assets/_Project/Scripts/Runtime/Castle/CastleNavMeshBaker.cs`.
+
+## How it works
+
+Three authored catalogues feed the scene. Each is a committed asset, editable by hand; none is
+generated at runtime.
+
+| Catalogue | Asset | Holds |
+|---|---|---|
+| Rooms | `Data/Castle/CastleRoomRegistry.asset` | 25 room prefabs, 5 per zone |
+| Loot | `Data/Loot/RaidLootTable.asset` | 9 postings over 5 loot prefabs |
+| Enemies | `Data/Enemies/EnemyRoster.asset` | 18 postings over 10 enemy prefabs |
+
+**`Tools/Plunderspell/Build Playable Raid Scene`** wires those three into a scene and saves it. It
+places no geometry of its own beyond a ground plane, a light and the extraction pad — every mesh in a
+raid comes from a prefab built from a `.blend`. If any catalogue is missing the build aborts and
+names all of them, rather than falling back to primitives.
+
+**`Tools/Plunderspell/Forge Enemy Prefabs + Roster`** authors one prefab per model in
+`Assets/Models/Enemies/` and the roster that posts them. Each prefab is a **variant of the model**,
+not a copy, so re-exporting the `.blend` flows through to the prefab. Onto that variant it adds a
+`CapsuleCollider` and `NavMeshAgent` sized from the model's measured bounds, a
+`StatusEffectReceiver`, and a `CastleGuard` tuned per role. The tuning table lives in
+`EnemyPrefabForge.Specs`; the roles it is derived from are recorded in
+`Assets/Models/Enemies/enemy_manifest.json`.
+
+**`Tools/Plunderspell/Forge Raid Loot Table`** pairs the five loot prefabs with the zones they are
+found in. Worth climbs inward — Copper Pot (15) at the wall, Ancient Relic (500) in the crypt — so
+the long carry out is what the valuable things cost.
+
+### Enemy postings
+
+Every zone draws from a mix, with the common soldiery outside and the rare, dangerous things deep:
+
+| Zone | Roster |
+|---|---|
+| CurtainWall | Watchman (12), HexTurret (4) |
+| OuterBailey | Watchman (10), ManAtArms (8), WarHound (6) |
+| InnerWard | ManAtArms (8), Sergeant (5), WarHound (6), SigilWisp (5) |
+| Keep | Sergeant (5), SigilWisp (4), VaultWarden (6), HexTurret (3), ArcRevenant (3) |
+| Crypt | VaultWarden (5), ArcRevenant (5), CryptRisen (12), GildedColossus (2) |
+
+`GuardPlacementPlanner` still decides *how many* guards stand *where* and what they walk; the roster
+only answers *which one*, from a fourth seed-derived RNG stream (`seed * 31 + 24593`) so picking an
+enemy cannot shift the castle, the loot, or where the garrison stands.
+
+### Navigation
+
+The castle is instantiated from the seed at runtime, so its NavMesh is built at runtime too. A bake
+done in the Editor would only ever cover the empty ground plane.
+
+`RaidDirector.BuildCastle` calls `CastleNavMeshBaker.Rebuild()` in the one window where it works:
+**after** the rooms are instantiated and **before** the garrison spawns. A guard spawned before the
+bake lands off-mesh and stands still for the entire raid.
+
+`CastleMeshImportSettings` forces Read/Write on everything under `Art/Models/Castle/`, because
+`NavMeshSurface` has to read those meshes to bake them. It is an `AssetPostprocessor` rather than a
+one-off pass so that re-exporting a `.blend` cannot quietly undo it.
+
+### Orientation
+
+The models come from Blender (Z-up) into Unity (Y-up), and the three prefab families do **not** agree
+on where that correction lives. This was measured by instantiating each prefab at candidate rotations
+and reading world bounds, not reasoned about:
+
+| Family | Root rotation | Upright when instantiated with |
+|---|---|---|
+| Castle rooms | `(90,0,0)` (repaired) | the prefab's own root rotation |
+| Loot | `(270,0,0)` | the prefab's own root rotation |
+| Enemies | identity (correction on mesh child) | the prefab's own root rotation |
+
+The castle prefabs were originally saved with a root of `(270,0,0)` *on top of* their mesh child's
+own `(270,0,0)`, which composes to a 180-degree flip about X — the room hangs below the floor.
+`Tools/Plunderspell/Fix Castle Prefab Orientation` sets those roots to `(90,0,0)`.
+
+Because every family is now upright at its own root rotation, the rule at every spawn site is the
+same: **compose with `prefab.transform.rotation`, never replace it.** `Instantiate(prefab, pos, rot,
+parent)` overwrites the root rotation, which is what laid every room on its edge.
+
+### Getting into a raid
+
+The raid no longer starts on scene load. The flow is
+**Main menu -> Lair -> Set Out -> raid -> back to the Lair**:
+
+- `MainMenuScreen`'s Play goes to `GameState.Lair`, not straight to `Playing`.
+- `LairScreen` shows the debt, the banked gold and the four eras, and reads `LairHubManager`
+  directly. Set Out moves to `GameState.Playing`.
+- `RaidBootstrapper` listens for that transition and calls `RaidDirector.StartRaid()`, taking the
+  era from the lair. It ignores Paused/Inventory -> Playing, which are returns, not departures.
+- When `RaidDirector.RaidResolved` fires, the bootstrapper puts the game back in `GameState.Lair`
+  so the takings land against the debt.
+- `_autoStart` still exists on `RaidBootstrapper` but defaults to **false**. Turn it on to skip the
+  menu while iterating on the raid itself.
+
+`RaidHudView` only draws in `Playing`, `Paused` or `Inventory`. It is IMGUI, which renders over the
+uGUI canvas, so an always-on HUD sits on top of the menu and the lair.
+
+## Invariants
+
+- **The scene is assembled from authored assets or not at all.** `RaidSceneBuilder` aborts when a
+  catalogue is missing. The silent fallback to primitives is what hid the problem for so long.
+- **Enemy prefabs are variants of their model.** Never copies — a copy severs the link to the
+  `.blend` and the art stops flowing through.
+- **Every zone has at least one enemy posting and one loot posting.** A zone with an empty pool
+  spawns nothing there, silently.
+- **The NavMesh is baked between castle generation and guard spawning.** Not in `Start()`, not
+  in the Editor.
+- **Spawn sites compose with the prefab's rotation, never replace it.** Passing a bare rotation to
+  `Instantiate` discards the Blender axis correction the prefab root carries.
+- **Castle models are Read/Write enabled.** An unreadable mesh still bakes in the Editor and
+  silently produces no surface in a player build.
+
+## Traps
+
+- **Loot can be thrown by its own spawn.** `LootPlacementPlanner` is pure, so it knows a room's
+  centre but not the shape of the room's mesh. It spawns loot 0.5 m above the room origin, scattered
+  up to 3 m. Against the old flat placeholder floor that was always safe; against real room geometry
+  a piece can spawn *inside* a wall or a prop, and PhysX ejects an overlapping rigidbody hard.
+  Measured on seed-varied runs: roughly **2–7 of ~19 pieces** per raid end up flung into the air or
+  out of the world. This is a pre-existing defect that the real art made visible; it is **not fixed**.
+  Reducing `ScatterRadius` from 3 m to 1 m only moved it from 7/19 to 5/18, so the dominant cause is
+  props at the room centre, not the scatter. A proper fix needs the spawner to find a clear resting
+  spot (the planner must stay pure), and should be done with that constraint in mind — an earlier
+  attempt that raycast for the floor made it *worse* (15/22) by landing loot on room roofs.
+
+- **`GameServices` is initialised after scene `OnEnable`.** `UIBootstrapper` calls
+  `GameServices.Initialize()` from `[RuntimeInitializeOnLoadMethod(AfterSceneLoad)]`, which runs
+  *later* than the `Awake`/`OnEnable` of objects already in the scene. Anything in a scene that
+  touches `GameServices` from `OnEnable` must call `Initialize()` itself first — it is idempotent.
+  Not doing so threw a NullReferenceException that silently ate the whole menu-to-raid transition.
+
+- **Play mode does not tick while the Editor is unfocused.** `Application.runInBackground` is now on
+  in Player Settings, but the Editor still needs `unity command set_autotick --enable true` to run
+  frames while being driven from the CLI. Without it a driven Play session sits at frame 1 forever
+  and every "nothing spawned" reading is a lie.
+
+- **PhysX does not see a new collider until transforms are synced.** The rooms are instantiated and
+  the loot is spawned in the same frame, so `LootSpawner.SpawnFor` calls `Physics.SyncTransforms()`
+  first. Without it, queries run against an empty physics scene.
+
+- **Room centres have no floor collider.** A downward ray from a room's centre passes through the
+  room and hits the ground plane at y = 0. The room prefabs are shells; the ground plane is the
+  floor. Anything probing for "the floor of this room" needs to know that.
+
+- **`AssetDatabase.GenerateUniqueAssetPath` is not idempotent.** `RaidSceneBuilder` used it to save
+  generated assets, so every re-run minted `GeneratedLootTable 1.asset`, `… 2.asset` and left the
+  scene pointing at the original. It now overwrites a fixed path instead. The stale duplicates still
+  in `Data/Generated/` are from that era.
+
+- **`GildedColossus` is genuinely rare.** Weight 2 in the Crypt only; it appeared twice in 523 spawns
+  across 40 seeds. That is intended for a vault boss, but it means a spot-check of one raid will
+  usually not contain one.
+
+## The placeholder era
+
+Before this, `RaidSceneBuilder` generated everything it needed at build time: a `GeneratedRoomRegistry`
+whose only entry was a primitive box room used for all five zones, a `GeneratedLootTable` of five
+identical gold cubes, and a capsule `CastleGuard` with no `NavMeshAgent` — so the garrison could not
+have moved even if a NavMesh had existed, and none did.
+
+Meanwhile the project already contained 25 modelled castle rooms wired into a complete
+`CastleRoomRegistry`, 5 modelled loot prefabs with colliders and `LootPickup` data, and 10 rigged
+enemy models. None of it was referenced by anything. The builder's own doc comment described this as
+intentional ("Everything it generates is placeholder… a harness for playing the game, not the art
+pass") — the harness simply outlived the art arriving.
+
+## Verification
+
+Driven against a live Editor through the Unity CLI pipeline package (`unity command …`). On a
+representative raid:
+
+- 40–48 castle rooms instantiated, ~12–15k triangles of modelled geometry
+- all 5 loot prefabs present; all 10 enemy prefabs reachable across 40 seeds (523 spawns)
+- every spawned enemy on the NavMesh (13/13, 12/12, 15/15 on separate runs)
+- same seed twice produces an identical garrison
+- 116/116 tests pass (12 EditMode, 104 PlayMode)
+
+Screenshots in `Raid_Scene_Verification/`.

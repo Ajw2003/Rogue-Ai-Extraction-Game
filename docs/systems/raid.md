@@ -19,6 +19,11 @@ Assemblies: `RogueAi.Raid` (loop, spawning), `RogueAi.Guards` (the garrison), `R
   independent RNG streams derived from it, so changing one cannot shift the others. Four peers build
   an identical raid without a byte of layout or loot data crossing the wire.
 
+- **The scene the loop runs in is assembled from authored assets** — 25 castle room prefabs, 5 loot
+  prefabs and 10 enemy prefabs, catalogued in three ScriptableObjects. See
+  [raid-scene-assembly.md](raid-scene-assembly.md) for how the scene, the prefabs and the enemy
+  roster are built and verified.
+
 - **`LootPlacementPlanner` / `GuardPlacementPlanner`** are pure functions of (layout, table, seed).
   No scene, no components, no time — which is what makes the placement *rules* assertable rather
   than eyeballed. `LootSpawner` / `GuardSpawner` are the halves that touch the scene, and only the
@@ -68,3 +73,7 @@ Assemblies: `RogueAi.Raid` (loop, spawning), `RogueAi.Guards` (the garrison), `R
 
 - **A conjured `LootItem` must be an instance, not the shared asset.** Aurum Voco's worth varies
   with cast volume, and writing it onto the template rewrites every other pile in the raid.
+
+- **Spawned loot can be flung by physics.** The planner is pure and places loot 0.5 m above a room's
+  centre, which can be inside real room geometry; PhysX then ejects it. Open defect — see
+  [raid-scene-assembly.md](raid-scene-assembly.md) "Traps".

@@ -19,7 +19,8 @@
         "RogueAi.Playtest",
         "RogueAi.Raid",
         "RogueAi.Status",
-        "RogueAi.UI"
+        "RogueAi.UI",
+        "Unity.AI.Navigation"
     ],
     "includePlatforms": [
         "Editor"
