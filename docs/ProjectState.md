@@ -54,6 +54,21 @@ None of these are tracked against a specific milestone above; they're cross-cutt
 correctness gaps surfaced by actually looking at the built scene; see "Cross-cutting issues" below
 for one further failure mode of the same kind.
 
+## The moodboard gap-closure backlog
+
+A second, separate audit pass (2026-09-16, same day as the docs-structure pass above) checked the
+built game against `docs/plunderspell.md` and the mood board pillar by pillar, rather than against
+the raid loop the playtesting backlog above was filed against. Full findings and reasoning:
+[`docs/plans/moodboard-gap-closure.md`](plans/moodboard-gap-closure.md). Headline: the voice and
+physics-loot pillars are real and mostly match the pitch; **the Mystical Market pillar (the fourth
+named pillar in the pitch) does not exist anywhere in the codebase**, the Lair is a menu screen
+rather than the physical place the pitch describes, and half the built bestiary (SigilWisp,
+VaultWarden, HexTurret, ArcRevenant, GildedColossus) reads as fantasy monsters with no basis in the
+pitch's human "household" antagonists — flagged as an open creative-direction question, not a bug.
+34 new issues are filed via `Tools/mkissues_moodboard_gap.py`
+(manifest: `docs/generated/github-issues-moodboard-gap.json`), additive to and non-duplicative of
+the 21-item backlog above.
+
 ## Cross-cutting issues that belong to no milestone
 
 - **The `isSpawned`/`isServer` trap has already caused three separate silent failures** (voice
@@ -65,4 +80,5 @@ for one further failure mode of the same kind.
   `NetworkBehaviour` is at risk of the same bug on its first offline/single-player run.
 - **No real Unity Editor player build has ever been produced or checked.** There is still no
   `BuildPipeline.BuildPlayer()` entry point anywhere in `Assets/` (confirmed by grep as of this
-  pass). Whether the project actually builds and runs as a standalone player is unknown.
+  pass). Whether the project actually builds and runs as a standalone player is unknown. Now
+  tracked as a GitHub issue in the moodboard gap-closure backlog, above.

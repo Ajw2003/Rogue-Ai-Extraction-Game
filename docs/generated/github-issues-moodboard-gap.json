@@ -1,0 +1,172 @@
+[
+  {
+    "number": "26",
+    "title": "EPIC: The Mystical Market pillar does not exist",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/26"
+  },
+  {
+    "number": "27",
+    "title": "Build the market hub - a place, a shop UI, and persistent \"stays bought\" state",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/27"
+  },
+  {
+    "number": "28",
+    "title": "Author wares and pricing for all four market stalls",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/28"
+  },
+  {
+    "number": "29",
+    "title": "Market mark-up and \"spend the leftover after the debt\" are unimplemented rules",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/29"
+  },
+  {
+    "number": "30",
+    "title": "EPIC: The Lair is a menu screen, not the physical place the pitch describes",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/30"
+  },
+  {
+    "number": "31",
+    "title": "Build a 3D Lair space to replace the menu screen",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/31"
+  },
+  {
+    "number": "32",
+    "title": "Lair lighting and mood pass - \"one candle, one fire, falling into black\"",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/32"
+  },
+  {
+    "number": "33",
+    "title": "Debt and hoard have no in-fiction representation - only HUD numbers",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/33"
+  },
+  {
+    "number": "34",
+    "title": "EPIC: No icon set exists anywhere - spells, weapons, loot, eras, status effects",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/34"
+  },
+  {
+    "number": "35",
+    "title": "Era-specific hazards from the pitch are entirely unimplemented",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/35"
+  },
+  {
+    "number": "36",
+    "title": "Era-specific loot catalogue is unauthored - five generic pieces stand in for the pitch's four eras",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/36"
+  },
+  {
+    "number": "37",
+    "title": "No melee combat system exists - reach/heft/noise stats aren't a swing mechanic yet",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/37"
+  },
+  {
+    "number": "38",
+    "title": "Weapon roster doesn't match the pitch's twelve named weapons",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/38"
+  },
+  {
+    "number": "39",
+    "title": "Ranged weapons have no aim or fire implementation",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/39"
+  },
+  {
+    "number": "40",
+    "title": "Weapon and loot icons for UI do not exist",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/40"
+  },
+  {
+    "number": "41",
+    "title": "Bestiary thematic divergence: half the enemy roster reads as fantasy monsters, not the pitch's household",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/41"
+  },
+  {
+    "number": "42",
+    "title": "Guards are silent - no patrol murmur, alert bark, or chase shout",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/42"
+  },
+  {
+    "number": "43",
+    "title": "GildedColossus (vault boss) has no unique behaviour, telegraph, or arena design",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/43"
+  },
+  {
+    "number": "44",
+    "title": "Door/socket types (murder-hole, arrow-loop) are layout tags only, not functional hazards",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/44"
+  },
+  {
+    "number": "45",
+    "title": "Drawbridge has no operable mechanism despite existing as a modelled room",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/45"
+  },
+  {
+    "number": "46",
+    "title": "Portal has no closing-countdown feedback - \"the way home begins to narrow\" is invisible",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/46"
+  },
+  {
+    "number": "47",
+    "title": "No loudness meter - the whisper/normal/shout dial the pitch calls \"the whole trick\" is invisible",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/47"
+  },
+  {
+    "number": "48",
+    "title": "Casting is invisible to teammates - \"friends hear the word half a heartbeat before it resolves\" isn't represented",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/48"
+  },
+  {
+    "number": "49",
+    "title": "Recognised phrase has no on-screen caption",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/49"
+  },
+  {
+    "number": "50",
+    "title": "M1's acceptance criterion has never been measured - real microphone, multi-accent recognition",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/50"
+  },
+  {
+    "number": "51",
+    "title": "No camera shake, hit-stop, or impact juice anywhere",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/51"
+  },
+  {
+    "number": "52",
+    "title": "Throwing and swinging have no wind-up or follow-through animation weight",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/52"
+  },
+  {
+    "number": "53",
+    "title": "No standalone Unity player build has ever been produced",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/53"
+  },
+  {
+    "number": "54",
+    "title": "No performance budget or profiling pass exists for authored-art raids",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/54"
+  },
+  {
+    "number": "55",
+    "title": "M2's acceptance criterion has never been run - a real four-player raid start to finish",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/55"
+  },
+  {
+    "number": "56",
+    "title": "Settings menu completeness (audio mix, keybinds, mic device) is unverified",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/56"
+  },
+  {
+    "number": "57",
+    "title": "\"Every word can also be bound to a key\" has no real settings-exposed keyboard-casting mode",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/57"
+  },
+  {
+    "number": "58",
+    "title": "Steam lobby/invite flow has no art or branding pass",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/58"
+  },
+  {
+    "number": "59",
+    "title": "The pitch's six reference lighting frames have no concept art or lighting targets",
+    "url": "https://github.com/Ajw2003/Rogue-Ai-Extraction-Game/issues/59"
+  }
+]

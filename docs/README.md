@@ -65,6 +65,12 @@ together and what was deliberately left undocumented, and why.
   built from, including the provenance note around the excluded `feature/Owen/PCG` branch.
 - [`docs/plans/steam-coop-framework.md`](plans/steam-coop-framework.md) — the plan for porting the
   predecessor project's Steam co-op framework, which Plunderspell was forked from.
+- [`docs/plans/moodboard-gap-closure.md`](plans/moodboard-gap-closure.md) — a full audit of the
+  built game against the pitch bible and mood board, pillar by pillar, plus the 34-item backlog it
+  produced (`Tools/mkissues_moodboard_gap.py`,
+  [`docs/generated/github-issues-moodboard-gap.json`](generated/github-issues-moodboard-gap.json)
+  once filed). Flags one open creative-direction question (the bestiary's thematic split) that
+  needs a decision, not just more art.
 - [`docs/prompts/plunderspell-fable.md`](prompts/plunderspell-fable.md) — the build-and-test
   prompt used to drive an agent session on this project.
 - [`docs/generated/`](generated/README.md) — the castle-generator and UI HTML previews, and the
