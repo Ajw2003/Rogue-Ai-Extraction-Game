@@ -40,7 +40,7 @@ namespace Plunderspell.UI.Screens
             version.rectTransform.anchoredPosition = new Vector2(-20f, 20f);
         }
 
-        private void OnPlayClicked() => GameServices.GameState.ChangeState(GameState.Playing);
+        private void OnPlayClicked() => GameServices.GameState.ChangeState(GameState.Lair);
 
         private void OnSettingsClicked() => GameServices.GameState.ChangeState(GameState.Settings);
 

@@ -3,7 +3,9 @@
     "rootNamespace": "Plunderspell.UI",
     "references": [
         "Plunderspell.Core",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "RogueAi.Lair",
+        "RogueAi.Inventory"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

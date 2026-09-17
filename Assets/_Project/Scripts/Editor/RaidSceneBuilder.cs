@@ -247,7 +247,8 @@ namespace RogueAi.EditorTools
                 navigation);
 
             var bootstrapper = go.AddComponent<RaidBootstrapper>();
-            bootstrapper.Configure(autoStart: true, era: HistoricalEra.HighMedieval);
+            // The raid starts when the player sets out from the lair, not on scene load.
+            bootstrapper.Configure(autoStart: false, era: HistoricalEra.HighMedieval);
 
             extraction.SetRaidDuration(RaidSeconds);
             return director;

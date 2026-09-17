@@ -91,6 +91,24 @@ Because every family is now upright at its own root rotation, the rule at every 
 same: **compose with `prefab.transform.rotation`, never replace it.** `Instantiate(prefab, pos, rot,
 parent)` overwrites the root rotation, which is what laid every room on its edge.
 
+### Getting into a raid
+
+The raid no longer starts on scene load. The flow is
+**Main menu -> Lair -> Set Out -> raid -> back to the Lair**:
+
+- `MainMenuScreen`'s Play goes to `GameState.Lair`, not straight to `Playing`.
+- `LairScreen` shows the debt, the banked gold and the four eras, and reads `LairHubManager`
+  directly. Set Out moves to `GameState.Playing`.
+- `RaidBootstrapper` listens for that transition and calls `RaidDirector.StartRaid()`, taking the
+  era from the lair. It ignores Paused/Inventory -> Playing, which are returns, not departures.
+- When `RaidDirector.RaidResolved` fires, the bootstrapper puts the game back in `GameState.Lair`
+  so the takings land against the debt.
+- `_autoStart` still exists on `RaidBootstrapper` but defaults to **false**. Turn it on to skip the
+  menu while iterating on the raid itself.
+
+`RaidHudView` only draws in `Playing`, `Paused` or `Inventory`. It is IMGUI, which renders over the
+uGUI canvas, so an always-on HUD sits on top of the menu and the lair.
+
 ## Invariants
 
 - **The scene is assembled from authored assets or not at all.** `RaidSceneBuilder` aborts when a
@@ -118,6 +136,12 @@ parent)` overwrites the root rotation, which is what laid every room on its edge
   props at the room centre, not the scatter. A proper fix needs the spawner to find a clear resting
   spot (the planner must stay pure), and should be done with that constraint in mind — an earlier
   attempt that raycast for the floor made it *worse* (15/22) by landing loot on room roofs.
+
+- **`GameServices` is initialised after scene `OnEnable`.** `UIBootstrapper` calls
+  `GameServices.Initialize()` from `[RuntimeInitializeOnLoadMethod(AfterSceneLoad)]`, which runs
+  *later* than the `Awake`/`OnEnable` of objects already in the scene. Anything in a scene that
+  touches `GameServices` from `OnEnable` must call `Initialize()` itself first — it is idempotent.
+  Not doing so threw a NullReferenceException that silently ate the whole menu-to-raid transition.
 
 - **Play mode does not tick while the Editor is unfocused.** `Application.runInBackground` is now on
   in Player Settings, but the Editor still needs `unity command set_autotick --enable true` to run

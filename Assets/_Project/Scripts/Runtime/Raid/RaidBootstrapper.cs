@@ -1,3 +1,4 @@
+using Plunderspell.Core;
 using RogueAi.Inventory;
 using UnityEngine;
 
@@ -15,8 +16,9 @@ namespace RogueAi.Raid
     public class RaidBootstrapper : MonoBehaviour
     {
         [Header("Start")]
-        [Tooltip("Begin a raid as soon as the scene runs, rather than waiting in the Lair.")]
-        [SerializeField] private bool _autoStart = true;
+        [Tooltip("Begin a raid as soon as the scene runs, ignoring the menu and the lair. Off by " +
+                 "default: the raid starts when the player sets out, so the menu is reachable.")]
+        [SerializeField] private bool _autoStart = false;
 
         [Tooltip("Era the auto-started raid is set in.")]
         [SerializeField] private HistoricalEra _era = HistoricalEra.HighMedieval;
@@ -36,6 +38,50 @@ namespace RogueAi.Raid
         private bool _started;
 
         private void Awake() => _director = GetComponent<RaidDirector>();
+
+        private void OnEnable()
+        {
+            // UIBootstrapper initialises the services on AfterSceneLoad, which runs *after* this
+            // OnEnable. Initialize() is idempotent, so calling it here removes the order dependency
+            // rather than relying on one.
+            GameServices.Initialize();
+
+            GameServices.GameState.StateChanged += OnGameStateChanged;
+            if (_director != null)
+                _director.RaidResolved += OnRaidResolved;
+        }
+
+        private void OnDisable()
+        {
+            if (GameServices.GameState != null)
+                GameServices.GameState.StateChanged -= OnGameStateChanged;
+            if (_director != null)
+                _director.RaidResolved -= OnRaidResolved;
+        }
+
+        /// <summary>Back to the lair once the takings are counted, so the debt can be paid down.</summary>
+        private void OnRaidResolved(float worthExtracted, int playersSaved)
+        {
+            GameServices.GameState.ChangeState(GameState.Lair);
+        }
+
+        /// <summary>
+        /// Sets out when the player leaves the lair, and returns them to it when the raid resolves.
+        /// The era comes from the lair rather than this component, so whatever they picked is what
+        /// they raid in.
+        /// </summary>
+        private void OnGameStateChanged(GameState previous, GameState next)
+        {
+            if (next != GameState.Playing || previous == GameState.Paused ||
+                previous == GameState.Inventory)
+                return;
+
+            if (_director.Phase == RaidPhase.Resolved)
+                _director.ReturnToLair();
+
+            if (_director.Phase == RaidPhase.InLair)
+                _director.StartRaid();
+        }
 
         private void Update()
         {
