@@ -31,6 +31,7 @@ import builders  # noqa: E402
 import castle_builders  # noqa: E402
 import manifest  # noqa: E402
 import mesh_kit as mk  # noqa: E402
+import room_kit as rk  # noqa: E402
 import validate_in_blender as val  # noqa: E402
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -52,7 +53,10 @@ def build_one(spec) -> tuple[object, list[str]]:
     builder_fn(bm, uv)
 
     obj = mk.finalize_to_object(bm, spec["key"], mk.used_pigments(), PALETTE_PNG)
-    issues = val.validate_object(obj, spec["tri_budget"])
+    # Only castle modules are placed on the generator's grid; a weapon or a
+    # goblet has no cell to stay inside of.
+    footprint = rk.FOOTPRINT if spec["subdir"] == "Castle" else None
+    issues = val.validate_object(obj, spec["tri_budget"], max_footprint=footprint)
     tris = sum(len(p.vertices) - 2 for p in obj.data.polygons)
     return obj, issues, tris, manifest.fingerprint_mesh(obj)
 

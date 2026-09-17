@@ -5,10 +5,18 @@ mesh_kit's primitives the same way builders.py stacks them for props.
 Runs only inside Blender's Python (imports bpy/bmesh/mathutils via mesh_kit).
 
 Every module is authored bottom-flush (lowest vertex at local Z=0) and
-centred on the local X/Y origin, sized to sit inside the ~12m grid cell
+centred on the local X/Y origin, sized to fill the 12m grid cell
 ProceduralCastleGenerator places modules on (see `cellSize` in
-ProceduralCastleGenerator.cs) with a small seam so two placed modules'
-outer walls never sit flush and z-fight.
+ProceduralCastleGenerator.cs) exactly. FOOTPRINT == cellSize deliberately:
+a deliberate seam smaller than the cell leaves a visible gap at every
+module boundary, which is what issue 19 was. Adjacent modules' outer walls
+are therefore coincident by design, and the OVERLAP growth below (a few
+millimetres, well under the grid's precision) is what keeps them from
+z-fighting rather than a whole-module inset.
+
+validate_in_blender enforces this: any castle module whose XY bounding box
+reaches past +/-(FOOTPRINT/2) (plus a tolerance for OVERLAP) fails the
+build, so a module can never silently grow back out of its cell.
 
 Doors are left as gaps in a wall run built from up to three box segments
 (two jambs + a lintel over the opening) rather than a boolean cut — same
@@ -21,7 +29,7 @@ from mathutils import Euler
 
 import mesh_kit as mk
 
-FOOTPRINT = 11.2          # module footprint inside the 12m grid cell
+FOOTPRINT = 12.0          # module footprint == ProceduralCastleGenerator cellSize
 HALF = FOOTPRINT / 2
 WALL_T = 0.5
 FLOOR_T = 0.3
@@ -45,6 +53,16 @@ _AXIS = {"north": "x", "south": "x", "east": "y", "west": "y"}
 def door(height, width=2.6, height_frac=0.72):
     """A door/archway opening sized relative to a wall's clear height."""
     return (width, min(height * height_frac, height - 0.3))
+
+
+def opening_size(height, trim=True):
+    """The archway size a wall of clear `height` actually ends up with —
+    `door()` clamped the way wall_run clamps it. A door plug built from
+    this exactly fills the hole; built from `door()` alone it would be too
+    tall for any wall whose trim band eats into the opening."""
+    ow, oh = door(height)
+    stone_h = height - TRIM_BAND if trim else height
+    return ow, min(oh, stone_h - 0.25)
 
 
 def paint_box(bm, uv, pigment, loc, size, grow_axis="z"):

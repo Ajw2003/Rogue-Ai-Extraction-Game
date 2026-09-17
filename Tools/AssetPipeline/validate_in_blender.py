@@ -14,9 +14,14 @@ import palette as pal
 QUAD_DOMINANT_MIN = 0.75
 UV_EPS = 1e-4
 BASE_PIVOT_TOLERANCE = 0.03  # metres of slack for "pivot sits at the base"
+# room_kit.paint_box grows every stacked box by OVERLAP (0.02) about its
+# centre, so a wall sitting exactly on the cell edge legitimately reaches
+# HALF + 0.01. Anything past this is a module genuinely hanging into its
+# neighbour's cell.
+FOOTPRINT_TOLERANCE = 0.05
 
 
-def validate_object(obj, tri_budget: int) -> list[str]:
+def validate_object(obj, tri_budget: int, max_footprint: float | None = None) -> list[str]:
     issues = []
 
     # ── transforms ──────────────────────────────────────────────
@@ -40,6 +45,22 @@ def validate_object(obj, tri_budget: int) -> list[str]:
     min_z = min((v.co.z for v in bm.verts), default=0.0)
     if abs(min_z) > BASE_PIVOT_TOLERANCE:
         issues.append(f"pivot not at base: lowest vertex Z={min_z:.4f} (want ~0)")
+
+    # ── footprint: the module stays inside its grid cell ────────
+    #    The generator spaces cells by cellSize and never inspects the
+    #    mesh, so a module wider than its cell silently intersects its
+    #    neighbour — issue 19. Checking each side separately rather than
+    #    the span catches an off-centre module that is narrow enough to
+    #    pass a width check yet still overhangs one edge.
+    if max_footprint is not None:
+        half = max_footprint / 2 + FOOTPRINT_TOLERANCE
+        for axis, name in ((0, "X"), (1, "Y")):
+            lo = min(v.co[axis] for v in bm.verts)
+            hi = max(v.co[axis] for v in bm.verts)
+            if lo < -half or hi > half:
+                issues.append(
+                    f"overhangs the {max_footprint:.1f}m cell on {name}: "
+                    f"[{lo:.3f}, {hi:.3f}] (allowed +/-{half:.3f})")
 
     # ── geometry: manifold ──────────────────────────────────────
     non_manifold = [e for e in bm.edges if not e.is_manifold]

@@ -64,6 +64,13 @@ CASTLE_SPECS = [
     dict(key="BurialVault",       builder="build_burial_vault",       tri_budget=350, subdir="Castle"),
     dict(key="CryptChamberFinal", builder="build_crypt_chamber_final",tri_budget=800, subdir="Castle"),
     dict(key="CryptStairwell",    builder="build_crypt_stairwell",    tri_budget=600, subdir="Castle"),
+    # Door plugs — one per enclosed zone, sized to that zone's archway.
+    # Not RoomIds: the generator instantiates these to seal an archway that
+    # ends up facing an empty cell (CastleRoomRegistry.DoorPlugs).
+    dict(key="DoorPlugOuterBailey", builder="build_door_plug_outer_bailey", tri_budget=40, subdir="Castle"),
+    dict(key="DoorPlugInnerWard",   builder="build_door_plug_inner_ward",   tri_budget=40, subdir="Castle"),
+    dict(key="DoorPlugKeep",        builder="build_door_plug_keep",         tri_budget=40, subdir="Castle"),
+    dict(key="DoorPlugCrypt",       builder="build_door_plug_crypt",        tri_budget=40, subdir="Castle"),
 ]
 
 ALL_SPECS = WEAPON_SPECS + LOOT_SPECS + CASTLE_SPECS
