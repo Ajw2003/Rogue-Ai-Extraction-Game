@@ -1,0 +1,19 @@
+{
+  "v": 3,
+  "layout": "files",
+  "createdOnFiles": { "v": 1, "at": "2026-09-17T00:00:00Z" },
+  "title": "Plunderspell",
+  "namespace": "Plunderspell",
+  "libraries": [],
+  "sections": {},
+  "groups": [],
+  "assetGroups": {},
+  "blobs": {},
+  "docs": { "readme": "project/README.md", "sections": [] },
+  "lastChange": {
+    "by": "Ayden",
+    "at": "2026-09-17T00:00:00Z",
+    "via": "Claude Code",
+    "note": "Initial system, extracted from docs/generated/plunderspell-moodboard.html (the pitch bible)."
+  }
+}
