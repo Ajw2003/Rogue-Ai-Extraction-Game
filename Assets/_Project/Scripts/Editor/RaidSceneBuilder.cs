@@ -72,10 +72,8 @@ namespace RogueAi.EditorTools
             EnsureFolder(SceneDirectory);
             EnsureFolder(DataDirectory);
 
-            // The catalogues are loaded AFTER the new scene, not before: opening a scene unloads
-            // assets nothing in it references yet, which quietly turned every reference loaded
-            // above it into a null one — the generator, loot spawner and guard spawner were all
-            // being wired to nothing.
+            // The catalogues are loaded AFTER the new scene, never before — see
+            // docs/systems/raid-scene-assembly.md ("Traps").
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
             if (!TryLoadAuthoredAssets(out CastleRoomRegistry registry, out RaidLootTable lootTable,

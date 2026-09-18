@@ -126,6 +126,17 @@ uGUI canvas, so an always-on HUD sits on top of the menu and the lair.
 
 ## Traps
 
+- **Opening a scene unloads every asset nothing in it references yet.** `RaidSceneBuilder` used to
+  load the three catalogue ScriptableObjects and *then* call
+  `EditorSceneManager.NewScene`, which destroyed the objects those local references pointed at.
+  `TryLoadAuthoredAssets` returned true, the null check passed, and the generator, loot spawner and
+  guard spawner were then all wired to a fake-null — the assembled scene had no room registry at
+  all. Load authored assets only after the scene exists.
+- **A new castle FBX imports with the wrong root rotation unless `bakeAxisConversion` is on.**
+  Every castle model committed before 2026-09-17 had it ticked by hand in its `.meta`; the first
+  one exported afterwards did not, imported at a 270-degree root instead of 90, and the upright
+  root the prefabs carry (see "Orientation") then turned it upside down.
+  `CastleMeshImportSettings` now forces it, so the tick can no longer be missed.
 - **Loot can be thrown by its own spawn.** `LootPlacementPlanner` is pure, so it knows a room's
   centre but not the shape of the room's mesh. It spawns loot 0.5 m above the room origin, scattered
   up to 3 m. Against the old flat placeholder floor that was always safe; against real room geometry

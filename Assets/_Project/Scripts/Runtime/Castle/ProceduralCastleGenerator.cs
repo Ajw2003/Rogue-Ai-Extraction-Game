@@ -314,10 +314,8 @@ namespace RogueAi.Castle
 
         /// <summary>
         /// Whether a module of <paramref name="zone"/> is authored with an archway facing
-        /// <paramref name="direction"/>. Enclosed rooms open on all four sides
-        /// (see <c>_shell</c> in Tools/AssetPipeline/castle_builders.py), which is what makes
-        /// every 4-adjacency in the layout a real, walkable connection regardless of how the
-        /// generator happened to rotate either module.
+        /// <paramref name="direction"/>. Enclosed rooms open on all four sides — see
+        /// docs/systems/castle.md ("Doorways and door plugs").
         /// </summary>
         public static bool HasArchwayFacing(CastleZone zone, Vector2Int direction)
         {

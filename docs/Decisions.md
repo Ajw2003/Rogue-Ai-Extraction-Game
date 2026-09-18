@@ -3,6 +3,46 @@
 Append-only. An entry is never rewritten or deleted; the one allowed edit is flipping its
 `Status` line to `Superseded` when a later entry replaces it. Newest entry at the top.
 
+## 2026-09-17 — Four doorways on every room plus plugs, rather than socket-matched placement
+
+**Context.** Issue 5 (rooms do not connect, doorways do not align) and issue 19 (modules do not
+fill the 12 m grid cell). The generator places a module on a grid cell and rotates it to face the
+already-placed neighbour it attached to; it never inspects the module's geometry. Rooms were
+authored with archways on an arbitrary one to four sides, so a placed room routinely met its
+neighbour archway-to-blank-wall.
+
+**Decision.** Author every enclosed room with an archway on all four sides, and seal the archways
+that end up facing an empty cell after placement, using one plain stone door-plug prefab per
+enclosed zone. Set `room_kit.FOOTPRINT` to 12.0 so a module fills its cell exactly.
+
+**Why.** The alternative considered was the one the original issue text suggested: have the
+generator read each candidate's sockets and choose or rotate a module whose doorways line up. That
+makes placement a constraint-satisfaction problem, can fail to place anything on a cell, and
+couples the layout algorithm to the art. Four openings everywhere makes door alignment
+structurally true instead of something the algorithm has to achieve, at the cost of one extra
+prefab per zone and a post-pass. Rejected as over-engineered for a layout that is already
+guaranteed 4-connected by construction.
+
+**Status.** Standing.
+
+## 2026-09-17 — One standard human at 1.80 m, with enemies scaled by the forge rather than re-modelled
+
+**Context.** Issue 6. The player was 2.0 m, rooms were 2.6–5.2 m, and the ten enemy models were
+authored between 0.77 m and 3.41 m tall with no common reference. The `GildedColossus` at 3.41 m
+did not fit in the Crypt it spawns in.
+
+**Decision.** A standard human is 1.80 m (eyes 1.65 m). Per-zone room heights are raised against
+it, and `EnemyPrefabForge` carries a standing height per enemy and scales each model uniformly
+from its authored height to that figure. The models themselves are untouched. Written up in
+`docs/systems/scale.md`.
+
+**Why.** Re-authoring ten rigged, skinned models in Blender to agree on a metre is a large change
+with real risk to the rigs, and it puts the game's scale standard somewhere nothing can check it.
+A number in the forge's spec table is one line per enemy, is visible next to the rest of that
+enemy's tuning, and is applied by the same tool that already authors the prefabs.
+
+**Status.** Standing.
+
 ## 2026-09-16 — Complete the docs structure by salvaging an abandoned scaffold branch, not rewriting it
 
 **Context.** Running a `docs/` structure/audit pass, `origin/claude/repo-status-check-hjp6z7` was

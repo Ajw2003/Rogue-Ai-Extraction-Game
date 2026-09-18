@@ -55,6 +55,7 @@ together and what was deliberately left undocumented, and why.
 | [`raid`](systems/raid.md) | The loop: Lair → castle → haul → extraction → Lair |
 | [`raid-scene-assembly`](systems/raid-scene-assembly.md) | Wiring the authored art (castle rooms, loot, enemies) into the playable scene |
 | [`enemy-asset-pipeline`](systems/enemy-asset-pipeline.md) | Generating the enemy roster from Python/Blender |
+| [`scale`](systems/scale.md) | The 1.8m standard human, and the room, archway and enemy heights measured against it |
 
 ## Everything else worth reaching
 

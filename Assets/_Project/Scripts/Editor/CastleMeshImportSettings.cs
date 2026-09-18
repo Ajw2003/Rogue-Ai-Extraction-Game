@@ -24,10 +24,9 @@ namespace RogueAi.EditorTools
 
             var importer = (ModelImporter)assetImporter;
             importer.isReadable = true;
-            // Without this a castle model imports with a 270-degree root rotation instead of 90,
-            // so the upright root the prefabs carry (see CastlePrefabOrientationFix) turns it
-            // upside down. Every model committed before this line had it ticked by hand; the one
-            // added after did not, and came into the scene inverted.
+            // Without this a castle model imports at a 270-degree root instead of 90 and the
+            // prefab's upright root then flips it — see docs/systems/raid-scene-assembly.md
+            // ("Orientation").
             importer.bakeAxisConversion = true;
         }
     }

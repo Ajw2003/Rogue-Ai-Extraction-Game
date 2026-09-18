@@ -29,6 +29,17 @@ this produces) and it does not decide when to escalate (`AlarmFSMManager`, see `
   locally — no mesh, module list, or transform is ever sent. If a layout fails validation, the
   server retries with `seed + 1` (not a fresh random number) up to `maxRetries`, so the seed it
   finally replicates is the one every client independently reproduces.
+- **Doorways and door plugs.** Every enclosed room module is authored with an archway on all four
+  sides (`_shell` in `Tools/AssetPipeline/castle_builders.py`). The generator places modules on the
+  grid without consulting their geometry and rotates them to face their anchor, so a room with
+  archways on only some sides would sooner or later meet its neighbour archway-to-blank-wall.
+  Opening all four makes every 4-adjacency a real connection regardless of rotation. The cost is
+  that a room on the outside of the layout has openings facing nothing, so
+  `ProceduralCastleGenerator.SealOpenArchways` runs after placement and fills every archway whose
+  4-neighbour cell is empty with that zone's door-plug prefab
+  (`CastleRoomRegistry.GetDoorPlugForZone`, authored by `CastleDoorPlugForge`). There is one plug
+  per enclosed zone because the archway size is derived from the zone's wall height — see
+  `scale.md` ("Archways").
 - **`CastleLockdown`** subscribes to `AlarmState` and locks (`Roused`) then bars (`HueAndCry`)
   every door — deliberately one-way, matching the alarm's own latch, so the castle can't hand back
   a mistake the players already paid for.
@@ -44,8 +55,20 @@ this produces) and it does not decide when to escalate (`AlarmFSMManager`, see `
 - **Lockdown only ever gets stricter.** `CastleLockdown` has no path back to unlocked; it mirrors
   `AlarmFSMManager`'s own latch at `Roused`.
 
+- **Two 4-adjacent enclosed rooms are always door-connected, and no archway opens into empty
+  space.** The first half comes from every room opening on all four sides, the second from
+  `SealOpenArchways`. `CastleGeneratorTests.Test_AdjacentRoomsAreDoorConnected` holds both.
+- **A module never leaves its grid cell.** `room_kit.FOOTPRINT` equals
+  `ProceduralCastleGenerator.cellSize` (12 m) exactly, and `validate_in_blender` fails the asset
+  build for any castle module whose XY bounding box reaches past ±6.05 m. Without that gate a
+  module quietly grows into its neighbour's cell, which is what issue 19 was.
+
 ## Traps
 
+- **The layout depends on whether a registry is assigned.** `PickWeighted` consumes a random draw
+  when there is a room pool and returns early without one when there is not, so the same seed
+  produces a different castle with and without prefabs. Compare two layouts only when both
+  generators have the same registry.
 - **`UnityEngine.Random` anywhere in the generation path is a silent multiplayer desync,** not a
   crash — clients drift apart with no error, because nothing here re-validates against a
   replicated layout, only against the seed. See `plunderspell.md` §7 for why this is called out as
