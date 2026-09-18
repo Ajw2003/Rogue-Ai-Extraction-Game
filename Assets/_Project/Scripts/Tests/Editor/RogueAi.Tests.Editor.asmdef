@@ -2,6 +2,7 @@
     "name": "RogueAi.Tests.Editor",
     "rootNamespace": "RogueAi.Tests.Editor",
     "references": [
+        "RogueAi.Castle",
         "RogueAi.Editor",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"

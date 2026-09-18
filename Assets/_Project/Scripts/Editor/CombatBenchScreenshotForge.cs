@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using RogueAi.Guards;
 using RogueAi.Playtest;
@@ -19,6 +20,8 @@ namespace RogueAi.EditorTools
 
         private const int k_SpawnCount = 5;
         private const float k_EyeHeight = 1.65f;
+        private const float k_LineupSpacing = 1.6f;
+        private const float k_LineupCameraDistance = 14f;
 
         private static readonly (string Name, Vector3 Offset, bool LooksAtCentre)[] k_Views =
         {
@@ -75,8 +78,72 @@ namespace RogueAi.EditorTools
             }
 
             bench.ClearSpawned();
+            written += CaptureScaleLineup(bench, outputDirectory);
+
             Debug.Log($"[BenchShots] Wrote {written} images to {k_OutputFolder}, " +
                       $"with {k_SpawnCount} spawned enemies in frame.");
+        }
+
+        /// <summary>
+        /// The whole cast stood in a row beside the player capsule: the one frame that shows whether
+        /// the models agree on a metre. Issue
+        /// <see href="https://github.com/Ajw2003/PlunderSpell/issues/6"/>.
+        /// </summary>
+        private static int CaptureScaleLineup(CombatBench bench, string outputDirectory)
+        {
+            EnemyRoster roster = bench.Roster;
+            if (roster == null)
+            {
+                return 0;
+            }
+
+            // The row runs away from the player capsule, which stays at the origin as the 1.80 m
+            // reference every enemy is read against.
+            var placed = new List<GameObject>();
+            float x = k_LineupSpacing;
+
+            foreach (EnemyRoster.Entry entry in roster.Entries)
+            {
+                if (entry == null || entry.Prefab == null)
+                {
+                    continue;
+                }
+
+                GameObject enemy = Object.Instantiate(entry.Prefab,
+                    new Vector3(x, 0f, 0f), Quaternion.Euler(0f, 180f, 0f));
+                enemy.name = $"Lineup_{entry.EnemyId}";
+                placed.Add(enemy);
+                x += k_LineupSpacing;
+            }
+
+            float rowEnd = x - k_LineupSpacing;
+            float centreX = rowEnd * 0.5f;
+            var focus = new Vector3(centreX, 1.4f, 0f);
+
+            // Orthographic size is half the frame *height*, so it has to come from the row's width
+            // divided by the aspect ratio — deriving it from the width directly zooms far enough out
+            // that 2 m figures become specks.
+            float aspect = SceneScreenshot.DefaultWidth / (float)SceneScreenshot.DefaultHeight;
+            float orthographicSize = (centreX + k_LineupSpacing) / aspect;
+
+            // The camera must stay inside the arena: the wall is opaque, and a camera behind it
+            // photographs the wall.
+            var frontCamera = new Vector3(centreX, focus.y, -k_LineupCameraDistance);
+            SceneScreenshot.Capture(frontCamera, Quaternion.identity, isOrthographic: true,
+                orthographicSize, Path.Combine(outputDirectory, "bench-scale-lineup.png"));
+
+            var angledCamera = new Vector3(centreX - 12f, 6f, -k_LineupCameraDistance);
+            SceneScreenshot.Capture(angledCamera,
+                Quaternion.LookRotation(focus - angledCamera, Vector3.up),
+                isOrthographic: false, orthographicSize,
+                Path.Combine(outputDirectory, "bench-scale-lineup-angled.png"));
+
+            foreach (GameObject enemy in placed)
+            {
+                Object.DestroyImmediate(enemy);
+            }
+
+            return 2;
         }
 
         private static GameObject FirstSpawnablePrefab(EnemyRoster roster)
