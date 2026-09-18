@@ -28,6 +28,45 @@ That is the game, and `RogueAi.Spells` is where it resolves.
   `StatusEffectReceiver` implements four of them in one component, so anything can be made a valid
   target by adding it.
 
+## Seeing a cast
+
+Until 2026-09-18 a cast was invisible. The effects did real work — ignite, shatter, levitate, put to
+sleep — and nothing appeared on screen, so the only evidence a spell had happened was a line in the
+console.
+
+Visuals are a **presentation layer**, deliberately not part of the effects.
+`SpellEffectRegistry`'s effects stay pure (no scene lookups, no spawning) so they remain testable by
+handing them a context. `SpellVfxDirector` subscribes to `SpellCastingSystem.CastResolved` instead,
+which fires on every peer — so a teammate's spell is visible to everyone, not just to whoever spoke.
+
+`CastReport` carries `Origin` and `Direction`, derived from the same `CastOrigin`/`CastDirection`
+the effect context uses, so the visual and the effect cannot disagree about where the spell came
+from.
+
+### What each spell looks like
+
+`SpellLookbook` maps a `SpellId` to a colour and a style. Every misfire returns the same angry
+orange regardless of what it was aimed at, so "that went wrong" is readable before the caption is.
+
+| Style | Spells | What it is |
+|---|---|---|
+| `Bolt` | Ignis | A tinted `Bolt.prefab` fired along the aim, plus a flash at the hands |
+| `Burst` | Frango, Levo, AurumVoco, Tonitrus, Somnus, CadaverSurge, Porta | An expanding, fading shell of light at the caster's hands |
+
+`SpellBurst` builds itself from a primitive — no prefab, no authored particle asset, because none
+exist yet. It disables its collider *before* destroying it: `Destroy` is deferred to the end of the
+frame, and a live collider expanding to 2.5 m punts every piece of loot in the room across it first.
+
+### A spell's bolt carries no damage
+
+This is the one thing to know before changing it. The effect has **already resolved on the server**
+by the time `CastResolved` fires, so the bolt is cosmetic — `Damage` is set to 0 on spawn. A bolt
+that damaged what it hit would apply Ignis twice.
+
+Making the bolt the thing that deals the damage would mean moving Ignis's resolution out of
+`IgnisEffect` and into a projectile hit, which is a change to how the spell system works rather
+than a visual — not attempted here.
+
 ## Invariants
 
 - **An intended spell never hits the caster; a misfire always aims at them.** Primary effects

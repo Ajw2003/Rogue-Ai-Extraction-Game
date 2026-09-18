@@ -1067,6 +1067,53 @@ Material:
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
+--- !u!1 &464793262
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 464793264}
+  - component: {fileID: 464793263}
+  m_Layer: 0
+  m_Name: SpellVfx
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &464793263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 464793262}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 167b13a50a45d5d43b5fe6773c102cb4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RogueAi.Spells::RogueAi.Spells.Vfx.SpellVfxDirector
+  m_boltPrefab: {fileID: 8541296174138858501, guid: eef694f7f1ca617469908d761fde4588, type: 3}
+  m_boltSpeed: 24
+  m_burstDuration: 0.45
+--- !u!4 &464793264
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 464793262}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &683702336
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2265,3 +2312,4 @@ SceneRoots:
   - {fileID: 1789894076}
   - {fileID: 1430163617}
   - {fileID: 683702336}
+  - {fileID: 464793264}
