@@ -207,3 +207,26 @@ not a problem to paper over by spawning a `GameObject` nobody asked for. See
 `docs/systems/core.md`'s invariant: "`SingletonBase.Instance` never creates anything."
 
 **Status.** Standing.
+
+## 2026-09-17 — Castle rooms stay open-topped until the loop is proven fun
+
+**Context.** Closing out Issues 5/6/19/25, the new multi-angle captures
+(`docs/generated/castle-screenshots/`, written by `CastleScreenshotForge`) showed that
+`room_kit.room_shell` builds a floor and four walls and no roof, so every enclosed room is open to
+the sky. An overhead plan cannot show this — you are looking down into the rooms either way — which
+is why it survived this long unnoticed.
+
+**Decision.** Rooms stay roofless for now. Roofing is deferred to a later phase, and explicitly
+**not** pinned to Phase 5 / Issue 23: it is a correctness gap, not an art-polish one, so it should
+be picked up as soon as the core loop is proven fun rather than waiting for the art pass. The flat
+silhouette found in the same pass (nothing masses above the curtain wall but the corner drums)
+*is* ordinary blandness and does belong with Issue 23 in Phase 5.
+
+**Why.** The user's standing directive is to get each feature working and find out whether the game
+is mechanically fun before doing more art. A roofless castle is fully walkable, lootable and
+testable, so roofs block nothing in Phase 1. They are a precondition for the lighting the pitch
+calls for ("one candle, one fire, falling into black", `docs/plunderspell.md`), which cannot read in
+a room open to the sky — so this must not be lost.
+
+**Status.** Standing. Not currently covered by any of the 55 filed backlog issues; this entry is
+the only record.
