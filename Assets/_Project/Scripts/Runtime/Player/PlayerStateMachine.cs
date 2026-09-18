@@ -46,12 +46,6 @@ namespace StateMachine
         public float MouseSensitivity = 100f;
         public Transform CameraTransform;
 
-        [Header("Combat Settings")]
-        public Transform AttackPoint;
-        public float AttackRange = 0.5f;
-        public float AttackDamage = 10f;
-        public LayerMask EnemyLayers;
-
         [Header("Ground Check Settings")]
         [SerializeField] private float _groundCheckRadius = 0.3f;
         [SerializeField] private float _groundCheckDistance = 1.6f;
@@ -99,15 +93,6 @@ namespace StateMachine
             // Space.Self: rotates around the transform's own up axis. With rotation frozen and
             // standard world gravity the body stays upright, so local up matches world up.
             transform.Rotate(Vector3.up * mouseX);
-        }
-
-        private void OnDrawGizmosSelected()
-        {
-            if (AttackPoint != null)
-            {
-                Gizmos.color = Color.red;
-                Gizmos.DrawWireSphere(AttackPoint.position, AttackRange);
-            }
         }
 
         public void Awake()
@@ -294,8 +279,15 @@ namespace StateMachine
             ChangeState(AttackState);
 
             // A player with no SpellBook is a valid setup (the test scene has one), so an unarmed
-            // attack swings without casting rather than throwing.
-            if (SpellBook != null) SpellBook.CastSpell();
+            // attack swings whatever is currently held instead of casting.
+            if (SpellBook != null)
+            {
+                SpellBook.CastSpell();
+            }
+            else if (ItemManager.Instance != null && CameraTransform != null)
+            {
+                ItemManager.Instance.TryMeleeSwing(CameraTransform.position, CameraTransform.forward);
+            }
         }
 
         public void Invunerable()

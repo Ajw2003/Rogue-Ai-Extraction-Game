@@ -174,4 +174,12 @@ public class ItemManager : SingletonBase<ItemManager>
     }
 
     public Item HoveredItem => _hoveredItem;
+
+    /// <summary>Swings the currently held item if it is a <see cref="MeleeWeapon"/>. Returns whether a swing happened.</summary>
+    public bool TryMeleeSwing(Vector3 origin, Vector3 forward)
+    {
+        return _draggedItem != null
+            && _draggedItem.TryGetComponent(out MeleeWeapon weapon)
+            && weapon.TrySwing(origin, forward);
+    }
 }

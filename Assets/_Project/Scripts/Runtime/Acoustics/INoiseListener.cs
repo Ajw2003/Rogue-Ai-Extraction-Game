@@ -10,7 +10,8 @@ namespace RogueAi.Acoustics
         Gunshot,
         VoiceCast,
         ItemDrop,
-        Explosion
+        Explosion,
+        MeleeSwing
     }
 
     /// <summary>

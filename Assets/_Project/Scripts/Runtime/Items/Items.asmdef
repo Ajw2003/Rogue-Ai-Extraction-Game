@@ -3,6 +3,7 @@
     "rootNamespace": "",
     "references": [
         "RogueAi.Core",
+        "RogueAi.Acoustics",
         "Unity.InputSystem"
     ],
     "includePlatforms": [],
