@@ -180,10 +180,19 @@ MonoBehaviour:
   _arrivalDistance: 1
   _turnSpeed: 240
   _patrolRoute: []
+  _attackRange: 2
+  _attackDamage: 14
+  _attackCooldown: 2.2
+  _projectilePrefab: {fileID: 8541296174138858501, guid: eef694f7f1ca617469908d761fde4588, type: 3}
+  _projectileSpeed: 18
   _maxHealth: 90
   _alarm: {fileID: 0}
   _shoutStrength: 0.8
   _shoutRadius: 20
+  <_health>k__BackingField:
+    _value: 100
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
 --- !u!54 &-2791027016567926796
 Rigidbody:
   m_ObjectHideFlags: 0

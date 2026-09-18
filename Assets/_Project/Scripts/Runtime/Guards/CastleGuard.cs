@@ -51,6 +51,23 @@ namespace RogueAi.Guards
         [Tooltip("Points walked in order. With fewer than two, the guard stands its post.")]
         [SerializeField] private List<Transform> _patrolRoute = new List<Transform>();
 
+        [Header("Attack")]
+        [Tooltip("How close this guard must be to strike, in metres. Ignored when it fires instead.")]
+        [SerializeField] private float _attackRange = 2.0f;
+
+        [Tooltip("Damage per hit.")]
+        [SerializeField] private float _attackDamage = 12f;
+
+        [Tooltip("Seconds between attacks.")]
+        [SerializeField] private float _attackCooldown = 1.4f;
+
+        [Tooltip("Leave empty for a melee guard. Assign a projectile and this guard shoots instead, " +
+                 "at its sight range rather than its attack range — this is what makes a turret a turret.")]
+        [SerializeField] private GameObject _projectilePrefab;
+
+        [Tooltip("Speed the projectile leaves at, in metres per second.")]
+        [SerializeField] private float _projectileSpeed = 18f;
+
         [Header("Health")]
         [SerializeField] private float _maxHealth = 100f;
 
@@ -75,6 +92,7 @@ namespace RogueAi.Guards
         private float _timeSinceLastContact;
         private int _patrolIndex;
         private bool _hasShoutedThisChase;
+        private float _lastAttackTime = float.NegativeInfinity;
 
         /// <summary>What this guard is currently doing.</summary>
         public GuardAlertState State => _state.value;
@@ -242,6 +260,8 @@ namespace RogueAi.Guards
 
                 case GuardAlertState.Chasing:
                     MoveTo(seen != null ? seen.position : _lastKnownIntruderPosition);
+                    if (seen != null)
+                        TryAttack(seen);
                     break;
 
                 case GuardAlertState.Searching:
@@ -362,6 +382,55 @@ namespace RogueAi.Guards
 
             StateChanged?.Invoke(next);
         }
+
+        /// <summary>
+        /// Strikes or fires at <paramref name="target"/> when in range and off cooldown. A guard that
+        /// could chase but never hurt anyone is what made the castle harmless.
+        ///
+        /// See docs/systems/raid.md, "Guards that can actually hurt you".
+        /// </summary>
+        private void TryAttack(Transform target)
+        {
+            if (IsIncapacitated || Time.time < _lastAttackTime + _attackCooldown)
+                return;
+
+            bool shoots = _projectilePrefab != null;
+            float reach = shoots ? GuardBrain.SightRange(_sightRange, CurrentAlarm) : _attackRange;
+
+            Vector3 origin = transform.position + Vector3.up * _eyeHeight;
+            Vector3 toTarget = target.position + Vector3.up * 0.9f - origin;
+            if (toTarget.magnitude > reach)
+                return;
+
+            _lastAttackTime = Time.time;
+
+            if (shoots)
+                FireAt(origin, toTarget.normalized);
+            else if (target.TryGetComponent(out IHealth health))
+                health.TakeDamage(_attackDamage);
+        }
+
+        /// <summary>
+        /// Spawns a projectile carrying this guard's damage, reusing the same
+        /// <c>NetworkedProjectile</c> the player's spells fire so there is one projectile in the game
+        /// rather than two.
+        /// </summary>
+        private void FireAt(Vector3 origin, Vector3 direction)
+        {
+            GameObject shot = Instantiate(_projectilePrefab, origin, Quaternion.LookRotation(direction));
+
+            foreach (Collider own in GetComponentsInChildren<Collider>())
+            {
+                if (shot.TryGetComponent(out Collider shotCollider))
+                    Physics.IgnoreCollision(shotCollider, own);
+            }
+
+            if (shot.TryGetComponent(out Rigidbody body))
+                body.linearVelocity = direction * _projectileSpeed;
+        }
+
+        /// <summary>The castle-wide alert level, or Calm when this guard has no alarm to read.</summary>
+        private AlarmState CurrentAlarm => _alarm != null ? _alarm.State : AlarmState.Calm;
 
         /// <summary>
         /// Forces this guard into <paramref name="next"/>. A dev and test seam in the same spirit as

@@ -87,8 +87,39 @@ and **both are deleted with it**:
   tallies. It exists so the seven test files still holding `LootPickup` keep asserting something
   during the transition rather than being rewritten twice.
 
+## Guards that can actually hurt you
+
+`CastleGuard` could see, hear, shout and chase, but had no attack of any kind — it would run at a
+player forever and never land a blow. The attack code in the project lived on
+`MonsterStateMachine`, a second enemy system that is not on any of the ten enemy prefabs.
+
+`CastleGuard.TryAttack` is called from the `Chasing` branch of `Act`, gated on range and a
+cooldown. The cooldown is load-bearing: without it a guard in contact damages the player every
+frame, which reads as dying instantly for no visible reason. An incapacitated guard cannot attack,
+which is what gives Somnus and Tonitrus their point.
+
+### Melee by default, ranged when armed
+
+One field decides which: leave `_projectilePrefab` empty and the guard strikes at `_attackRange`;
+assign one and it fires from its **sight** range instead. That is what makes the `HexTurret` — spec'd
+at patrol speed 0, "tracks and fires" — a turret rather than a guard that cannot walk.
+
+Only the turret is armed. `Tools ▸ Plunderspell ▸ Arm The HexTurret` does it as a targeted prefab
+edit, deliberately **not** through `EnemyPrefabForge`: the forge rebuilds all ten enemy prefabs and
+would discard the hand-tuning they carry.
+
+### One projectile
+
+`Prefabs/Projectiles/Bolt.prefab` (built by `Tools ▸ Plunderspell ▸ Forge Projectile Prefab`) is the
+only projectile in the game, fired by guards and spells alike. It carries `NetworkedProjectile` for
+damage and lifetime, and `ProjectileTint` so one prefab can read as fire, frost or lightning without
+a prefab per spell. Gravity is off — a bolt flies where it was aimed, rather than landing on the
+floor between two people in a large room.
+
 ## Invariants
 
+- **A guard's attack is gated on a cooldown.** Contact damage per frame is not a difficulty
+  setting, it is an instant death with no readable cause.
 - **Worth is tallied from `LootValue`, never from `Item` or `LootPickup`.** A piece with no
   `LootValue` is worth nothing, which is why the spawner attaches one unconditionally.
 - **A raid never starts in a castle you cannot walk out of.** `RaidDirector.GenerateWalkable`
