@@ -402,6 +402,11 @@ namespace RogueAi.Guards
                 EnterState(GuardAlertState.Incapacitated,
                     _alarm != null ? _alarm.State : AlarmState.Calm);
             }
+
+            if (IsDead)
+            {
+                Destroy(this.gameObject);
+            }
         }
 
         /// <summary>True once this guard is down for good, as opposed to merely asleep.</summary>
