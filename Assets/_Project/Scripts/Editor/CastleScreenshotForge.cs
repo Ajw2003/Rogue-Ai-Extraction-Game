@@ -9,9 +9,9 @@ using UnityEngine.Rendering;
 namespace RogueAi.EditorTools
 {
     /// <summary>
-    /// Renders a generated castle to PNG so a layout change can be judged by eye instead of by
-    /// reading coordinates out of a log. Produces an overhead orthographic floor plan and a
-    /// standing eye-level view from the player's spawn, for each of several seeds.
+    /// Renders a generated castle to PNG so a layout change can be judged by eye rather than by
+    /// reading coordinates out of a log. See docs/systems/castle.md, "Visual verification", for
+    /// which view catches which class of fault and why the set is shaped this way.
     ///
     /// Run headlessly with -executeMethod RogueAi.EditorTools.CastleScreenshotForge.CaptureAll.
     /// A real graphics device is required, so the batchmode invocation must NOT pass -nographics.
@@ -25,13 +25,28 @@ namespace RogueAi.EditorTools
         private const int k_CaptureWidth = 1600;
         private const int k_CaptureHeight = 900;
 
-        // Wide enough to frame the whole CurtainWall ring (radius 5 cells at 12m) with margin.
         private const float k_PlanOrthographicSize = 78f;
         private const float k_PlanAltitude = 200f;
+        private const float k_ElevationOrthographicSize = 46f;
 
         private const float k_EyeHeight = 1.65f;
+        private const float k_AerialDistance = 150f;
+        private const float k_AerialAltitude = 95f;
+        private const float k_GateApproachDistance = 38f;
 
         private static readonly int[] k_Seeds = { 12345, 777, 20260917 };
+
+        // Only the first seed gets the full sweep; the others get plan plus one aerial, which is
+        // enough to tell a real layout fault from a one-seed fluke without tripling the image count.
+        private const int k_FullSweepSeed = 12345;
+
+        private static readonly (string Name, Vector3 Direction)[] k_AerialCorners =
+        {
+            ("ne", new Vector3(1f, 0f, 1f)),
+            ("se", new Vector3(1f, 0f, -1f)),
+            ("sw", new Vector3(-1f, 0f, -1f)),
+            ("nw", new Vector3(-1f, 0f, 1f)),
+        };
 
         [MenuItem("Tools/Plunderspell/Capture Castle Screenshots")]
         public static void CaptureAll()
@@ -57,55 +72,151 @@ namespace RogueAi.EditorTools
             }
 
             EnsureSunlight();
-
             GameObject ground = GameObject.Find(k_GroundObjectName);
+            int imageCount = 0;
 
             foreach (int seed in k_Seeds)
             {
                 ProceduralCastleData data = generator.Generate(seed);
+                bool isFullSweep = seed == k_FullSweepSeed;
 
-                // The ground plane fills the frame with flat colour from directly overhead, hiding
-                // the wall seams and archways the plan exists to show.
+                // The ground plane fills an overhead frame with flat colour, hiding the wall seams
+                // and archways the plan exists to show. Every other view needs it for the horizon.
                 SetGroundVisible(ground, false);
-                CapturePlan(data, seed, outputDirectory);
+                imageCount += CapturePlan(data, seed, outputDirectory);
                 SetGroundVisible(ground, true);
 
-                CaptureEyeLevel(data, seed, outputDirectory);
-                Debug.Log($"[CastleShots] seed {seed}: {data.PlacedModules.Count} modules captured.");
+                imageCount += CaptureAerials(data, seed, outputDirectory, isFullSweep);
+
+                if (isFullSweep)
+                {
+                    imageCount += CaptureElevation(data, seed, outputDirectory);
+                    imageCount += CaptureGateApproach(data, seed, outputDirectory);
+                    imageCount += CaptureCourtyard(data, seed, outputDirectory);
+                    imageCount += CaptureEyeLevel(data, seed, outputDirectory);
+                }
+
+                Debug.Log($"[CastleShots] seed {seed}: {data.PlacedModules.Count} modules.");
             }
 
             generator.ClearGenerated();
-            Debug.Log($"[CastleShots] Wrote {k_Seeds.Length * 2} images to {k_OutputFolder}.");
+            Debug.Log($"[CastleShots] Wrote {imageCount} images to {k_OutputFolder}.");
         }
 
-        /// <summary>Top-down orthographic floor plan: shows gaps, overlaps and overall shape.</summary>
-        private static void CapturePlan(ProceduralCastleData data, int seed, string outputDirectory)
+        /// <summary>Top-down orthographic floor plan: gaps, overlaps, and the overall shape.</summary>
+        private static int CapturePlan(ProceduralCastleData data, int seed, string outputDirectory)
         {
             Vector3 center = LayoutCenter(data);
-            var position = new Vector3(center.x, k_PlanAltitude, center.z);
 
-            RenderFrom(position, Quaternion.Euler(90f, 0f, 0f), isOrthographic: true,
+            RenderFrom(new Vector3(center.x, k_PlanAltitude, center.z), Quaternion.Euler(90f, 0f, 0f),
+                isOrthographic: true, k_PlanOrthographicSize,
                 Path.Combine(outputDirectory, $"seed-{seed}-plan.png"));
+            return 1;
         }
 
         /// <summary>
-        /// Standing eye-level view from the crypt centre looking outward — the check that a player
-        /// can actually see through aligned archways rather than into a sealed wall.
+        /// Three-quarter aerials from each corner: the silhouette and massing test, and the view
+        /// that exposes a module yawed the wrong way, which an overhead plan flattens out.
         /// </summary>
-        private static void CaptureEyeLevel(ProceduralCastleData data, int seed, string outputDirectory)
+        private static int CaptureAerials(ProceduralCastleData data, int seed, string outputDirectory,
+            bool isFullSweep)
+        {
+            Vector3 center = LayoutCenter(data);
+            int written = 0;
+
+            foreach ((string name, Vector3 direction) in k_AerialCorners)
+            {
+                Vector3 position = center + direction.normalized * k_AerialDistance
+                                   + Vector3.up * k_AerialAltitude;
+
+                RenderFrom(position, Quaternion.LookRotation(center - position, Vector3.up),
+                    isOrthographic: false, k_PlanOrthographicSize,
+                    Path.Combine(outputDirectory, $"seed-{seed}-aerial-{name}.png"));
+                written++;
+
+                if (!isFullSweep)
+                {
+                    break;
+                }
+            }
+
+            return written;
+        }
+
+        /// <summary>
+        /// Orthographic side elevation, Issue 19's own check: every floor flush at Y=0, and the
+        /// zone heights stepping sensibly rather than floating or sinking.
+        /// </summary>
+        private static int CaptureElevation(ProceduralCastleData data, int seed, string outputDirectory)
+        {
+            Vector3 center = LayoutCenter(data);
+            var position = new Vector3(center.x, 12f, center.z - 300f);
+
+            RenderFrom(position, Quaternion.Euler(0f, 0f, 0f), isOrthographic: true,
+                k_ElevationOrthographicSize,
+                Path.Combine(outputDirectory, $"seed-{seed}-elevation.png"));
+            return 1;
+        }
+
+        /// <summary>
+        /// Standing outside the gate looking in. The curtain wall's outward face is the thing most
+        /// likely to be rotated wrong, because each wall module raises its wall on one named side.
+        /// </summary>
+        private static int CaptureGateApproach(ProceduralCastleData data, int seed,
+            string outputDirectory)
+        {
+            if (data.ExtractionExitIndex < 0)
+            {
+                Debug.LogWarning("[CastleShots] No extraction exit; skipping the gate approach.");
+                return 0;
+            }
+
+            Vector3 center = LayoutCenter(data);
+            Vector3 gate = data.PlacedModules[data.ExtractionExitIndex].Position;
+
+            Vector3 outward = gate - center;
+            outward.y = 0f;
+            outward = outward.sqrMagnitude > 0.001f ? outward.normalized : Vector3.right;
+
+            var position = new Vector3(gate.x, k_EyeHeight, gate.z) + outward * k_GateApproachDistance;
+            var target = new Vector3(gate.x, k_EyeHeight, gate.z);
+
+            RenderFrom(position, Quaternion.LookRotation(target - position, Vector3.up),
+                isOrthographic: false, k_PlanOrthographicSize,
+                Path.Combine(outputDirectory, $"seed-{seed}-gate.png"));
+            return 1;
+        }
+
+        /// <summary>Ground level inside the walls: do the wards enclose, or read as loose boxes?</summary>
+        private static int CaptureCourtyard(ProceduralCastleData data, int seed, string outputDirectory)
+        {
+            Vector3 center = LayoutCenter(data);
+            var position = new Vector3(center.x, k_EyeHeight, center.z);
+
+            RenderFrom(position, Quaternion.Euler(-8f, 45f, 0f), isOrthographic: false,
+                k_PlanOrthographicSize,
+                Path.Combine(outputDirectory, $"seed-{seed}-courtyard.png"));
+            return 1;
+        }
+
+        /// <summary>
+        /// Standing eye-level in the crypt looking out: the check that archways actually line up
+        /// through successive rooms instead of opening onto a wall.
+        /// </summary>
+        private static int CaptureEyeLevel(ProceduralCastleData data, int seed, string outputDirectory)
         {
             Vector3 origin = data.CryptStartIndex >= 0
                 ? data.PlacedModules[data.CryptStartIndex].Position
                 : LayoutCenter(data);
 
-            var position = new Vector3(origin.x, k_EyeHeight, origin.z);
-
-            RenderFrom(position, Quaternion.Euler(0f, 0f, 0f), isOrthographic: false,
+            RenderFrom(new Vector3(origin.x, k_EyeHeight, origin.z), Quaternion.identity,
+                isOrthographic: false, k_PlanOrthographicSize,
                 Path.Combine(outputDirectory, $"seed-{seed}-eye.png"));
+            return 1;
         }
 
         private static void RenderFrom(Vector3 position, Quaternion rotation, bool isOrthographic,
-            string filePath)
+            float orthographicSize, string filePath)
         {
             var cameraGo = new GameObject("CastleScreenshotCamera");
             cameraGo.transform.SetPositionAndRotation(position, rotation);
@@ -114,7 +225,7 @@ namespace RogueAi.EditorTools
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = new Color(0.06f, 0.06f, 0.08f);
             camera.orthographic = isOrthographic;
-            camera.orthographicSize = k_PlanOrthographicSize;
+            camera.orthographicSize = orthographicSize;
             camera.fieldOfView = 70f;
             camera.nearClipPlane = 0.05f;
             camera.farClipPlane = 1000f;
@@ -154,7 +265,7 @@ namespace RogueAi.EditorTools
             }
         }
 
-        /// <summary>Mean of every placed module position, so the plan frames the castle it built.</summary>
+        /// <summary>Mean of every placed module position, so a view frames the castle it built.</summary>
         private static Vector3 LayoutCenter(ProceduralCastleData data)
         {
             List<ProceduralCastleData.PlacedModule> modules = data.PlacedModules;
@@ -173,8 +284,8 @@ namespace RogueAi.EditorTools
         }
 
         /// <summary>
-        /// Without a light the plan renders as flat silhouettes, which hides exactly the seams and
-        /// wall thicknesses these captures exist to show.
+        /// Without a light every view renders as flat silhouettes, which hides exactly the seams
+        /// and wall thicknesses these captures exist to show.
         /// </summary>
         private static void EnsureSunlight()
         {
