@@ -4,6 +4,7 @@ using NUnit.Framework;
 using Plunderspell.Core;
 using Plunderspell.UI;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.TestTools;
 
 namespace Plunderspell.Tests.PlayMode
@@ -14,6 +15,9 @@ namespace Plunderspell.Tests.PlayMode
     /// Editor, or headless with:
     /// Unity -batchmode -projectPath &lt;path&gt; -runTests -testPlatform PlayMode
     ///   -testResults UI_Verification_Screenshots/playmode-results.xml -logFile - -quit
+    ///
+    /// Note the absence of -nographics: this test needs a real graphics device and skips itself
+    /// without one, so a -nographics run leaves the committed screenshots untouched.
     ///
     /// Captures via a dedicated camera rendered synchronously to a RenderTexture rather than
     /// ScreenCapture.CaptureScreenshot/WaitForEndOfFrame: batchmode never presents a frame, so
@@ -35,6 +39,15 @@ namespace Plunderspell.Tests.PlayMode
         [UnityTest]
         public IEnumerator CapturesAllUIScreens()
         {
+            // Under -nographics there is no graphics device, so RenderTexture.Create fails and every
+            // ReadPixels returns a blank frame. Running on would overwrite the committed reference
+            // screenshots with grey rectangles, so this capture only runs where it can actually render.
+            if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null)
+            {
+                Assert.Ignore("No graphics device (-nographics); UI capture would overwrite the " +
+                              "committed screenshots with blank frames.");
+            }
+
             var directory = Path.Combine(Directory.GetCurrentDirectory(), OutputFolder);
             Directory.CreateDirectory(directory);
 
