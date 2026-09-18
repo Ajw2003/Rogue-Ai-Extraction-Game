@@ -21,6 +21,7 @@ this document, not a reason to go grep the repo.
 | `Tools/AssetPipeline/` | Blender-driven generation of weapon/loot/castle-module props |
 | `Tools/EnemyForge/` | Blender-driven generation of the enemy roster (mesh, rig, textures) |
 | `Tools/mkissues.py` | files the playtesting backlog to GitHub issues; see `docs/generated/github-issues.json` |
+| `Plans/` | one exhaustive plan per GitHub issue, plus `Priority_Queue.md`, the live execution order |
 | `docs/` | this tree |
 
 ## The tiers
