@@ -1,5 +1,53 @@
 # Today
 
+**2026-09-18 — Phase 1 verification pass.** Worked `Plans/Priority_Queue.md` Phase 1 in order,
+checking each issue against the code rather than against its plan, on branch
+`claude/playable-loop-fixes`.
+
+## Done
+
+- **Resolved the two plan documents disagreeing.** `Plans/Priority_Queue.md` (later, and written
+  against "get each individual feature completed first to see if the game is fun mechanically
+  before doing any more artwork") is the live order; `docs/plans/playable-state-backlog.md` is
+  marked superseded for ordering and kept as the issue map. Its 55 per-issue plan links all pointed
+  at `docs/plans/issues/`, which does not exist — the plans are in `Plans/`. Relinked, and `Plans/`
+  is now in `docs/README.md`'s moving-parts table.
+- **Fixed issue 9 on the component the raid actually uses.** It had been implemented against
+  `FreeLookPlaytestController`, which is not in `RaidScene.unity` — the raid carries
+  `PlayerStateMachine` + `PlayerInputController`, which had no gate at all. See `docs/Decisions.md`,
+  "Issue 9's gate belongs on the raid's player, not only on the playtest harness".
+- **Closed 5 issues on evidence**, not on a code read: #5, #9, #19, #20, #25. 55 open → 50.
+- Regenerated the 13-image castle screenshot set as the visual evidence behind #5/#19/#25.
+
+## Verified, on this machine
+
+Unity 6000.3.15f1 batchmode: compile exit 0 with zero `error CS`; EditMode 12/12; PlayMode 117/118.
+The one PlayMode failure (`Test_TheCursorFollowsTheGameStateAndIsFreedByLosingFocus`) was confirmed
+to fail identically on unmodified HEAD — `Cursor.lockState` cannot be `Locked` with no interactive
+window. It is a batchmode artifact and should not be read as a red suite.
+
+## Deliberately not closed
+
+- **#7 (crosshair)** and **#8 (cursor lock)** are both implemented and both unverifiable headlessly
+  — IMGUI is invisible to `Camera.Render()`, and cursor lock needs a real window. They need one
+  interactive play session, not more code.
+- **#15 (loot discoverable)** — `LootHighlight` works and #20 is fixed, but the discoverability
+  claim is visual and no capture of the focused-vs-unfocused state was made.
+- **#6 (player too tall)** — only partial evidence (clear headroom under the archway at 1.65m eye
+  height in `seed-12345-eye.png`); not measured against every room type.
+
+## Surfaced, not today's job
+
+- **`ItemGym.unity` cannot currently be used as a combat bench** (#18): nothing in it reaches
+  `GameState.Playing`, so the gated body cannot move until the bootstrapped Main Menu → Lair →
+  Descend route is walked, and no enemy prefab is in the scene to swing at.
+- **`EditorBuildSettings` lists only `TestScene`** — `RaidScene` is not in the build list, so #53
+  is more than "nobody pressed Build".
+- **#37 melee only fires when the player has no `SpellBook`** — `PlayerStateMachine.Attack()` casts
+  a spell if one is present and never reaches `TryMeleeSwing`.
+
+---
+
 **2026-09-16 — documentation audit day.** No gameplay code changed. `main` had gained the
 raid-scene-assembly work, the menu → lair → raid flow, the castle orientation fix and a 21-issue
 playtesting backlog since anyone last touched `docs/`, and `docs/` itself had tier 4
