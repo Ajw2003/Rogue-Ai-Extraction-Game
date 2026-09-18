@@ -14,12 +14,27 @@ this produces) and it does not decide when to escalate (`AlarmFSMManager`, see `
 
 ## How it works
 
-- **`ProceduralCastleGenerator.Generate(seed)`** lays out concentric Chebyshev rings on a square
-  grid, growing outward from a `CryptChamberFinal` at the origin through `Keep` → `InnerWard` →
-  `OuterBailey` → `CurtainWall`. Every module attaches to an already-placed 4-neighbour, so the
-  floor plan is guaranteed to be a single 4-connected region. A `System.Random` seeded once at the
-  top drives every placement decision — never `UnityEngine.Random`, whose global static state is
-  shared with VFX/audio and would make generation order-dependent (see `plunderspell.md` §7).
+- **`ProceduralCastleGenerator.Generate(seed)`** builds a closed curtain wall around a dense block
+  of concentric wards. The outer Chebyshev ring at `m_curtainWallRadius` (4 by default, so the
+  castle is 9 cells / 108 m across) is filled completely: a `WallCorner` drum at each of the four
+  turns, a `Bastion` every `m_bastionSpacing` cells along the runs, exactly one `GatehouseModule`
+  on the +X axis cell with its `Drawbridge` in the cell immediately outside, and `WallStraight`
+  everywhere else. Everything inside that ring is enclosed rooms, zoned by radius — `Crypt` at the
+  origin, then `Keep`, `InnerWard`, `OuterBailey` — filled to `m_interiorFillFraction` (0.9, giving
+  ~44 rooms) with the remainder left open as courtyards. A `System.Random` seeded once at the top
+  drives every decision — never `UnityEngine.Random`, whose global static state is shared with
+  VFX/audio and would make generation order-dependent (see `plunderspell.md` §7).
+- **Courtyards are carved, not grown.** Candidate cells are shuffled by the seeded RNG and removed
+  one at a time, each removal kept only if a flood fill shows the remaining interior is still a
+  single 4-connected region. The origin (the path's start) and the cell inward of the gate (its
+  end) are never candidates. That is what guarantees the A* validator can always walk out.
+- **Wall pieces face outward, and that is not the same rotation as a room.** `build_wall_straight`
+  in `Tools/AssetPipeline/castle_builders.py` raises its wall on the module's *south* side, which
+  lands on local −Z after the Blender Z-up correction, so `RotationForOutwardWall` yaws the module
+  until local −Z points away from the castle — the opposite of `RotationForFacing`, which points a
+  room *toward* its anchor. `build_wall_corner` raises south *and* west, so unrotated its two faces
+  cover the south-west pair; `RotationForCorner` yaws by that piece's south face, which carries the
+  west face onto the corner's other outward side.
 - **`CastlePathValidator.ValidatePath`** rasterises every placed module into a walkable grid at
   `CellScale`×`CellScale` resolution per layout cell (so adjacent modules' footprints touch and
   stay 4-connected) and runs a 4-directional A* from the crypt start to the extraction exit. This
@@ -31,15 +46,19 @@ this produces) and it does not decide when to escalate (`AlarmFSMManager`, see `
   finally replicates is the one every client independently reproduces.
 - **Doorways and door plugs.** Every enclosed room module is authored with an archway on all four
   sides (`_shell` in `Tools/AssetPipeline/castle_builders.py`). The generator places modules on the
-  grid without consulting their geometry and rotates them to face their anchor, so a room with
-  archways on only some sides would sooner or later meet its neighbour archway-to-blank-wall.
-  Opening all four makes every 4-adjacency a real connection regardless of rotation. The cost is
-  that a room on the outside of the layout has openings facing nothing, so
-  `ProceduralCastleGenerator.SealOpenArchways` runs after placement and fills every archway whose
-  4-neighbour cell is empty with that zone's door-plug prefab
-  (`CastleRoomRegistry.GetDoorPlugForZone`, authored by `CastleDoorPlugForge`). There is one plug
-  per enclosed zone because the archway size is derived from the zone's wall height — see
+  grid without consulting their geometry, so a room with archways on only some sides would sooner
+  or later meet its neighbour archway-to-blank-wall. Opening all four makes every 4-adjacency a
+  real connection regardless of rotation. The cost is that a room on the edge of the block has
+  openings facing nothing, so `SealOpenArchways` runs after placement and plugs every archway that
+  does not lead into another enclosed room — including archways onto a curtain-wall cell, which is
+  a wall and not somewhere to walk. The single exception is the gatehouse cell, which is the way
+  out. Plugs come from `CastleRoomRegistry.GetDoorPlugForZone` (authored by `CastleDoorPlugForge`),
+  one per enclosed zone because the archway size is derived from the zone's wall height — see
   `scale.md` ("Archways").
+- **The gatehouse is the extraction exit.** `AssignExtractionExit` marks it, so `ExtractionExitIndex`
+  points at a `CurtainWall` module rather than an `OuterBailey` room. `LootPlacementPlanner` and
+  `GuardPlacementPlanner` both skip that index, and the raid starts there too — see `scale.md`
+  ("Spawning").
 - **`CastleLockdown`** subscribes to `AlarmState` and locks (`Roused`) then bars (`HueAndCry`)
   every door — deliberately one-way, matching the alarm's own latch, so the castle can't hand back
   a mistake the players already paid for.
@@ -58,6 +77,12 @@ this produces) and it does not decide when to escalate (`AlarmFSMManager`, see `
 - **Two 4-adjacent enclosed rooms are always door-connected, and no archway opens into empty
   space.** The first half comes from every room opening on all four sides, the second from
   `SealOpenArchways`. `CastleGeneratorTests.Test_AdjacentRoomsAreDoorConnected` holds both.
+- **The curtain wall is a closed loop.** Every cell on the outer ring perimeter carries a
+  `CurtainWall` module and there is exactly one gatehouse, for every seed.
+  `Test_CurtainWallIsAClosedLoop` holds it.
+- **The interior stays one 4-connected region and stays playable.** Courtyards are only carved
+  where connectivity survives, and `Test_InteriorRoomCountIsPlayable` keeps the room count in
+  40-60 so the castle is neither a corridor nor a city.
 - **A module never leaves its grid cell.** `room_kit.FOOTPRINT` equals
   `ProceduralCastleGenerator.cellSize` (12 m) exactly, and `validate_in_blender` fails the asset
   build for any castle module whose XY bounding box reaches past ±6.05 m. Without that gate a

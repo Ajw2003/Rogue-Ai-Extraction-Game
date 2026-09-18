@@ -106,14 +106,20 @@ metre of air above it, and no clipping through the room it fights in.
 
 ## Spawning
 
-`RaidSceneBuilder` derives the player's start from the layout rather than a fixed coordinate: it
-generates a castle, takes the extraction-exit room (the room the raid enters and leaves through),
-and probes outward from that room's centre — centre first, then two rings of eight — for the first
-player-sized capsule that touches no collider. The centre is tried first but rarely wins, because a
-room's set-piece (a well, a stair core, a sarcophagus) is usually exactly there.
+`CastleSpawnResolver.ResolveSpawn(layout)` is the single derivation, shared by the runtime and the
+editor. It takes the extraction-exit module — the gatehouse, the castle's one gate — steps 3.5 m
+inward from its centre (the gatehouse's wall, portcullis bars and flanking drum towers all crowd
+the outward half of that cell) and probes for the first player-sized capsule that touches no
+collider: the anchor first, then two rings of eight.
 
-**Caveat.** The scene is authored once, so the spawn saved into `RaidScene.unity` is the one for
-`ProceduralCastleGenerator.defaultSeed`. `RaidDirector` rolls a fresh seed per raid unless its
-`_fixedSeed` is set, and nothing currently re-derives the spawn at raid start — so for a rolled
-seed the authored spawn is not guaranteed to be inside that raid's extraction room. Closing that
-needs the same derivation called from `RaidDirector.BuildCastle`, which is not yet wired.
+Two callers, one probe:
+
+- **`RaidDirector.PlacePlayerAtSpawn`** runs on every `BuildCastle`, so the spawn follows whatever
+  seed the raid actually rolled. This is the one that matters at play time.
+- **`RaidSceneBuilder`** bakes a spawn for `ProceduralCastleGenerator.defaultSeed` into
+  `RaidScene.unity`, so the authored scene looks right when opened. The director overwrites it at
+  raid start.
+
+**Trap.** `Physics.SyncTransforms()` must run between instantiating the castle and probing it, or
+the colliders are still at their previous transforms and every candidate reads as clear. Both
+callers do this.

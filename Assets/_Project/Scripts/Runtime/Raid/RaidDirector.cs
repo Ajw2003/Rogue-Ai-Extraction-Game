@@ -49,6 +49,10 @@ namespace RogueAi.Raid
         [Tooltip("Bakes the walkable surface over the generated castle. Without it guards cannot move.")]
         [SerializeField] private CastleNavMeshBaker _navigation;
 
+        [Tooltip("The player to stand just inside the gatehouse when the castle is built. The seed " +
+                 "is rolled per raid, so a spawn baked into the scene is only right for one of them.")]
+        [SerializeField] private Transform _playerRoot;
+
         [Header("Raid setup")]
         [Tooltip("Seed for the next raid. Left at 0, a fresh one is rolled per raid.")]
         [SerializeField] private int _fixedSeed;
@@ -159,6 +163,10 @@ namespace RogueAi.Raid
             Castle = GenerateWalkable(ref seed);
             _seed.value = seed;
 
+            // Before the NavMesh bake and the spawners, so a guard or a loot pile is never dropped
+            // on top of a player who is about to be moved there.
+            PlacePlayerAtSpawn();
+
             if (_castleNetwork != null && (!isSpawned || isServer))
                 _castleNetwork.SetSeed(seed);
 
@@ -241,6 +249,23 @@ namespace RogueAi.Raid
         // -----------------------------------------------------------------------------------------
         // Plumbing
         // -----------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Stands the player just inside the gatehouse of the castle just built. Derived here, from
+        /// the seed this raid actually rolled, rather than baked into the scene — a baked spawn is
+        /// only in the right place for the one seed it was baked from.
+        /// </summary>
+        private void PlacePlayerAtSpawn()
+        {
+            if (_playerRoot == null || Castle == null)
+                return;
+
+            // The rooms were instantiated a moment ago; without this their colliders are still at
+            // their old transforms and every overlap probe reports clear.
+            Physics.SyncTransforms();
+
+            _playerRoot.position = CastleSpawnResolver.ResolveSpawn(Castle);
+        }
 
         private void OnExtractionResolved(float worth, int saved)
         {
@@ -330,7 +355,7 @@ namespace RogueAi.Raid
         public void Configure(ProceduralCastleGenerator generator, LootSpawner spawner,
             ExtractionZone zone, LairHubManager lair, AlarmFSMManager alarm = null,
             CastleNetworkManager castleNetwork = null, GuardSpawner guardSpawner = null,
-            CastleNavMeshBaker navigation = null)
+            CastleNavMeshBaker navigation = null, Transform playerRoot = null)
         {
             UnsubscribeFromZone();
 
@@ -342,6 +367,7 @@ namespace RogueAi.Raid
             _castleNetwork = castleNetwork;
             _guardSpawner = guardSpawner;
             _navigation = navigation;
+            _playerRoot = playerRoot;
 
             SubscribeToZone();
         }

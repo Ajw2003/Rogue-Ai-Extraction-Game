@@ -6,11 +6,14 @@ namespace RogueAi.Castle
     /// <summary>
     /// Deterministic, seed-driven procedural castle builder.
     ///
-    /// The castle is laid out as concentric Chebyshev rings on a square grid, growing from the
-    /// <c>CryptChamberFinal</c> at the origin outward through Keep, InnerWard, OuterBailey and
-    /// CurtainWall. Every module is attached to an already-placed 4-neighbour, so the resulting
-    /// floor plan is guaranteed to be a single 4-connected region — which is what lets the A*
-    /// validator always find (or correctly reject) a crypt→extraction path.
+    /// The castle is a closed curtain wall enclosing a dense block of concentric wards. The outer
+    /// Chebyshev ring at <see cref="CurtainWallRadius"/> is filled completely — corners, bastions,
+    /// one gatehouse and straight runs — so the wall reads as an unbroken loop. Everything inside
+    /// that ring is enclosed rooms: Crypt at the origin, then Keep, InnerWard and OuterBailey
+    /// outward, filled to <c>m_interiorFillFraction</c> with the remainder left as courtyards.
+    ///
+    /// Courtyards are only ever carved where the interior stays a single 4-connected region, which
+    /// is what lets the A* validator always find (or correctly reject) a crypt→extraction path.
     ///
     /// Because the entire layout is a pure function of the seed, only the seed is replicated over
     /// the network (see <see cref="CastleNetworkManager"/>); no mesh or transform data is sent.
@@ -28,6 +31,20 @@ namespace RogueAi.Castle
         [Tooltip("Parent for instantiated rooms. Auto-created if left null.")]
         [SerializeField] private Transform roomContainer;
 
+        [Tooltip("Chebyshev ring the closed curtain wall sits on. Everything inside it is rooms, " +
+                 "so the castle is (2 x radius + 1) cells across. 4 gives a 9x9 interior.")]
+        [Range(3, 7)]
+        [SerializeField] private int m_curtainWallRadius = 4;
+
+        [Tooltip("Fraction of the interior cells that become rooms. The remainder are left open " +
+                 "as courtyards, but only where the interior stays one connected region.")]
+        [Range(0.5f, 1f)]
+        [SerializeField] private float m_interiorFillFraction = 0.9f;
+
+        [Tooltip("Cells between bastions along the straight runs of the curtain wall.")]
+        [Range(2, 6)]
+        [SerializeField] private int m_bastionSpacing = 3;
+
         // Module geometry the door-plug placement has to agree with, authored in
         // Tools/AssetPipeline/room_kit.py. Duplicated here rather than measured off the mesh
         // because the layout is computed for data-only (prefab-free) castles too.
@@ -38,38 +55,29 @@ namespace RogueAi.Castle
         /// <summary>Distance from a module's centre to the middle of one of its four walls.</summary>
         private const float k_ArchwayInset = k_ModuleFootprint / 2f - k_WallThickness / 2f;
 
+        // Curtain-wall piece ids, matching the prefabs in the registry.
+        private const string k_WallStraightId = "WallStraight";
+        private const string k_WallCornerId = "WallCorner";
+        private const string k_BastionId = "Bastion";
+        private const string k_GatehouseId = "GatehouseModule";
+        private const string k_DrawbridgeId = "Drawbridge";
+        private const string k_CryptFinalId = "CryptChamberFinal";
+
+        /// <summary>
+        /// The side the one gatehouse sits on. Fixed rather than rolled so the drawbridge approach,
+        /// the authored extraction zone and the player's spawn all agree for every seed.
+        /// </summary>
+        private static readonly Vector2Int k_GateOutward = new Vector2Int(1, 0);
+
         /// <summary>The most recent layout produced by <see cref="Generate"/>.</summary>
         public ProceduralCastleData LastGenerated { get; private set; }
 
         public CastleRoomRegistry Registry { get => registry; set => registry = value; }
 
+        /// <summary>Chebyshev ring the closed curtain wall occupies.</summary>
+        public int CurtainWallRadius => m_curtainWallRadius;
+
         private readonly List<GameObject> _instantiated = new List<GameObject>();
-
-        // Zone build order from the center outward, paired with the ring radius and room-count range.
-        private static readonly ZoneRing[] Rings =
-        {
-            new ZoneRing(CastleZone.Crypt,       1, 3, 5),
-            new ZoneRing(CastleZone.Keep,        2, 4, 7),
-            new ZoneRing(CastleZone.InnerWard,   3, 6, 10),
-            new ZoneRing(CastleZone.OuterBailey, 4, 8, 14),
-            new ZoneRing(CastleZone.CurtainWall, 5, 10, 16),
-        };
-
-        private readonly struct ZoneRing
-        {
-            public readonly CastleZone Zone;
-            public readonly int Radius;
-            public readonly int MinCount;
-            public readonly int MaxCount;
-
-            public ZoneRing(CastleZone zone, int radius, int min, int max)
-            {
-                Zone = zone;
-                Radius = radius;
-                MinCount = min;
-                MaxCount = max;
-            }
-        }
 
         /// <summary>
         /// Builds a castle layout deterministically from <paramref name="seed"/>. If room prefabs are
@@ -86,104 +94,281 @@ namespace RogueAi.Castle
             // Maps an occupied grid cell -> index into data.PlacedModules.
             var occupied = new Dictionary<Vector2Int, int>();
 
-            // 1 & 2. Place the crypt final chamber at the center origin.
-            string cryptFinalId = PickCryptFinalId();
-            var centerCell = Vector2Int.zero;
-            int cryptIndex = PlaceModule(data, occupied, cryptFinalId, CastleZone.Crypt, centerCell,
-                Vector2Int.up, isCryptEntry: true);
-            data.CryptStartIndex = cryptIndex;
+            BuildInterior(data, occupied, rng);
+            int gatehouseIndex = BuildCurtainWall(data, occupied);
+            AssignExtractionExit(data, gatehouseIndex);
 
-            // 3-6. Ring by ring outward.
-            foreach (ZoneRing ring in Rings)
-            {
-                int count = rng.Next(ring.MinCount, ring.MaxCount + 1);
-                // The crypt ring already spent one slot on the final chamber (the center).
-                if (ring.Zone == CastleZone.Crypt)
-                    count = Mathf.Max(0, count - 1);
-
-                PlaceRing(data, occupied, rng, ring, count);
-            }
-
-            // 7. Mark one OuterBailey module as the extraction exit.
-            AssignExtractionExit(data);
-
-            // 8. Every enclosed room is authored with an archway on all four sides, so any side
-            //    with no neighbour is currently a hole in the outer face. Fill those.
+            // Every enclosed room is authored with an archway on all four sides, so any side with
+            // no neighbour is currently a hole in the outer face. Fill those.
             SealOpenArchways(data, occupied);
 
             LastGenerated = data;
             return data;
         }
 
+        // --- Interior ------------------------------------------------------------
+
         /// <summary>
-        /// Places up to <paramref name="count"/> modules on a single Chebyshev ring, always
-        /// attaching each to an already-placed 4-neighbour so the layout stays connected. Axis
-        /// cells (which connect straight inward to the previous ring) are prioritised so that every
-        /// adjacent zone pair is joined by at least two "staircase" links.
+        /// Fills the cells inside the curtain wall with enclosed rooms, zoned by ring, leaving a
+        /// deterministic handful open as courtyards. A cell is only left open when the remaining
+        /// interior is still one 4-connected region, so the crypt can always be walked out of.
         /// </summary>
-        private void PlaceRing(ProceduralCastleData data, Dictionary<Vector2Int, int> occupied,
-            System.Random rng, ZoneRing ring, int count)
+        private void BuildInterior(ProceduralCastleData data, Dictionary<Vector2Int, int> occupied,
+            System.Random rng)
         {
-            if (count <= 0)
-                return;
+            List<Vector2Int> interior = InteriorCells();
+            var kept = new HashSet<Vector2Int>(interior);
 
-            List<Vector2Int> candidates = RingCells(ring.Radius);
-            Shuffle(candidates, rng);
+            var courtyardOrder = new List<Vector2Int>(interior);
+            Shuffle(courtyardOrder, rng);
 
-            // Prioritise the four axis cells to guarantee >=2 inward (staircase) connections.
-            candidates.Sort((a, b) =>
+            int courtyardTarget = Mathf.RoundToInt(interior.Count * (1f - m_interiorFillFraction));
+            Vector2Int gateApproach = k_GateOutward * (m_curtainWallRadius - 1);
+            int carved = 0;
+
+            for (int i = 0; i < courtyardOrder.Count && carved < courtyardTarget; i++)
             {
-                int aAxis = (a.x == 0 || a.y == 0) ? 0 : 1;
-                int bAxis = (b.x == 0 || b.y == 0) ? 0 : 1;
-                return aAxis.CompareTo(bAxis);
-            });
+                Vector2Int cell = courtyardOrder[i];
 
-            var weightedPool = registry != null ? registry.GetModulesForZone(ring.Zone) : null;
-            int placed = 0;
-            int inwardLinks = 0;
+                // The crypt is the path's start and the gate approach is its end; neither can be a
+                // hole without making some seeds unplayable.
+                if (cell == Vector2Int.zero || cell == gateApproach)
+                    continue;
 
-            // Iterate until we have placed `count` modules or a full pass adds nothing (ring full).
-            bool progress = true;
-            while (placed < count && progress)
-            {
-                progress = false;
-                for (int i = 0; i < candidates.Count && placed < count; i++)
+                kept.Remove(cell);
+                if (IsSingleConnectedRegion(kept))
                 {
-                    Vector2Int cell = candidates[i];
-                    if (occupied.ContainsKey(cell))
-                        continue;
-
-                    if (!TryFindPlacedNeighbour(occupied, cell, out Vector2Int neighbour))
-                        continue;
-
-                    string roomId = PickWeighted(weightedPool, rng, ring.Zone);
-                    Vector2Int facing = neighbour - cell; // point the module toward its anchor
-                    PlaceModule(data, occupied, roomId, ring.Zone, cell, facing, isCryptEntry: false);
-
-                    // An inward link is a connection to a cell one ring closer to the center.
-                    if (Chebyshev(neighbour) < ring.Radius)
-                        inwardLinks++;
-
-                    placed++;
-                    progress = true;
+                    carved++;
+                }
+                else
+                {
+                    kept.Add(cell);
                 }
             }
 
-            if (inwardLinks < 2)
+            // Place innermost-first in a fixed cell order, so placement indices (and therefore
+            // CryptStartIndex) are a function of the seed alone and never of hash iteration order.
+            var ordered = new List<Vector2Int>(kept);
+            ordered.Sort(CompareByRingThenCell);
+
+            for (int i = 0; i < ordered.Count; i++)
             {
-                Debug.LogWarning($"[CastleGen] Zone {ring.Zone} has only {inwardLinks} inward " +
-                                 "staircase link(s); expected at least 2.");
+                Vector2Int cell = ordered[i];
+                CastleZone zone = ZoneForRing(Chebyshev(cell));
+                bool isCryptCentre = cell == Vector2Int.zero;
+
+                string roomId = isCryptCentre
+                    ? ResolveRoomId(k_CryptFinalId)
+                    : PickWeighted(registry != null ? registry.GetModulesForZone(zone) : null, rng, zone);
+
+                int index = PlaceModule(data, occupied, roomId, zone, cell,
+                    RotationForFacing(InwardStep(cell)), isCryptEntry: isCryptCentre);
+
+                if (isCryptCentre)
+                    data.CryptStartIndex = index;
             }
         }
 
+        /// <summary>Every cell strictly inside the curtain wall ring.</summary>
+        private List<Vector2Int> InteriorCells()
+        {
+            int limit = m_curtainWallRadius - 1;
+            var cells = new List<Vector2Int>();
+            for (int x = -limit; x <= limit; x++)
+            {
+                for (int y = -limit; y <= limit; y++)
+                {
+                    cells.Add(new Vector2Int(x, y));
+                }
+            }
+            return cells;
+        }
+
+        /// <summary>
+        /// Which ward a given Chebyshev ring belongs to. The origin is the crypt and the outermost
+        /// interior ring is the bailey; widening the castle widens the Keep band between them.
+        /// </summary>
+        private CastleZone ZoneForRing(int ring)
+        {
+            if (ring == 0)
+                return CastleZone.Crypt;
+            if (ring >= m_curtainWallRadius - 1)
+                return CastleZone.OuterBailey;
+            if (ring == m_curtainWallRadius - 2)
+                return CastleZone.InnerWard;
+            return CastleZone.Keep;
+        }
+
+        /// <summary>Whether every cell in <paramref name="cells"/> is reachable from the origin.</summary>
+        private static bool IsSingleConnectedRegion(HashSet<Vector2Int> cells)
+        {
+            if (cells.Count == 0 || !cells.Contains(Vector2Int.zero))
+                return false;
+
+            var seen = new HashSet<Vector2Int> { Vector2Int.zero };
+            var frontier = new Queue<Vector2Int>();
+            frontier.Enqueue(Vector2Int.zero);
+
+            while (frontier.Count > 0)
+            {
+                Vector2Int current = frontier.Dequeue();
+                foreach (Vector2Int dir in FourDirs)
+                {
+                    Vector2Int next = current + dir;
+                    if (!cells.Contains(next) || !seen.Add(next))
+                        continue;
+                    frontier.Enqueue(next);
+                }
+            }
+
+            return seen.Count == cells.Count;
+        }
+
+        // --- Curtain wall --------------------------------------------------------
+
+        /// <summary>
+        /// Fills the whole outer ring so the wall is an unbroken closed loop: a corner tower at each
+        /// of the four turns, bastions at a fixed spacing along the runs, exactly one gatehouse on
+        /// an axis cell with its drawbridge in the cell immediately outside, and straight wall
+        /// everywhere else. Returns the index of the gatehouse module.
+        /// </summary>
+        private int BuildCurtainWall(ProceduralCastleData data, Dictionary<Vector2Int, int> occupied)
+        {
+            List<Vector2Int> perimeter = PerimeterCells(m_curtainWallRadius);
+            Vector2Int gateCell = k_GateOutward * m_curtainWallRadius;
+            int gatehouseIndex = -1;
+
+            for (int i = 0; i < perimeter.Count; i++)
+            {
+                Vector2Int cell = perimeter[i];
+                bool isCorner = Mathf.Abs(cell.x) == m_curtainWallRadius
+                                && Mathf.Abs(cell.y) == m_curtainWallRadius;
+
+                if (isCorner)
+                {
+                    PlaceModule(data, occupied, ResolveRoomId(k_WallCornerId), CastleZone.CurtainWall,
+                        cell, RotationForCorner(cell), isCryptEntry: false);
+                    continue;
+                }
+
+                Quaternion rotation = RotationForOutwardWall(OutwardFacing(cell));
+
+                if (cell == gateCell)
+                {
+                    gatehouseIndex = PlaceModule(data, occupied, ResolveRoomId(k_GatehouseId),
+                        CastleZone.CurtainWall, cell, rotation, isCryptEntry: false);
+                    continue;
+                }
+
+                string roomId = i % m_bastionSpacing == 0
+                    ? ResolveRoomId(k_BastionId)
+                    : ResolveRoomId(k_WallStraightId);
+
+                PlaceModule(data, occupied, roomId, CastleZone.CurtainWall, cell, rotation,
+                    isCryptEntry: false);
+            }
+
+            // The deck runs inward from its own wall face, so the drawbridge shares the gatehouse's
+            // orientation and lands pointing back at the gate.
+            PlaceModule(data, occupied, ResolveRoomId(k_DrawbridgeId), CastleZone.CurtainWall,
+                gateCell + k_GateOutward, RotationForOutwardWall(k_GateOutward), isCryptEntry: false);
+
+            return gatehouseIndex;
+        }
+
+        /// <summary>The ring's cells walked once round the boundary, so "every Nth" reads as spacing.</summary>
+        private static List<Vector2Int> PerimeterCells(int radius)
+        {
+            var cells = new List<Vector2Int>();
+            for (int x = -radius; x <= radius; x++)
+            {
+                cells.Add(new Vector2Int(x, -radius));
+            }
+            for (int y = -radius + 1; y <= radius; y++)
+            {
+                cells.Add(new Vector2Int(radius, y));
+            }
+            for (int x = radius - 1; x >= -radius; x--)
+            {
+                cells.Add(new Vector2Int(x, radius));
+            }
+            for (int y = radius - 1; y > -radius; y--)
+            {
+                cells.Add(new Vector2Int(-radius, y));
+            }
+            return cells;
+        }
+
+        /// <summary>Which way a non-corner perimeter cell faces out of the castle.</summary>
+        private Vector2Int OutwardFacing(Vector2Int cell)
+        {
+            if (cell.x == m_curtainWallRadius)
+                return new Vector2Int(1, 0);
+            if (cell.x == -m_curtainWallRadius)
+                return new Vector2Int(-1, 0);
+            if (cell.y == m_curtainWallRadius)
+                return new Vector2Int(0, 1);
+            return new Vector2Int(0, -1);
+        }
+
+        /// <summary>
+        /// Yaw that turns a curtain-wall piece's wall face outward.
+        ///
+        /// <c>build_wall_straight</c> (Tools/AssetPipeline/castle_builders.py) raises its wall on the
+        /// module's SOUTH side, which lands on local -Z once the Blender Z-up correction is applied.
+        /// So the module has to be yawed until local -Z points away from the castle — the opposite of
+        /// what <see cref="RotationForFacing"/> does, which is why the wall ring has its own rule.
+        /// </summary>
+        private static Quaternion RotationForOutwardWall(Vector2Int outward)
+        {
+            float yaw;
+            if (outward.x > 0)
+            {
+                yaw = 270f;
+            }
+            else if (outward.x < 0)
+            {
+                yaw = 90f;
+            }
+            else if (outward.y > 0)
+            {
+                yaw = 180f;
+            }
+            else
+            {
+                yaw = 0f;
+            }
+            return Quaternion.Euler(0f, yaw, 0f);
+        }
+
+        /// <summary>
+        /// Yaw for a corner tower. <c>build_wall_corner</c> raises SOUTH and WEST, so unrotated its
+        /// two faces cover the south-west outward pair; yawing by that piece's south face is enough
+        /// to carry the west face onto the other outward side of any corner.
+        /// </summary>
+        private static Quaternion RotationForCorner(Vector2Int cell)
+        {
+            int signX = cell.x > 0 ? 1 : -1;
+            int signY = cell.y > 0 ? 1 : -1;
+
+            // South-west and north-east are reached by turning the south face onto the vertical
+            // outward side; the mixed corners by turning it onto the horizontal one.
+            Vector2Int primary = signX == signY
+                ? new Vector2Int(0, signY)
+                : new Vector2Int(signX, 0);
+
+            return RotationForOutwardWall(primary);
+        }
+
+        // --- Placement -----------------------------------------------------------
+
         /// <summary>Records (and optionally instantiates) a single module, returning its index.</summary>
         private int PlaceModule(ProceduralCastleData data, Dictionary<Vector2Int, int> occupied,
-            string roomId, CastleZone zone, Vector2Int cell, Vector2Int facing, bool isCryptEntry)
+            string roomId, CastleZone zone, Vector2Int cell, Quaternion rotation, bool isCryptEntry)
         {
-            Vector3 worldPos = new Vector3(cell.x * cellSize, 0f, cell.y * cellSize);
-            Quaternion rot = RotationForFacing(facing);
+            var worldPos = new Vector3(cell.x * cellSize, 0f, cell.y * cellSize);
 
-            var placed = new ProceduralCastleData.PlacedModule(roomId, worldPos, rot, zone, cell)
+            var placed = new ProceduralCastleData.PlacedModule(roomId, worldPos, rotation, zone, cell)
             {
                 IsCryptEntry = isCryptEntry
             };
@@ -192,7 +377,7 @@ namespace RogueAi.Castle
             data.PlacedModules.Add(placed);
             occupied[cell] = index;
 
-            InstantiateModule(roomId, zone, cell, worldPos, rot, isCryptEntry);
+            InstantiateModule(roomId, zone, cell, worldPos, rotation, isCryptEntry);
             return index;
         }
 
@@ -226,34 +411,34 @@ namespace RogueAi.Castle
             module.PopulateSockets();
         }
 
-        /// <summary>Marks the last-placed OuterBailey module as the extraction exit.</summary>
-        private void AssignExtractionExit(ProceduralCastleData data)
+        /// <summary>
+        /// Marks the gatehouse as the extraction exit: the castle has exactly one gate, so leaving
+        /// through it is the only way out, and it is where the raid starts too.
+        /// </summary>
+        private void AssignExtractionExit(ProceduralCastleData data, int gatehouseIndex)
         {
-            for (int i = data.PlacedModules.Count - 1; i >= 0; i--)
+            if (gatehouseIndex < 0 || gatehouseIndex >= data.PlacedModules.Count)
             {
-                if (data.PlacedModules[i].Zone == CastleZone.OuterBailey)
-                {
-                    var pm = data.PlacedModules[i];
-                    pm.IsExtractionExit = true;
-                    data.PlacedModules[i] = pm;
-                    data.ExtractionExitIndex = i;
-
-                    // Reflect on the instantiated module too, if present.
-                    foreach (GameObject go in _instantiated)
-                    {
-                        if (go == null) continue;
-                        var m = go.GetComponent<CastleRoomModule>();
-                        if (m != null && m.GridPosition == pm.GridPosition && m.Zone == CastleZone.OuterBailey)
-                        {
-                            m.IsExtractionExit = true;
-                            break;
-                        }
-                    }
-                    return;
-                }
+                Debug.LogWarning("[CastleGen] No gatehouse placed — extraction exit unassigned.");
+                return;
             }
 
-            Debug.LogWarning("[CastleGen] No OuterBailey module placed — extraction exit unassigned.");
+            ProceduralCastleData.PlacedModule module = data.PlacedModules[gatehouseIndex];
+            module.IsExtractionExit = true;
+            data.PlacedModules[gatehouseIndex] = module;
+            data.ExtractionExitIndex = gatehouseIndex;
+
+            foreach (GameObject go in _instantiated)
+            {
+                if (go == null)
+                    continue;
+                var m = go.GetComponent<CastleRoomModule>();
+                if (m != null && m.GridPosition == module.GridPosition)
+                {
+                    m.IsExtractionExit = true;
+                    break;
+                }
+            }
         }
 
         /// <summary>
@@ -278,11 +463,26 @@ namespace RogueAi.Castle
 
                 foreach (Vector2Int dir in FourDirs)
                 {
-                    if (occupied.ContainsKey(module.GridPosition + dir))
+                    if (IsArchwayConnected(data, occupied, module.GridPosition + dir))
                         continue;
                     InstantiateDoorPlug(plug, module, dir);
                 }
             }
+        }
+
+        /// <summary>
+        /// Whether an archway onto <paramref name="neighbour"/> leads somewhere, and so must be
+        /// left open. A curtain-wall cell is a wall, not a room, so an archway onto one is as open
+        /// as an archway onto nothing — except at the gatehouse, which is the way out.
+        /// </summary>
+        private bool IsArchwayConnected(ProceduralCastleData data,
+            Dictionary<Vector2Int, int> occupied, Vector2Int neighbour)
+        {
+            if (neighbour == k_GateOutward * m_curtainWallRadius)
+                return true;
+            if (!occupied.TryGetValue(neighbour, out int index))
+                return false;
+            return IsEnclosedRoom(data.PlacedModules[index].Zone);
         }
 
         /// <summary>Places one door plug in the archway of <paramref name="module"/> facing <paramref name="dir"/>.</summary>
@@ -348,13 +548,13 @@ namespace RogueAi.Castle
 
         // --- Selection helpers ---------------------------------------------------
 
-        private string PickCryptFinalId()
+        /// <summary>The registry's id for a known piece, falling back to the literal for data-only runs.</summary>
+        private string ResolveRoomId(string roomId)
         {
-            const string fallback = "CryptChamberFinal";
             if (registry == null)
-                return fallback;
-            CastleRoomModuleData entry = registry.GetById(fallback);
-            return entry != null ? entry.RoomId : fallback;
+                return roomId;
+            CastleRoomModuleData entry = registry.GetById(roomId);
+            return entry != null ? entry.RoomId : roomId;
         }
 
         /// <summary>Weighted random RoomId from a zone pool; falls back to a synthetic id.</summary>
@@ -380,21 +580,6 @@ namespace RogueAi.Castle
 
         // --- Grid helpers --------------------------------------------------------
 
-        /// <summary>All grid cells whose Chebyshev distance from the origin equals <paramref name="r"/>.</summary>
-        private static List<Vector2Int> RingCells(int r)
-        {
-            var cells = new List<Vector2Int>();
-            for (int x = -r; x <= r; x++)
-            {
-                for (int y = -r; y <= r; y++)
-                {
-                    if (Mathf.Max(Mathf.Abs(x), Mathf.Abs(y)) == r)
-                        cells.Add(new Vector2Int(x, y));
-                }
-            }
-            return cells;
-        }
-
         private static int Chebyshev(Vector2Int c) => Mathf.Max(Mathf.Abs(c.x), Mathf.Abs(c.y));
 
         private static readonly Vector2Int[] FourDirs =
@@ -403,31 +588,25 @@ namespace RogueAi.Castle
             new Vector2Int(0, 1), new Vector2Int(0, -1)
         };
 
-        /// <summary>Finds a placed 4-neighbour of <paramref name="cell"/>, preferring inward ones.</summary>
-        private static bool TryFindPlacedNeighbour(Dictionary<Vector2Int, int> occupied,
-            Vector2Int cell, out Vector2Int neighbour)
+        /// <summary>Innermost ring first, then a stable cell order within the ring.</summary>
+        private static int CompareByRingThenCell(Vector2Int a, Vector2Int b)
         {
-            int cellRing = Chebyshev(cell);
-            neighbour = default;
-            bool found = false;
-            foreach (Vector2Int d in FourDirs)
-            {
-                Vector2Int n = cell + d;
-                if (!occupied.ContainsKey(n))
-                    continue;
-                // Prefer an inward neighbour (closer to center) for the strongest connectivity.
-                if (Chebyshev(n) < cellRing)
-                {
-                    neighbour = n;
-                    return true;
-                }
-                if (!found)
-                {
-                    neighbour = n;
-                    found = true;
-                }
-            }
-            return found;
+            int ring = Chebyshev(a).CompareTo(Chebyshev(b));
+            if (ring != 0)
+                return ring;
+            int x = a.x.CompareTo(b.x);
+            return x != 0 ? x : a.y.CompareTo(b.y);
+        }
+
+        /// <summary>The single step from <paramref name="cell"/> toward the origin.</summary>
+        private static Vector2Int InwardStep(Vector2Int cell)
+        {
+            int ring = Chebyshev(cell);
+            if (ring == 0)
+                return Vector2Int.zero;
+            if (Mathf.Abs(cell.x) == ring)
+                return new Vector2Int(cell.x > 0 ? -1 : 1, 0);
+            return new Vector2Int(0, cell.y > 0 ? -1 : 1);
         }
 
         /// <summary>Deterministic Fisher–Yates shuffle driven by the seeded RNG.</summary>

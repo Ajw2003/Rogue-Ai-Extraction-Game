@@ -112,10 +112,102 @@ namespace RogueAi.Tests
             var gen = MakeGenerator();
             ProceduralCastleData data = gen.Generate(777);
             Assert.GreaterOrEqual(data.ExtractionExitIndex, 0, "An extraction exit must be assigned.");
-            Assert.IsTrue(data.PlacedModules[data.ExtractionExitIndex].IsExtractionExit);
-            Assert.AreEqual(CastleZone.OuterBailey,
-                data.PlacedModules[data.ExtractionExitIndex].Zone,
-                "Extraction exit should be an OuterBailey module.");
+            ProceduralCastleData.PlacedModule exit = data.PlacedModules[data.ExtractionExitIndex];
+            Assert.IsTrue(exit.IsExtractionExit);
+            Assert.AreEqual(CastleZone.CurtainWall, exit.Zone,
+                "The castle's one gate is the way out, so the exit is a curtain-wall module.");
+            Assert.AreEqual("GatehouseModule", exit.RoomId,
+                "The extraction exit should be the gatehouse specifically.");
+        }
+
+        [Test]
+        public void Test_CurtainWallIsAClosedLoop()
+        {
+            var gen = MakeGenerator();
+            int radius = gen.CurtainWallRadius;
+
+            foreach (int seed in new[] { 42, 777, 12345, -9, 20260917 })
+            {
+                ProceduralCastleData data = gen.Generate(seed);
+
+                var byCell = new Dictionary<Vector2Int, ProceduralCastleData.PlacedModule>();
+                foreach (var pm in data.PlacedModules)
+                    byCell[pm.GridPosition] = pm;
+
+                int gatehouses = 0;
+                for (int x = -radius; x <= radius; x++)
+                {
+                    for (int y = -radius; y <= radius; y++)
+                    {
+                        if (Mathf.Max(Mathf.Abs(x), Mathf.Abs(y)) != radius)
+                            continue;
+
+                        var cell = new Vector2Int(x, y);
+                        Assert.IsTrue(byCell.TryGetValue(cell, out var pm),
+                            $"seed {seed}: perimeter cell {cell} is a hole in the curtain wall.");
+                        Assert.AreEqual(CastleZone.CurtainWall, pm.Zone,
+                            $"seed {seed}: perimeter cell {cell} is not a curtain-wall module.");
+
+                        if (pm.RoomId == "GatehouseModule")
+                            gatehouses++;
+                    }
+                }
+
+                Assert.AreEqual(1, gatehouses, $"seed {seed}: the castle must have exactly one gate.");
+            }
+        }
+
+        [Test]
+        public void Test_InteriorRoomCountIsPlayable()
+        {
+            var gen = MakeGenerator();
+
+            foreach (int seed in new[] { 42, 777, 12345, -9 })
+            {
+                ProceduralCastleData data = gen.Generate(seed);
+
+                int rooms = 0;
+                foreach (var pm in data.PlacedModules)
+                {
+                    if (ProceduralCastleGenerator.IsEnclosedRoom(pm.Zone))
+                        rooms++;
+                }
+
+                Assert.That(rooms, Is.InRange(40, 60),
+                    $"seed {seed}: {rooms} interior rooms is outside the playable range.");
+            }
+        }
+
+        /// <summary>
+        /// Covers the derivation, not collider clearance: a data-only layout has no prefabs, so the
+        /// capsule probe finds every candidate clear and the spawn lands on the first one. What this
+        /// asserts is that for any seed the spawn is on the floor, inside the gate cell, and on the
+        /// castle side of the wall.
+        /// </summary>
+        [Test]
+        public void Test_SpawnIsJustInsideTheGatehouseForEverySeed()
+        {
+            var gen = MakeGenerator();
+            const float expectedY = CastleSpawnResolver.FloorHeight + CastleSpawnResolver.FloorClearance
+                                    + CastleSpawnResolver.PlayerHeight * 0.5f;
+
+            foreach (int seed in new[] { 42, 777, 12345, -9, 20260917, 1 })
+            {
+                ProceduralCastleData data = gen.Generate(seed);
+                Assert.GreaterOrEqual(data.ExtractionExitIndex, 0, $"seed {seed}: no extraction exit.");
+
+                Vector3 gate = data.PlacedModules[data.ExtractionExitIndex].Position;
+                Vector3 spawn = CastleSpawnResolver.ResolveSpawn(data);
+
+                Assert.That(spawn.y, Is.EqualTo(expectedY).Within(0.001f),
+                    $"seed {seed}: spawn is not standing on the floor.");
+
+                var flat = new Vector2(spawn.x - gate.x, spawn.z - gate.z);
+                Assert.That(flat.magnitude, Is.LessThan(6f),
+                    $"seed {seed}: spawn {spawn} is outside the gate cell at {gate}.");
+                Assert.Less(spawn.x, gate.x,
+                    $"seed {seed}: spawn {spawn} is outside the wall rather than inside the gate.");
+            }
         }
 
         [Test]
