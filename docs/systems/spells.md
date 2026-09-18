@@ -57,6 +57,40 @@ orange regardless of what it was aimed at, so "that went wrong" is readable befo
 exist yet. It disables its collider *before* destroying it: `Destroy` is deferred to the end of the
 frame, and a live collider expanding to 2.5 m punts every piece of loot in the room across it first.
 
+### Casting it in the Editor
+
+There is no microphone involved in the Editor. `VoiceServiceLocator.ShouldUseMock()` returns true
+unconditionally under `UNITY_EDITOR`, so `MockVoiceInputService` is always the provider, and it is
+driven by the keyboard:
+
+**Hold `V`, press `1`–`8` while still holding it, then release `V`.**
+
+Holding `V` is what opens the mic (`PushToCastController`), and the mock only reads number keys
+`while IsListening` — press a number without holding `V` and nothing happens at all, which is the
+easiest way to conclude the spells are broken when they are not.
+
+| Key (while holding V) | Spell | Hold also… |
+|---|---|---|
+| 1–8 | Ignis, Frango, Levo, Aurum Voco, Tonitrus, Somnus, Cadaver Surge, Porta | |
+| 1–8 | the near-match misfire of each | `Shift` |
+| 1–8 | whisper (quiet, weak) | `Ctrl` |
+
+`Shift` doubles as the shout volume, so a shifted key is both a misfire and a shout.
+
+The raid's player carries `SpellCastingSystem` and `PushToCastController` and has **no**
+`SpellBook`, so `PlayerStateMachine.Attack` swings the held item rather than casting — casting is
+the voice path only.
+
+### What the visuals actually look like
+
+`Tools ▸ Plunderspell ▸ Capture Spell VFX Screenshots` photographs every look into
+`docs/generated/spell-vfx-screenshots/`. The committed set is the evidence that these render at all.
+
+**Known limitation, visible in that capture:** a burst is an *opaque* sphere. `SpellBurst` fades by
+writing alpha into `_BaseColor`, and the URP/Lit material it builds is opaque, so the alpha does
+nothing — the fade is currently dead code and a burst reads as a solid coloured ball rather than
+light. Fixing it means a transparent or additive material on the burst.
+
 ### A spell's bolt carries no damage
 
 This is the one thing to know before changing it. The effect has **already resolved on the server**

@@ -46,12 +46,25 @@ namespace RogueAi.Spells.Vfx
             burst.m_endRadius = Mathf.Max(0.3f, radius);
             burst.m_startRadius = burst.m_endRadius * 0.15f;
             burst.m_duration = Mathf.Max(0.05f, duration);
+
+            // Applied now rather than on the first Update: otherwise the first frame of every cast
+            // renders as an untinted 1 m sphere at the primitive's default scale.
+            burst.SetProgress(0f);
             return burst;
         }
 
         private void Awake()
         {
             m_renderer = GetComponent<Renderer>();
+            EnsureGlow();
+        }
+
+        private void EnsureGlow()
+        {
+            if (m_light != null)
+            {
+                return;
+            }
 
             var lightGo = new GameObject("Glow");
             lightGo.transform.SetParent(transform, false);
@@ -63,6 +76,26 @@ namespace RogueAi.Spells.Vfx
         {
             m_age += Time.deltaTime;
             float t = Mathf.Clamp01(m_age / m_duration);
+            SetProgress(t);
+
+            if (t >= 1f)
+            {
+                Destroy(gameObject);
+            }
+        }
+
+        /// <summary>
+        /// Puts the burst at <paramref name="t"/> (0..1) through its life. Public so a capture tool
+        /// can photograph a burst mid-bloom without running the game.
+        /// </summary>
+        public void SetProgress(float t)
+        {
+            t = Mathf.Clamp01(t);
+
+            if (m_renderer == null)
+            {
+                m_renderer = GetComponent<Renderer>();
+            }
 
             // Fast out, slow to a stop: a spell should arrive rather than drift outwards.
             float eased = 1f - (1f - t) * (1f - t);
@@ -77,11 +110,6 @@ namespace RogueAi.Spells.Vfx
                 m_light.color = m_colour;
                 m_light.range = radius * 4f;
                 m_light.intensity = 4f * fade;
-            }
-
-            if (t >= 1f)
-            {
-                Destroy(gameObject);
             }
         }
 
