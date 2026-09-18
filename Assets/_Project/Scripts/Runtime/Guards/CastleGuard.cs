@@ -364,6 +364,16 @@ namespace RogueAi.Guards
         }
 
         /// <summary>
+        /// Forces this guard into <paramref name="next"/>. A dev and test seam in the same spirit as
+        /// <see cref="Tick"/> being public: it lets a bench drop a guard straight into a chase rather
+        /// than waiting for it to notice anyone. Not for gameplay — the AI owns its own transitions.
+        /// </summary>
+        public void SetAlertState(GuardAlertState next)
+        {
+            EnterState(next, _alarm != null ? _alarm.State : AlarmState.Calm);
+        }
+
+        /// <summary>
         /// The guard shouts. This goes through the ordinary acoustic path, so it reaches the alarm
         /// and every other guard in earshot — one guard spotting you is how a castle wakes up.
         /// </summary>
