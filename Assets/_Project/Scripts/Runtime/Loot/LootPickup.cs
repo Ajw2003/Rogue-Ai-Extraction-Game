@@ -138,6 +138,12 @@ namespace RogueAi.Loot
         private void ApplyBrokenState()
         {
             _isBroken.value = true;
+
+            // Transition bridge: extraction tallies LootValue now, so breaking through the old
+            // system has to reach the new one or a smashed piece still pays out. Goes away with
+            // LootPickup. See docs/systems/raid.md, "Carrying and extracting".
+            if (TryGetComponent(out LootValue value))
+                value.Ruin();
             if (_meshRenderer != null) _meshRenderer.enabled = false;
             if (_brokenVfx != null) _brokenVfx.Play();
             if (_rb != null)

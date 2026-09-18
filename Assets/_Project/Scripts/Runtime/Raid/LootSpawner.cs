@@ -149,6 +149,12 @@ namespace RogueAi.Raid
                 pickup = go.AddComponent<LootPickup>();
             pickup.SetData(item);
 
+            // Extraction tallies LootValue, so every spawned piece gets one or the haul is worth
+            // nothing however carefully it was carried out.
+            if (!go.TryGetComponent(out LootValue value))
+                value = go.AddComponent<LootValue>();
+            value.SetItem(item);
+
             _spawned.Add(go);
             return go;
         }

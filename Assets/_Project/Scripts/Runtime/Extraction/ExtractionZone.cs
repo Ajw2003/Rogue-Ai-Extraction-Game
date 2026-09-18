@@ -30,7 +30,7 @@ namespace RogueAi.Extraction
         private readonly SyncVar<bool> _extractionComplete = new SyncVar<bool>(false);
 
         // Server-side tracking of everything currently inside the trigger.
-        private readonly List<LootPickup> _lootInZone = new List<LootPickup>();
+        private readonly List<LootValue> _lootInZone = new List<LootValue>();
         private readonly List<NetworkIdentity> _playersInZone = new List<NetworkIdentity>();
 
         /// <summary>Seconds left in the raid (replicated).</summary>
@@ -41,6 +41,19 @@ namespace RogueAi.Extraction
 
         /// <summary>Raised on every peer when the extraction resolves: (worthExtracted, playersSaved).</summary>
         public event Action<float, int> ExtractionResolved;
+
+        /// <summary>
+        /// Raised whenever loot enters or leaves the zone: (worthInZone, pieceCount). The HUD shows a
+        /// running total from this, so a player can see the haul grow as they stack it on the pad
+        /// rather than only learning what it was worth after the raid has already ended.
+        /// </summary>
+        public event Action<float, int> HaulInZoneChanged;
+
+        /// <summary>Worth of everything currently standing in the zone.</summary>
+        public float WorthInZone => ComputeWorth(_lootInZone);
+
+        /// <summary>How many pieces are currently standing in the zone.</summary>
+        public int PiecesInZone => _lootInZone.Count;
 
         protected override void OnSpawned()
         {
@@ -115,14 +128,14 @@ namespace RogueAi.Extraction
         /// Pure, network-free tally helper: sum the worth of every non-broken pickup in the list.
         /// Exposed for unit testing (<c>Test_ExtractionTally</c>).
         /// </summary>
-        public static float ComputeWorth(IEnumerable<LootPickup> loot)
+        public static float ComputeWorth(IEnumerable<LootValue> loot)
         {
             float total = 0f;
-            foreach (var pickup in loot)
+            foreach (LootValue piece in loot)
             {
-                if (pickup == null || pickup.IsBroken || pickup.Data == null)
+                if (piece == null || piece.IsRuined)
                     continue;
-                total += pickup.Data.Worth;
+                total += piece.Worth;
             }
             return total;
         }
@@ -146,12 +159,15 @@ namespace RogueAi.Extraction
             if (isSpawned && !isServer)
                 return;
 
-            var pickup = other.GetComponentInParent<LootPickup>();
-            if (pickup != null && !_lootInZone.Contains(pickup))
-                _lootInZone.Add(pickup);
+            var piece = other.GetComponentInParent<LootValue>();
+            if (piece != null && !_lootInZone.Contains(piece))
+            {
+                _lootInZone.Add(piece);
+                OnHaulChanged();
+            }
 
             var identity = other.GetComponentInParent<NetworkIdentity>();
-            if (identity != null && pickup == null && !_playersInZone.Contains(identity))
+            if (identity != null && piece == null && !_playersInZone.Contains(identity))
                 _playersInZone.Add(identity);
         }
 
@@ -160,14 +176,16 @@ namespace RogueAi.Extraction
             if (isSpawned && !isServer)
                 return;
 
-            var pickup = other.GetComponentInParent<LootPickup>();
-            if (pickup != null)
-                _lootInZone.Remove(pickup);
+            var piece = other.GetComponentInParent<LootValue>();
+            if (piece != null && _lootInZone.Remove(piece))
+                OnHaulChanged();
 
             var identity = other.GetComponentInParent<NetworkIdentity>();
-            if (identity != null && pickup == null)
+            if (identity != null && piece == null)
                 _playersInZone.Remove(identity);
         }
+
+        private void OnHaulChanged() => HaulInZoneChanged?.Invoke(WorthInZone, _lootInZone.Count);
 
         // -----------------------------------------------------------------------------------------
         // Test / integration seams (network-free mutation of the tracked lists)
@@ -197,13 +215,39 @@ namespace RogueAi.Extraction
             _lootInZone.Clear();
             _playersInZone.Clear();
             ResetClock();
+            OnHaulChanged();
         }
 
-        /// <summary>Test seam: register a pickup as being inside the zone.</summary>
+        /// <summary>Test seam: register a piece as being inside the zone.</summary>
+        public void TrackLoot(LootValue piece)
+        {
+            if (piece != null && !_lootInZone.Contains(piece))
+            {
+                _lootInZone.Add(piece);
+                OnHaulChanged();
+            }
+        }
+
+        /// <summary>
+        /// Transition overload for callers still holding a <see cref="LootPickup"/>. Attaches the
+        /// <see cref="LootValue"/> the zone now tallies, carrying the pickup's authored worth across.
+        /// Delete alongside <see cref="LootPickup"/>.
+        /// </summary>
         public void TrackLoot(LootPickup pickup)
         {
-            if (pickup != null && !_lootInZone.Contains(pickup))
-                _lootInZone.Add(pickup);
+            if (pickup == null)
+                return;
+
+            if (!pickup.TryGetComponent(out LootValue piece))
+            {
+                piece = pickup.gameObject.AddComponent<LootValue>();
+                piece.SetItem(pickup.Data);
+            }
+
+            if (pickup.IsBroken)
+                piece.Ruin();
+
+            TrackLoot(piece);
         }
 
         /// <summary>Test seam: register a player identity as being inside the zone.</summary>

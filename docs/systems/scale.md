@@ -89,8 +89,28 @@ metre of air above it, and no clipping through the room it fights in.
 - **Floors sit at ground level in every zone.** A taller zone is taller at the ceiling, never
   lower at the floor, so a player crossing a zone boundary never steps up or down.
 
+## Verification
+
+`ScaleInvariantTests` (EditMode) measures the shipped art against this document rather than
+restating its numbers: it instantiates each prefab and reads real world-space renderer bounds, so a
+mesh that disagrees with the table fails rather than passing on a copied constant.
+
+| Test | Asserts |
+|---|---|
+| `Test_ThePlayerCapsuleIsTheStandardHuman` | `CastleSpawnResolver` is sized 1.80 m × 0.40 m |
+| `Test_EveryRoomModuleClearsAStandardHuman` | every registry room's clear height exceeds 1.80 m |
+| `Test_NoEnemyIsTallerThanTheRoomsItIsPostedTo` | no enemy exceeds the shortest zone's clear height |
+| `Test_EveryEnemyStandsOnItsOwnOrigin` | feet at the origin — **currently `[Ignore]`d, see issue 94** |
+
+Archway clearance is **not** covered: the opening is a hole in a mesh rather than an object, so
+nothing here measures it. The archway figures above are still derived from
+`Tools/AssetPipeline/room_kit.opening_size()`, not verified against the art.
+
 ## Traps
 
+- **Three enemies do not stand on the floor.** `ArcRevenant` floats 0.15 m, `GildedColossus`
+  sinks 0.16 m and `VaultWarden` sinks 0.12 m, because `EnemyPrefabForge` assumes the source models
+  are exported feet-on-origin and only scales them. Issue 94.
 - **The `GildedColossus` fits in the Crypt but not through its archway.** At 2.50 m tall and
   1.57 m wide it cannot pass a 2.60 × 2.16 m opening standing up. It is a room-bound boss: it
   fights where it spawns. Anything that expects it to patrol between rooms needs either a taller

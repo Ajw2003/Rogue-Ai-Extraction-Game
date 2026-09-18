@@ -21,6 +21,7 @@ this document, not a reason to go grep the repo.
 | `Tools/AssetPipeline/` | Blender-driven generation of weapon/loot/castle-module props |
 | `Tools/EnemyForge/` | Blender-driven generation of the enemy roster (mesh, rig, textures) |
 | `Tools/mkissues.py` | files the playtesting backlog to GitHub issues; see `docs/generated/github-issues.json` |
+| `Plans/` | one exhaustive plan per GitHub issue, plus `Priority_Queue.md`, the live execution order |
 | `docs/` | this tree |
 
 ## The tiers
@@ -55,6 +56,7 @@ together and what was deliberately left undocumented, and why.
 | [`raid`](systems/raid.md) | The loop: Lair → castle → haul → extraction → Lair |
 | [`raid-scene-assembly`](systems/raid-scene-assembly.md) | Wiring the authored art (castle rooms, loot, enemies) into the playable scene |
 | [`enemy-asset-pipeline`](systems/enemy-asset-pipeline.md) | Generating the enemy roster from Python/Blender |
+| [`combat-bench`](systems/combat-bench.md) | The one-room arena for trying a weapon, spell or enemy without starting a raid |
 | [`scale`](systems/scale.md) | The 1.8m standard human, and the room, archway and enemy heights measured against it |
 
 ## Everything else worth reaching

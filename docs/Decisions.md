@@ -3,6 +3,70 @@
 Append-only. An entry is never rewritten or deleted; the one allowed edit is flipping its
 `Status` line to `Superseded` when a later entry replaces it. Newest entry at the top.
 
+## 2026-09-18 — The raid scene is authored; the builder gets a scaffold path
+
+**Context.** `RaidSceneBuilder.BuildPlayer` assembled a player carrying
+`FreeLookPlaytestController`, but the committed `RaidScene.unity` carried `PlayerStateMachine` +
+`PlayerInputController` — the scene had been hand-edited away from what its own builder produced.
+Running *Build Playable Raid Scene* would have silently swapped the real player for the ItemGym
+harness and, after the same day's issue-9 work, removed the input gate with it. The requested
+direction was to stop regenerating the scene and author it instead.
+
+**Decision.** `RaidScene.unity` is authored and nothing regenerates it. `RaidSceneBuilder` writes
+`RaidScene.Scaffold.unity`, and asserts at entry that its output path is not the authored one. The
+raid player is extracted to `Prefabs/RaidPlayer.prefab`, which both the authored scene and the
+scaffold instance, and `BuildPlayer` instantiates that prefab rather than assembling a rig. The
+fallback path, used only when the prefab is missing, builds the shipping controller — not the
+harness.
+
+**Why.** A generator and a hand-edited artefact cannot both own one file; whichever ran last won,
+which is not a rule anyone can reason about. Giving the generator a different path costs nothing —
+the scaffold is still useful for checking the catalogues assemble — and removes the whole class of
+"a tool quietly ate a day of authoring". Making the player a prefab is what stops the two scenes
+disagreeing about what a player is a second time.
+
+**What replaces the builder's guarantee.** A generated scene re-wired its references every run, so a
+dropped reference healed itself. An authored one does not. `AuthoredRaidSceneTests` asserts the
+player is an instance of the authored prefab, carries the shipping controller and not
+`FreeLookPlaytestController`, and that every serialised reference on `RaidDirector` and
+`RaidHudPresenter` is still assigned.
+
+**Not done.** `Prefabs/Player.prefab` is left alone: it is `TestSceneBuilder`'s third-person
+2.0 m × 0.5 m rig for `TestScene.unity`, a different thing that happens to share a name shape.
+`EnemyPrefabForge` is also untouched — issue 94 stands.
+
+**Status.** Standing.
+
+## 2026-09-18 — Issue 9's gate belongs on the raid's player, not only on the playtest harness
+
+**Context.** Issue 9 (the player moves and looks while the main menu is open) was implemented by
+gating `FreeLookPlaytestController` and `PushToCastController` on `GameServices.IsPlaying`, and a
+PlayMode test was written against `FreeLookPlaytestController`. `RaidScene.unity` does not contain
+that component — it carries `PlayerStateMachine` plus `PlayerInputController`. The harness gained a
+gate, the shipping player did not, and the test passed anyway.
+
+**Decision.** `PlayerInputController` gates every input path it owns — the per-frame look, and the
+Move/Attack/Jump/Dodge/item-click callbacks — on `GameServices.IsPlaying`, and clears held movement
+on the frame the gate closes. The rule is exposed as the pure predicate
+`PlayerInputController.AcceptsInputIn(GameState)`, mirroring `CursorLockPolicy.ShouldCapture`, and a
+test asserts the two agree state for state.
+
+**Why.** Clearing movement is not optional: `MovementDirection` persists between Input System
+callbacks, so gating the callbacks alone leaves the body travelling on the last value delivered
+before the menu opened. Making the rule a pure predicate rather than an inline
+`GameServices.IsPlaying` check is what lets the cursor rule and the input rule be asserted against
+each other — a menu the cursor is free on but the player still walks behind is precisely the bug,
+and that class of disagreement is now a test failure rather than a playtest report.
+
+**Why it was missed.** `FreeLookPlaytestController`'s own doc comment described
+`PlayerStateMachine` as bound to "a player prefab that does not exist yet," which had stopped being
+true by the time issue 9 was worked. A component's comment claiming it is the only playable body is
+not evidence that it is in the scene; the scene file is. That comment now says where it is actually
+used (`ItemGym.unity`) and warns that changes made there do not reach the raid.
+
+**Status.** Standing. Supersedes the scope, not the mechanism, of "One owner for the cursor; input
+gates on the state variable" — that entry's rule was right and its coverage was incomplete.
+
 ## 2026-09-17 — Four doorways on every room plus plugs, rather than socket-matched placement
 
 **Context.** Issue 5 (rooms do not connect, doorways do not align) and issue 19 (modules do not

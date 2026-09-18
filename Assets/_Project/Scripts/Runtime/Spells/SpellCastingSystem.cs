@@ -113,7 +113,8 @@ namespace RogueAi.Spells
             if (!isSpawned)
             {
                 int affected = ExecuteEffect(resolved, result.Volume, this);
-                PresentCast(resolved, result.Volume, this, default, affected);
+                PresentCast(resolved, result.Volume, this, default, affected,
+                    CastOrigin(this), CastDirection(this));
                 return;
             }
 
@@ -131,7 +132,8 @@ namespace RogueAi.Spells
             int affected = ExecuteEffect(spellId, volume, caster);
 
             // info.sender is the player that requested the cast.
-            BroadcastCast(spellId, volume, caster, info.sender, affected);
+            BroadcastCast(spellId, volume, caster, info.sender, affected,
+                CastOrigin(caster), CastDirection(caster));
         }
 
         /// <summary>
@@ -141,16 +143,29 @@ namespace RogueAi.Spells
         /// </summary>
         public int ExecuteEffect(SpellId spellId, CastVolume volume, NetworkIdentity caster)
         {
-            Transform origin = caster != null ? caster.transform : transform;
             var ctx = new SpellEffectContext(
                 spellId, volume,
-                origin.position + origin.forward * _castOriginForwardOffset + Vector3.up * _castOriginHeight,
-                origin.forward,
+                CastOrigin(caster), CastDirection(caster),
                 caster,
                 _targetLayers,
                 _geometryLayers);
 
             return SpellEffectRegistry.Execute(ctx);
+        }
+
+        /// <summary>Where a cast leaves the caster's hands. Shared by the effect and its visual, so
+        /// the two cannot disagree about where the spell came from.</summary>
+        private Vector3 CastOrigin(NetworkIdentity caster)
+        {
+            Transform origin = caster != null ? caster.transform : transform;
+            return origin.position + origin.forward * _castOriginForwardOffset
+                   + Vector3.up * _castOriginHeight;
+        }
+
+        private Vector3 CastDirection(NetworkIdentity caster)
+        {
+            Transform origin = caster != null ? caster.transform : transform;
+            return origin.forward;
         }
 
         /// <summary>
@@ -159,14 +174,15 @@ namespace RogueAi.Spells
         /// </summary>
         [ObserversRpc(bufferLast: false)]
         private void BroadcastCast(SpellId spellId, CastVolume volume, NetworkIdentity caster,
-            PlayerID sender, int affected) => PresentCast(spellId, volume, caster, sender, affected);
+            PlayerID sender, int affected, Vector3 origin, Vector3 direction) =>
+            PresentCast(spellId, volume, caster, sender, affected, origin, direction);
 
         /// <summary>
         /// Presentation half, callable without an RPC. Must stay side-effect-free apart from logging
         /// and the local event: the effect has already happened on the server.
         /// </summary>
         private static void PresentCast(SpellId spellId, CastVolume volume, NetworkIdentity caster,
-            PlayerID sender, int affected)
+            PlayerID sender, int affected, Vector3 origin, Vector3 direction)
         {
             string who = caster != null ? caster.name : sender.ToString();
             if (IsMisfire(spellId))
@@ -174,7 +190,7 @@ namespace RogueAi.Spells
             else
                 Debug.Log($"[SpellCast] Player {who} cast {spellId} (Volume: {volume}, affected: {affected})");
 
-            CastResolved?.Invoke(new CastReport(spellId, volume, affected, who));
+            CastResolved?.Invoke(new CastReport(spellId, volume, affected, who, origin, direction));
         }
 
         /// <summary>What a resolved cast did. The HUD's cast feed reads these.</summary>
@@ -185,12 +201,21 @@ namespace RogueAi.Spells
             public readonly int Affected;
             public readonly string CasterName;
 
-            public CastReport(SpellId spell, CastVolume volume, int affected, string casterName)
+            /// <summary>Where the cast left the caster's hands, so a visual can be put there.</summary>
+            public readonly Vector3 Origin;
+
+            /// <summary>Which way the caster was facing, for directional visuals.</summary>
+            public readonly Vector3 Direction;
+
+            public CastReport(SpellId spell, CastVolume volume, int affected, string casterName,
+                Vector3 origin = default, Vector3 direction = default)
             {
                 Spell = spell;
                 Volume = volume;
                 Affected = affected;
                 CasterName = casterName;
+                Origin = origin;
+                Direction = direction.sqrMagnitude > 1e-6f ? direction.normalized : Vector3.forward;
             }
 
             public bool IsMisfire => SpellCatalogue.IsMisfire(Spell);
@@ -198,6 +223,13 @@ namespace RogueAi.Spells
 
         /// <summary>Raised on every peer when a cast resolves. UI and audio subscribe.</summary>
         public static event System.Action<CastReport> CastResolved;
+
+        /// <summary>
+        /// Announces a cast to the presentation layer without routing a real one through the voice
+        /// pipeline and a transport. An event cannot be raised from outside its declaring class, so
+        /// without this the HUD's cast feed and the spell visuals are both untestable.
+        /// </summary>
+        public static void AnnounceForTesting(CastReport report) => CastResolved?.Invoke(report);
 
         /// <summary>True if the resolved id is one of the misfire outcomes.</summary>
         public static bool IsMisfire(SpellId id) => SpellCatalogue.IsMisfire(id);
