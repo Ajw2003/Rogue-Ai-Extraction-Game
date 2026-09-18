@@ -77,6 +77,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 893e65063672fd64ea526eec4a5f25c0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7660776534142933920}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 893e65063672fd64ea526eec4a5f25c0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -1047688489085833015}
   m_SourcePrefab: {fileID: 100100000, guid: 893e65063672fd64ea526eec4a5f25c0, type: 3}
 --- !u!23 &5014848887632378992 stripped
 MeshRenderer:
@@ -161,3 +164,19 @@ MonoBehaviour:
   _meshRenderer: {fileID: 5014848887632378992}
   _brokenVfx: {fileID: 0}
   _handLocalOffset: {x: 0, y: 0, z: 0}
+--- !u!114 &-1047688489085833015
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6816389412842675621}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee81d29afbf11a9478fb8230b135d419, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RogueAi.Items::Item
+  _followSpeed: 20
+  _rotationSpeed: 10
+  _damageMultiplier: 2
+  _damageCooldown: 0.5

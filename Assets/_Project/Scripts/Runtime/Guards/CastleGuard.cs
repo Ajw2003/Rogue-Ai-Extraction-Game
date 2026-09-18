@@ -64,7 +64,8 @@ namespace RogueAi.Guards
 
         private readonly SyncVar<GuardAlertState> _state =
             new SyncVar<GuardAlertState>(GuardAlertState.Patrolling);
-        private readonly SyncVar<float> _health = new SyncVar<float>(100f);
+
+        [field: SerializeField] private SyncVar<float> _health { get; set; } = new SyncVar<float>(100f);
 
         private StatusEffectReceiver _status;
         private NavMeshAgent _agent;
@@ -78,7 +79,7 @@ namespace RogueAi.Guards
         /// <summary>What this guard is currently doing.</summary>
         public GuardAlertState State => _state.value;
 
-        public float CurrentHealth => _health.value;
+        [field: SerializeField] public float CurrentHealth => _health.value;
         public float MaxHealth => _maxHealth;
 
         /// <summary>True when asleep, stunned or otherwise unable to act.</summary>

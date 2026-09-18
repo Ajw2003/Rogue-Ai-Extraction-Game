@@ -1,3 +1,4 @@
+using RogueAi.Inventory;
 using UnityEngine;
 
 /// <summary>

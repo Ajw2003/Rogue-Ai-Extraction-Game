@@ -4,7 +4,8 @@
     "references": [
         "RogueAi.Core",
         "RogueAi.Acoustics",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "RogueAi.Inventory"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

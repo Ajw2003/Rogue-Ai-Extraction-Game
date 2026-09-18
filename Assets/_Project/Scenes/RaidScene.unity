@@ -326,9 +326,10 @@ GameObject:
   - component: {fileID: 379109623}
   - component: {fileID: 379109622}
   - component: {fileID: 379109621}
-  - component: {fileID: 379109620}
   - component: {fileID: 379109617}
   - component: {fileID: 379109619}
+  - component: {fileID: 379109628}
+  - component: {fileID: 379109629}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -394,29 +395,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2bad5926e645494cb2c8aa74376ed03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: RogueAi.Guards::RogueAi.Guards.IntruderTag
---- !u!114 &379109620
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 379109616}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 16f913840d13c544e864a36024f1d74d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: RogueAi.Playtest::RogueAi.Playtest.FreeLookPlaytestController
-  _walkSpeed: 4
-  _sprintSpeed: 7
-  _crouchSpeed: 1.8
-  _jumpSpeed: 5
-  _mouseSensitivity: 2.5
-  _maxPitch: 85
-  _sprintKey: 304
-  _crouchKey: 306
-  _jumpKey: 32
-  _footsteps: {fileID: 0}
-  _stepDistance: 2
 --- !u!114 &379109621
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -572,6 +550,49 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
+--- !u!114 &379109628
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 379109616}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61f50616b7ae63244b170a2a9c4323cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RogueAi.Player::StateMachine.PlayerStateMachine
+  _rb: {fileID: 379109627}
+  walkSpeed: 5
+  JumpForce: 5
+  FallMultiplier: 2.5
+  AirControl: 0.7
+  DodgeForce: 5
+  respawnSpeed: 0
+  MouseSensitivity: 100
+  CameraTransform: {fileID: 2066049022}
+  _groundCheckRadius: 0.3
+  _groundCheckDistance: 1.6
+  _groundedHeight: 1
+  _groundSnapSpeed: 15
+  _groundLayer:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  MinVelocityForDamage: 5
+  _chokeDamage: 5
+  dead: 0
+--- !u!114 &379109629
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 379109616}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c2c8881fd52f75439f527c4f4c0f10a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RogueAi.Player::Player.PlayerInputController
 --- !u!1 &477194055
 GameObject:
   m_ObjectHideFlags: 0
@@ -681,6 +702,60 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 16.8, y: 16.8, z: 16.8}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &496588592
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 496588594}
+  - component: {fileID: 496588593}
+  m_Layer: 0
+  m_Name: ItemManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &496588593
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 496588592}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6dc0b013fe4d80144b6ff5cd87a1dc91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RogueAi.Items::ItemManager
+  _itemLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  _dragDistance: 5
+  _scrollSpeed: 25
+  _minDragDepth: 0.5
+  _maxDragDepth: 10
+  _raycastDistance: 100
+  _rotationSensitivity: 0.5
+  _throwForce: 15
+--- !u!4 &496588594
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 496588592}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -1648,3 +1723,4 @@ SceneRoots:
   - {fileID: 379109618}
   - {fileID: 1029301709}
   - {fileID: 74181999}
+  - {fileID: 496588594}
