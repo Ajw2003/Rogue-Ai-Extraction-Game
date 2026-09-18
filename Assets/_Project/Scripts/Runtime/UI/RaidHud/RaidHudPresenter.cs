@@ -46,10 +46,6 @@ namespace RogueAi.UI
         public RaidHudModel Build()
         {
             LootPickup carried = _interactor != null ? _interactor.Carried : null;
-            string carriedName = carried != null && carried.Data != null
-                ? carried.Data.DisplayName
-                : string.Empty;
-
             bool stale = Time.time - _lastCastAt > _castLineDuration;
 
             return new RaidHudModel(
@@ -57,13 +53,32 @@ namespace RogueAi.UI
                 _extractionZone != null ? _extractionZone.TimeRemaining : 0f,
                 _alarm != null ? _alarm.State : AlarmState.Calm,
                 _alarm != null ? _alarm.AlarmLevel : 0f,
-                carriedName,
+                CarriedName(carried),
                 carried != null && carried.Data != null && carried.Data.RequiresDualCarry,
                 BuildInteractPrompt(carried),
                 HasInteractTarget(),
                 _lair != null ? _lair.TotalDebt : 0f,
                 _lair != null ? _lair.AccumulatedGold : 0f,
-                stale ? string.Empty : _lastCastLine);
+                stale ? string.Empty : _lastCastLine,
+                _extractionZone != null ? _extractionZone.WorthInZone : 0f,
+                _extractionZone != null ? _extractionZone.PiecesInZone : 0);
+        }
+
+        /// <summary>
+        /// What the player is holding. Reads <c>ItemManager</c> first — that is the live pickup
+        /// system — and falls back to the old interactor while both still exist.
+        /// </summary>
+        private static string CarriedName(LootPickup legacyCarried)
+        {
+            Item held = ItemManager.Instance != null ? ItemManager.Instance.CarriedItem : null;
+            if (held != null)
+            {
+                return held.TryGetComponent(out LootValue value) ? value.DisplayName : held.name;
+            }
+
+            return legacyCarried != null && legacyCarried.Data != null
+                ? legacyCarried.Data.DisplayName
+                : string.Empty;
         }
 
         /// <summary>

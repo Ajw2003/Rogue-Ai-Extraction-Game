@@ -175,6 +175,9 @@ public class ItemManager : SingletonBase<ItemManager>
 
     public Item HoveredItem => _hoveredItem;
 
+    /// <summary>The item currently held, or null. The HUD reads this to name what is being carried.</summary>
+    public Item CarriedItem => _draggedItem;
+
     /// <summary>Swings the currently held item if it is a <see cref="MeleeWeapon"/>. Returns whether a swing happened.</summary>
     public bool TryMeleeSwing(Vector3 origin, Vector3 forward)
     {

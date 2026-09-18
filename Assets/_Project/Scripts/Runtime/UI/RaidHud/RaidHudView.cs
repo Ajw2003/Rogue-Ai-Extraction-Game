@@ -80,9 +80,18 @@ namespace RogueAi.UI
             DrawBar(GUILayoutUtility.GetRect(width - pad, 10f), model.AlarmFill, AlarmColour(model.Alarm));
             GUILayout.EndArea();
 
-            // Top-right: the money.
+            // Top-right: the money, and the haul standing on the pad. The haul sits with the debt
+            // rather than near the crosshair because it is the number the debt is measured against.
             GUILayout.BeginArea(new Rect(Screen.width - width - pad, pad, width, 80f));
             GUILayout.Label($"Debt {model.Debt:0}   Banked {model.BankedGold:0}", _label);
+
+            GUIStyle haulStyle = _label;
+            if (model.HaulPieces > 0)
+            {
+                haulStyle = new GUIStyle(_label);
+                haulStyle.normal.textColor = new Color(1f, 0.85f, 0.35f);
+            }
+            GUILayout.Label(model.HaulText, haulStyle);
             GUILayout.EndArea();
 
             DrawCrosshair(state, model.HasInteractTarget);

@@ -52,8 +52,45 @@ the short distance to the floor.
 un-freezing it would drop it out of the carrier's hand socket. It is public so a test can settle the
 haul without waiting the delay out in real time.
 
+## Carrying and extracting
+
+There were two pickup systems on the same objects. Loot prefabs carried **both** `LootPickup` (a
+networked carry with two-person rules and fragility) and `Item` (the physics grab/carry/throw the
+`PlayerStateMachine` drives through `ItemManager`). As of 2026-09-18 the `Item`/`ItemManager` path
+is the live one.
+
+### Worth lives on `LootValue`
+
+`Item` has no notion of value, so `LootValue` carries it: a small component beside `Item` on every
+loot prefab. It prefers an authored `LootItem` asset when one is assigned and falls back to its own
+`m_worth`, so the values already authored on the loot prefabs came across unchanged. Anything
+without a `LootValue` extracts for nothing.
+
+`LootSpawner.SpawnLoose` attaches one to everything it spawns — every path into the world funnels
+through it, so there is one place this can be forgotten rather than five.
+
+### The haul is visible while the raid runs
+
+`ExtractionZone` tracks `LootValue` in its trigger and raises `HaulInZoneChanged(worth, pieces)` as
+loot enters and leaves. `RaidHudPresenter` reads `WorthInZone`/`PiecesInZone` into the model and the
+view draws it beside the debt — the number the debt is measured against. An empty pad reads
+"bring loot to the pad" rather than "0 gold", because a zero looks like a broken counter.
+
+### The transition bridge
+
+`LootPickup` is still in the tree until the new path has been played. Two seams keep both honest
+and **both are deleted with it**:
+
+- `LootPickup.ApplyBrokenState` also calls `Ruin()` on a sibling `LootValue`. Without it a piece
+  smashed through the old system still pays out.
+- `ExtractionZone.TrackLoot(LootPickup)` is an overload that attaches the `LootValue` the zone now
+  tallies. It exists so the seven test files still holding `LootPickup` keep asserting something
+  during the transition rather than being rewritten twice.
+
 ## Invariants
 
+- **Worth is tallied from `LootValue`, never from `Item` or `LootPickup`.** A piece with no
+  `LootValue` is worth nothing, which is why the spawner attaches one unconditionally.
 - **A raid never starts in a castle you cannot walk out of.** `RaidDirector.GenerateWalkable`
   validates crypt→exit reachability and walks the seed forward (`seed + 1`, not a fresh random
   number) until one passes, so the seed it reports is the seed it replicates.
