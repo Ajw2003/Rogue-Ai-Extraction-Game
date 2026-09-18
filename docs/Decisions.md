@@ -3,6 +3,40 @@
 Append-only. An entry is never rewritten or deleted; the one allowed edit is flipping its
 `Status` line to `Superseded` when a later entry replaces it. Newest entry at the top.
 
+## 2026-09-18 — The raid scene is authored; the builder gets a scaffold path
+
+**Context.** `RaidSceneBuilder.BuildPlayer` assembled a player carrying
+`FreeLookPlaytestController`, but the committed `RaidScene.unity` carried `PlayerStateMachine` +
+`PlayerInputController` — the scene had been hand-edited away from what its own builder produced.
+Running *Build Playable Raid Scene* would have silently swapped the real player for the ItemGym
+harness and, after the same day's issue-9 work, removed the input gate with it. The requested
+direction was to stop regenerating the scene and author it instead.
+
+**Decision.** `RaidScene.unity` is authored and nothing regenerates it. `RaidSceneBuilder` writes
+`RaidScene.Scaffold.unity`, and asserts at entry that its output path is not the authored one. The
+raid player is extracted to `Prefabs/RaidPlayer.prefab`, which both the authored scene and the
+scaffold instance, and `BuildPlayer` instantiates that prefab rather than assembling a rig. The
+fallback path, used only when the prefab is missing, builds the shipping controller — not the
+harness.
+
+**Why.** A generator and a hand-edited artefact cannot both own one file; whichever ran last won,
+which is not a rule anyone can reason about. Giving the generator a different path costs nothing —
+the scaffold is still useful for checking the catalogues assemble — and removes the whole class of
+"a tool quietly ate a day of authoring". Making the player a prefab is what stops the two scenes
+disagreeing about what a player is a second time.
+
+**What replaces the builder's guarantee.** A generated scene re-wired its references every run, so a
+dropped reference healed itself. An authored one does not. `AuthoredRaidSceneTests` asserts the
+player is an instance of the authored prefab, carries the shipping controller and not
+`FreeLookPlaytestController`, and that every serialised reference on `RaidDirector` and
+`RaidHudPresenter` is still assigned.
+
+**Not done.** `Prefabs/Player.prefab` is left alone: it is `TestSceneBuilder`'s third-person
+2.0 m × 0.5 m rig for `TestScene.unity`, a different thing that happens to share a name shape.
+`EnemyPrefabForge` is also untouched — issue 94 stands.
+
+**Status.** Standing.
+
 ## 2026-09-18 — Issue 9's gate belongs on the raid's player, not only on the playtest harness
 
 **Context.** Issue 9 (the player moves and looks while the main menu is open) was implemented by
