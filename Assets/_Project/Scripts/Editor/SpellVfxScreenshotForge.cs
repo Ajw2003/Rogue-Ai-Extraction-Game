@@ -104,6 +104,55 @@ namespace RogueAi.EditorTools
                       $"{k_Showcase.Length} spell looks.");
         }
 
+        /// <summary>
+        /// A spell going off inside the actual raid scene, at the player's own spawn, seen from the
+        /// player's eye. The bench captures prove the looks exist; this proves they show up in the
+        /// game.
+        /// </summary>
+        [MenuItem("Tools/Plunderspell/Capture A Cast In The Raid Scene")]
+        public static void CaptureRaidSceneCast()
+        {
+            if (!SceneScreenshot.HasGraphicsDevice)
+            {
+                Debug.LogError("[SpellShots] No graphics device. Re-run without -nographics.");
+                EditorApplication.Exit(1);
+                return;
+            }
+
+            string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), k_OutputFolder);
+            Directory.CreateDirectory(outputDirectory);
+
+            EditorSceneManager.OpenScene("Assets/_Project/Scenes/RaidScene.unity", OpenSceneMode.Single);
+
+            var casting = Object.FindFirstObjectByType<SpellCastingSystem>();
+            if (casting == null)
+            {
+                Debug.LogError("[SpellShots] The raid scene has no SpellCastingSystem.");
+                EditorApplication.Exit(1);
+                return;
+            }
+
+            Transform player = casting.transform;
+            Vector3 hands = player.position + player.forward * 1.0f + Vector3.up * 1.5f;
+
+            SpellLook look = SpellLookbook.For(SpellId.Tonitrus);
+            SpellBurst burst = SpellBurst.Spawn(hands, look.Colour, look.Radius, 0.45f);
+            burst.SetProgress(k_CaptureProgress);
+
+            Vector3 eye = player.position + Vector3.up * 1.65f - player.forward * 1.2f;
+            SceneScreenshot.Capture(eye, Quaternion.LookRotation(hands - eye, Vector3.up),
+                isOrthographic: false, 10f,
+                Path.Combine(outputDirectory, "raid-cast-eye.png"));
+
+            Vector3 over = player.position + Vector3.up * 6f - player.forward * 7f;
+            SceneScreenshot.Capture(over, Quaternion.LookRotation(hands - over, Vector3.up),
+                isOrthographic: false, 10f,
+                Path.Combine(outputDirectory, "raid-cast-over.png"));
+
+            Object.DestroyImmediate(burst.gameObject);
+            Debug.Log($"[SpellShots] Wrote 2 raid-scene cast images to {k_OutputFolder}.");
+        }
+
         private static GameObject SpawnTintedBolt(Vector3 position, Color colour)
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(k_BoltPath);

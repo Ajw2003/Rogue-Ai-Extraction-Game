@@ -57,6 +57,42 @@ orange regardless of what it was aimed at, so "that went wrong" is readable befo
 exist yet. It disables its collider *before* destroying it: `Destroy` is deferred to the end of the
 frame, and a live collider expanding to 2.5 m punts every piece of loot in the room across it first.
 
+### Two ways to cast
+
+The project contains two casting systems, and only one of them is the game's.
+
+| | `SpellCastingSystem` | `SpellBook` |
+|---|---|---|
+| Origin | Plunderspell | ported from the predecessor project |
+| Input | hold `V`, speak (or press 1-8) | the attack button |
+| Resolves | phrase → `SpellId` → `ISpellEffect` | fires a projectile |
+| On the raid player | **yes** | no |
+| Needs authored assets | `SpellLexicon.asset` (assigned) | a `SpellStats` asset — **none exists in the project** |
+
+`PlayerStateMachine.Attack` casts through `SpellBook` **only when one is assigned**, and swings the
+held item otherwise. The raid player has no `SpellBook`, so attacking swings and casting is the
+voice path. That is the intended design: the pitch is a game about speaking words.
+
+`SpellBook`'s field was an auto-property, which Unity does not serialize — which is why no slot for
+it ever appeared in the Inspector however public it looked. It is now a serialized field with a
+property over it, so it can be assigned. Two supporting fixes make assigning one safe: `SpellBook`
+self-wires its camera and shoot point, and reports a missing `SpellStats` rather than throwing in
+`Start` and taking the whole player down with it.
+
+**Assigning a `SpellBook` still will not fire anything**, because no `SpellStats` asset exists.
+Voice casting is unaffected either way.
+
+### Casting runs on the new Input System
+
+`PushToCastController` and `MockVoiceInputService` originally read the legacy `Input` class while
+the rest of the project (`GameFlowInput`, `ItemManager`) uses `Keyboard.current`. Both now use the
+new Input System. The split was a silent failure waiting to happen: the project's Active Input
+Handling is currently "Both", and the moment it is set to "Input System Package (New)" every
+casting key stops working with no error.
+
+`CastingInputTests` presses the real keys through `InputTestFixture` and asserts the whole chain,
+so the input layer is covered rather than assumed.
+
 ### Casting it in the Editor
 
 There is no microphone involved in the Editor. `VoiceServiceLocator.ShouldUseMock()` returns true

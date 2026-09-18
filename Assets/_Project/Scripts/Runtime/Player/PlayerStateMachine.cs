@@ -27,7 +27,21 @@ namespace StateMachine
         public PlayerIdleState IdleState { get; set; }
         public PlayerJumpState JumpState { get; set; }
 
-        public SpellBook SpellBook { get; set; }
+        [Header("Casting")]
+        [Tooltip("Optional. Leave empty and the raid's voice casting (hold V) is used instead. " +
+                 "See docs/systems/spells.md, \"Two ways to cast\".")]
+        [SerializeField] private SpellBook _spellBook;
+
+        /// <summary>
+        /// The held spellbook, or null when the player casts by voice. Backed by a serialized field
+        /// so it can be assigned in the Inspector — an auto-property cannot be, which is why this
+        /// slot never appeared.
+        /// </summary>
+        public SpellBook SpellBook
+        {
+            get => _spellBook;
+            set => _spellBook = value;
+        }
 
         public Vector2 MovementDirection { get; set; }
 
@@ -124,9 +138,24 @@ namespace StateMachine
             AssignSpellBook(null);
         }
 
+        /// <summary>
+        /// Resolves the spellbook: an explicit one, else one already assigned in the Inspector, else
+        /// one on this object. Null is a valid outcome and means "this player casts by voice".
+        /// </summary>
         public void AssignSpellBook(SpellBook spellBook)
         {
-            SpellBook = spellBook == null ? GetComponent<SpellBook>() : spellBook;
+            if (spellBook != null)
+            {
+                _spellBook = spellBook;
+                return;
+            }
+
+            // Only fall back to a sibling component when nothing was authored, so Start() cannot
+            // wipe an Inspector assignment the moment the scene loads.
+            if (_spellBook == null)
+            {
+                _spellBook = GetComponent<SpellBook>();
+            }
         }
 
         public void Die()
