@@ -40,6 +40,18 @@ Assemblies: `RogueAi.Raid` (loop, spawning), `RogueAi.Guards` (the garrison), `R
 - **`RaidHudPresenter`** gathers the raid into a plain `RaidHudModel`; `RaidHudView` draws it with
   IMGUI. What the player is *told* is logic and is tested; how it is drawn is not.
 
+## How loot settles
+
+`LootSpawner.SpawnFor` freezes every spawned rigidbody (`isKinematic = true`, velocities zeroed),
+then starts a coroutine that waits `m_settleDelay` (0.5 s by default) and calls `ReleaseSpawned`.
+A rigidbody that begins a frame overlapping a wall is depenetrated with enough impulse to throw it
+out of the castle; holding it frozen until the rooms have stopped arriving means it only ever falls
+the short distance to the floor.
+
+`ReleaseSpawned` skips anything carried or broken — a carried item is kinematic on purpose, and
+un-freezing it would drop it out of the carrier's hand socket. It is public so a test can settle the
+haul without waiting the delay out in real time.
+
 ## Invariants
 
 - **A raid never starts in a castle you cannot walk out of.** `RaidDirector.GenerateWalkable`
@@ -75,5 +87,7 @@ Assemblies: `RogueAi.Raid` (loop, spawning), `RogueAi.Guards` (the garrison), `R
   with cast volume, and writing it onto the template rewrites every other pile in the raid.
 
 - **Spawned loot can be flung by physics.** The planner is pure and places loot 0.5 m above a room's
-  centre, which can be inside real room geometry; PhysX then ejects it. Open defect — see
-  [raid-scene-assembly.md](raid-scene-assembly.md) "Traps".
+  centre, which can be inside real room geometry; PhysX then ejects it. Fixed by the settle window
+  described under "How it works" — `LootSpawner` spawns every body kinematic and only hands it back
+  to physics once the scene has stopped moving. The planner itself was deliberately left untouched:
+  it must stay a pure calculation so every peer plans identical positions.

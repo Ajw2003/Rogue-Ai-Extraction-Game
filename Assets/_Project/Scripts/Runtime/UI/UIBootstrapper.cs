@@ -36,7 +36,8 @@ namespace Plunderspell.UI
 
         private static UIRoot CreateUIRoot()
         {
-            var go = new GameObject("UIRoot", typeof(UIRoot), typeof(GameFlowInput));
+            var go = new GameObject("UIRoot", typeof(UIRoot), typeof(GameFlowInput),
+                typeof(CursorLockPolicy));
             Object.DontDestroyOnLoad(go);
             return go.GetComponent<UIRoot>();
         }

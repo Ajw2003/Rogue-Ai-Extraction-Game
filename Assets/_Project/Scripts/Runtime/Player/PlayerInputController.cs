@@ -16,7 +16,6 @@ namespace Player
             _input ??= new PlayerInputs();
             _stateMachine = GetComponent<PlayerStateMachine>();
             EventManager.Instance?.Subscribe(this, (PlayerIdleEvent e) => EnableAllInputs());
-            Cursor.lockState = CursorLockMode.Locked;
         }
 
         private void Start()
@@ -52,17 +51,11 @@ namespace Player
             }
         }
 
+        // Opening the inventory used to free the cursor from here. Cursor lock and visibility are
+        // now owned solely by CursorLockPolicy, which follows GameState; a second writer is what left
+        // the cursor stuck between a menu and the world.
         private void OpenInventoryInput(bool enable)
         {
-            if (enable)
-            {
-                _input.PlayerActions.OpenInventory.performed += OnOpenInventoryPerformed;
-            }
-        }
-
-        private void OnOpenInventoryPerformed(InputAction.CallbackContext context)
-        {
-            Cursor.lockState = CursorLockMode.None;
         }
 
         private void ItemInteractionInputs(bool enable)

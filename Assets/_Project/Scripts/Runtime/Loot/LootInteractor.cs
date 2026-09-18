@@ -83,15 +83,22 @@ namespace RogueAi.Loot
             Vector3 origin = _eye != null ? _eye.position : transform.position;
             Vector3 direction = _eye != null ? _eye.forward : transform.forward;
 
-            if (Physics.SphereCast(origin, _reach, direction, out RaycastHit hit))
+            // A ray, not a sphere cast: reach is a distance, and passing it as a sweep radius casts a
+            // 6-metre ball that starts already overlapping whatever the player is standing next to,
+            // which resolves as a zero-distance hit on an arbitrary collider.
+            if (Physics.Raycast(origin, direction, out RaycastHit hit, _reach, _interactableLayers,
+                    QueryTriggerInteraction.Collide))
             {
                 Focus = hit.collider.GetComponentInParent<LootPickup>();
                 FocusDoor = hit.collider.GetComponentInParent<CastleDoorHandle>();
-                Debug.Log(Focus);
             }
 
             if (Focus != previous)
+            {
+                SetHighlight(previous, false);
+                SetHighlight(Focus, true);
                 FocusChanged?.Invoke(Focus);
+            }
         }
 
         /// <summary>
@@ -148,6 +155,29 @@ namespace RogueAi.Loot
 
         /// <summary>Test/tooling seam: point the reach ray at a specific transform.</summary>
         public void SetEye(Transform eye) => _eye = eye;
+
+        /// <summary>
+        /// Turns the focused item's glow on or off, attaching the glow the first time an item is
+        /// looked at. Added here rather than authored onto each prefab so conjured and test-built
+        /// loot highlights too, and so no piece of loot can be shipped without it.
+        /// </summary>
+        private static void SetHighlight(LootPickup pickup, bool highlighted)
+        {
+            if (pickup == null)
+                return;
+
+            var highlight = pickup.GetComponent<LootHighlight>();
+            if (highlight == null)
+            {
+                if (!highlighted)
+                    return;
+                highlight = pickup.gameObject.AddComponent<LootHighlight>();
+            }
+
+            highlight.SetHighlighted(highlighted);
+        }
+
+        private void OnDisable() => SetHighlight(Focus, false);
     }
 
     /// <summary>

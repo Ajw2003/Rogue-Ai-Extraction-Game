@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using RogueAi.Castle;
 using RogueAi.Loot;
@@ -20,8 +21,13 @@ namespace RogueAi.Raid
         [Tooltip("Parent for spawned loot. Auto-created if left null.")]
         [SerializeField] private Transform _container;
 
+        [Tooltip("Seconds to hold spawned loot frozen while the rest of the castle finishes arriving.")]
+        [SerializeField] private float m_settleDelay = 0.5f;
+
         private readonly List<GameObject> _spawned = new List<GameObject>();
         private readonly List<LootPlacement> _lastPlan = new List<LootPlacement>();
+
+        private Coroutine m_settleRoutine;
 
         public RaidLootTable Table { get => _table; set => _table = value; }
 
@@ -51,8 +57,73 @@ namespace RogueAi.Raid
             for (int i = 0; i < plan.Count; i++)
                 Spawn(plan[i]);
 
+            BeginSettling();
             return _lastPlan;
         }
+
+        /// <summary>
+        /// Holds every spawned piece frozen for <see cref="m_settleDelay"/>, then hands it back to
+        /// physics. See docs/systems/raid.md, "How loot settles".
+        /// </summary>
+        private void BeginSettling()
+        {
+            FreezeSpawned();
+
+            // Outside play mode there are no coroutines and no physics step, so the freeze is the
+            // whole story: nothing will move the loot until the scene is played.
+            if (!Application.isPlaying || !isActiveAndEnabled)
+                return;
+
+            if (m_settleRoutine != null)
+                StopCoroutine(m_settleRoutine);
+            m_settleRoutine = StartCoroutine(ReleaseAfterSettleDelay());
+        }
+
+        private void FreezeSpawned()
+        {
+            for (int i = 0; i < _spawned.Count; i++)
+            {
+                Rigidbody body = RigidbodyOf(_spawned[i]);
+                if (body == null)
+                    continue;
+
+                body.isKinematic = true;
+            }
+        }
+
+        private IEnumerator ReleaseAfterSettleDelay()
+        {
+            yield return new WaitForSeconds(m_settleDelay);
+            ReleaseSpawned();
+            m_settleRoutine = null;
+        }
+
+        /// <summary>
+        /// Unfreezes everything that is not already in someone's hands. Public so a test can settle
+        /// the haul without waiting out the delay in real time.
+        /// </summary>
+        public void ReleaseSpawned()
+        {
+            for (int i = 0; i < _spawned.Count; i++)
+            {
+                GameObject go = _spawned[i];
+                if (go == null)
+                    continue;
+
+                // A carried item is kinematic on purpose — releasing it would drop it out of the
+                // carrier's hand socket.
+                var pickup = go.GetComponent<LootPickup>();
+                if (pickup != null && (pickup.IsBeingCarried || pickup.IsBroken))
+                    continue;
+
+                Rigidbody body = RigidbodyOf(go);
+                if (body != null)
+                    body.isKinematic = false;
+            }
+        }
+
+        private static Rigidbody RigidbodyOf(GameObject go) =>
+            go != null ? go.GetComponent<Rigidbody>() : null;
 
         /// <summary>Spawns a single loose piece of loot — what Aurum Voco conjures.</summary>
         public GameObject SpawnLoose(LootItem item, GameObject prefab, Vector3 position)

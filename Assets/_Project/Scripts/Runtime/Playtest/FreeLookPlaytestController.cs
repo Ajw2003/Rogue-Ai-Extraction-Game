@@ -59,11 +59,22 @@ namespace RogueAi.Playtest
 
         private void Update()
         {
+            // Gated on the state, not by disabling this component: a component that is switched off
+            // and on again loses the camera and rigidbody it resolved in Awake.
+            if (!Plunderspell.Core.GameServices.IsPlaying)
+                return;
+
             Look();
             UpdateStance();
         }
 
-        private void FixedUpdate() => Move();
+        private void FixedUpdate()
+        {
+            if (!Plunderspell.Core.GameServices.IsPlaying)
+                return;
+
+            Move();
+        }
 
         private void Look()
         {
@@ -95,14 +106,14 @@ namespace RogueAi.Playtest
                 wish = wish.normalized;
 
             float speed = SpeedFor(Stance);
-            Vector3 velocity = _body.velocity;
+            Vector3 velocity = _body.linearVelocity;
             Vector3 target = wish * speed;
 
             // Horizontal velocity is driven directly; vertical is left to gravity and the jump.
-            _body.velocity = new Vector3(target.x, velocity.y, target.z);
+            _body.linearVelocity = new Vector3(target.x, velocity.y, target.z);
 
             if (Input.GetKey(_jumpKey) && Mathf.Abs(velocity.y) < 0.01f)
-                _body.velocity = new Vector3(target.x, _jumpSpeed, target.z);
+                _body.linearVelocity = new Vector3(target.x, _jumpSpeed, target.z);
 
             AccumulateFootsteps(target, Time.fixedDeltaTime);
         }

@@ -17,14 +17,23 @@ namespace RogueAi.UI
         public readonly string CarriedLootName;
         public readonly bool CarriedNeedsTwo;
         public readonly string InteractPrompt;
+
+        /// <summary>
+        /// True while the player is aiming at something they can act on. The crosshair swaps to its
+        /// interaction form on this, which is what makes "you can touch that" readable at a glance
+        /// before the player has read the prompt.
+        /// </summary>
+        public readonly bool HasInteractTarget;
+
         public readonly float Debt;
         public readonly float BankedGold;
         public readonly string LastCastLine;
 
         public RaidHudModel(RaidPhase phase, float timeRemaining, AlarmState alarm, float alarmLevel,
             string carriedLootName, bool carriedNeedsTwo, string interactPrompt,
-            float debt, float bankedGold, string lastCastLine)
+            bool hasInteractTarget, float debt, float bankedGold, string lastCastLine)
         {
+            HasInteractTarget = hasInteractTarget;
             Phase = phase;
             TimeRemaining = timeRemaining;
             Alarm = alarm;

@@ -230,3 +230,68 @@ a room open to the sky — so this must not be lost.
 
 **Status.** Standing. Not currently covered by any of the 55 filed backlog issues; this entry is
 the only record.
+
+## 2026-09-17 — Loot reads through glow and prompt; size is tuned on the prefab, not in Blender
+
+**Context.** Issue 15 asked for loot to be discoverable, and offered a choice: fix the authored size
+in `Tools/AssetPipeline` (the root cause) or scale the prefab.
+
+**Decision.** Scale on the prefab root (`AncientRelic`/`CopperPot`/`SilverPlate` ×2.0,
+`GoldenGoblet` ×2.2, `HeavyChest` ×1.4). The builders in `Tools/AssetPipeline/builders.py` were left
+alone.
+
+**Why.** The meshes are not authored wrong — a copper pot really is 26 cm across, a goblet 19 cm
+tall. What loot needs is a *gameplay readability* multiplier, which is a tuning value and not a
+property of the model. Changing the builders would also invalidate each prefab's baked `BoxCollider`
+extents, which are mesh-derived, forcing a full Blender rebuild plus manifest and preview churn plus
+an extra Editor re-bake pass. Scaling the prefab root moves mesh and collider together in one edit.
+
+**Status.** Standing. Revisit if the art pass re-authors these meshes anyway.
+
+## 2026-09-17 — Focus glow is a property block, added at runtime
+
+**Context.** Issue 15 wanted the focused item highlighted.
+
+**Decision.** `LootHighlight` pushes an `_EmissionColor` through a `MaterialPropertyBlock`, and
+`LootInteractor` attaches it to an item the first time that item is looked at rather than it being
+authored onto each prefab.
+
+**Why.** Emissive brightening needs no render-feature wiring, so it works whichever pipeline the
+project lands on, and a property block never writes to the shared material asset or allocates a
+per-item material instance. Attaching at runtime means conjured loot, tooling-built scenes and
+test-built loot all highlight, and no piece of loot can ship without it.
+
+**Status.** Standing. An outline shader is the obvious upgrade once a render pipeline is settled.
+
+## 2026-09-17 — One owner for the cursor; input gates on the state variable
+
+**Context.** Issues 8 and 9. `PlayerInputController` locked the cursor in `Awake` and freed it when
+the inventory key was pressed, while nothing else had an opinion, so the cursor ended up stuck
+between a menu and the world.
+
+**Decision.** `CursorLockPolicy` (on the bootstrapped `UIRoot`) is the only thing in the game that
+touches `Cursor`. It follows `GameStateManager.StateChanged` and implements `OnApplicationFocus`.
+The writes in `PlayerInputController` were removed. `FreeLookPlaytestController` and
+`PushToCastController` gate on `GameServices.IsPlaying` at the top of their input reads.
+
+**Why.** With two writers the one that ran last wins, which is not a rule anyone can reason about.
+Gating on the state variable rather than enabling/disabling the components is deliberate: a
+component switched off and on again re-runs `Awake` wiring and loses the camera and rigidbody it
+resolved — Issue 9's plan calls this out explicitly.
+
+**Status.** Standing.
+
+## 2026-09-17 — The crosshair is IMGUI, and therefore invisible to the screenshot test
+
+**Context.** Issue 7 placed the crosshair in `RaidHudView`, which draws with IMGUI.
+
+**Decision.** The crosshair is generated in code (no asset, no third-party dependency) and drawn in
+`RaidHudView.DrawCrosshair`, visible only in `GameState.Playing`.
+
+**Why.** `RaidHudView` is deliberately IMGUI so the raid is playable from a code-built scene with no
+authored prefabs. The cost is that `UIScreenshotPlayModeTests` captures through a camera into a
+`RenderTexture`, and `Camera.Render()` never invokes `OnGUI` — so the committed `02_HUD.png` cannot
+show the crosshair or the interact prompt no matter how well they work. Visual proof of the HUD has
+to wait for the uGUI/art pass that replaces `RaidHudView` against the same `RaidHudModel`.
+
+**Status.** Standing, and a known gap in the screenshot evidence.

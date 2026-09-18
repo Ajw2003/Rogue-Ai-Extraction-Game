@@ -3,7 +3,8 @@
     "rootNamespace": "RogueAi.Playtest",
     "references": [
         "RogueAi.Core",
-        "RogueAi.Acoustics"
+        "RogueAi.Acoustics",
+        "Plunderspell.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

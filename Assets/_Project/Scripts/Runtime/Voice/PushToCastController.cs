@@ -42,6 +42,15 @@ namespace RogueAi.Voice
 
         private void Update()
         {
+            // Gated on the state rather than by disabling this component, so the mic is never left
+            // open across a pause and the animator hash survives the menu.
+            if (!Plunderspell.Core.GameServices.IsPlaying)
+            {
+                if (IsCasting)
+                    EndCasting();
+                return;
+            }
+
             if (Input.GetKeyDown(_pushToCastKey))
                 BeginCasting();
             else if (Input.GetKeyUp(_pushToCastKey))

@@ -18,7 +18,10 @@
         "RogueAi.UI",
         "PurrNet.Runtime",
         "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "UnityEditor.TestRunner",
+        "Plunderspell.Core",
+        "Plunderspell.UI",
+        "RogueAi.Playtest"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

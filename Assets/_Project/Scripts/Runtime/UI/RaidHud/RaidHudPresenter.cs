@@ -60,6 +60,7 @@ namespace RogueAi.UI
                 carriedName,
                 carried != null && carried.Data != null && carried.Data.RequiresDualCarry,
                 BuildInteractPrompt(carried),
+                HasInteractTarget(),
                 _lair != null ? _lair.TotalDebt : 0f,
                 _lair != null ? _lair.AccumulatedGold : 0f,
                 stale ? string.Empty : _lastCastLine);
@@ -75,24 +76,39 @@ namespace RogueAi.UI
                 return string.Empty;
 
             if (_interactor.FocusDoor != null)
-                return "[E] Open";
+                return "Press [E] to open the door";
 
             LootPickup focus = _interactor.Focus;
             if (focus == null)
-                return carried != null ? "[Q] Drop" : string.Empty;
+                return carried != null ? "Press [Q] to drop" : string.Empty;
+
+            string name = NameOf(focus);
 
             if (focus.IsBroken)
-                return "Broken — worthless";
+                return $"{name} — broken, worthless";
 
             if (focus.Data != null && focus.Data.RequiresDualCarry)
             {
                 return focus.IsBeingCarried
-                    ? "[E] Take the other end"
-                    : "[E] Lift — needs two";
+                    ? $"Press [E] to take the other end of {name} — needs two"
+                    : $"Press [E] to lift {name} — needs two";
             }
 
-            return focus.IsBeingCarried ? string.Empty : "[E] Take";
+            return focus.IsBeingCarried ? string.Empty : $"Press [E] to pick up {name}";
         }
+
+        /// <summary>True while the crosshair is over something the interact key would act on.</summary>
+        private bool HasInteractTarget()
+        {
+            if (_interactor == null)
+                return false;
+            return _interactor.FocusDoor != null || _interactor.Focus != null;
+        }
+
+        private static string NameOf(LootPickup pickup) =>
+            pickup != null && pickup.Data != null && !string.IsNullOrEmpty(pickup.Data.DisplayName)
+                ? pickup.Data.DisplayName
+                : "it";
 
         private void OnCastResolved(SpellCastingSystem.CastReport report)
         {
